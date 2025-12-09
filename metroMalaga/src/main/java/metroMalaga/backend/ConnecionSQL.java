@@ -1,0 +1,21 @@
+package metroMalaga.backend;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class ConnecionSQL {
+	private final String RUTA = "jdbc:mysql://localhost/";
+	private final String USUARIO = "root";
+	private final String PASS = "";
+
+	public Connection conectar() {
+		Connection con = null;
+		try {
+			con = DriverManager.getConnection(RUTA, USUARIO, PASS);
+		} catch (SQLException e) {
+			
+		}
+		return con;
+	}
+}
