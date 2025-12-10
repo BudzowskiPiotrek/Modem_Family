@@ -6,24 +6,27 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-
 import metroMalaga.Clases.Usuario;
+import metroMalaga.frontend.PanelLogin;
 
 public class HandleLoginAttempt implements ActionListener {
 	private final JTextField userField;
 	private final JPasswordField passwordField;
 	private final JButton loginButton;
 	private Usuario user;
+	private final PanelLogin panelLogin;
 	private ServiceLogin sl = new ServiceLogin();
 
 	private static final String USERNAME_PATTERN = "^[a-zA-Z0-9]+$";
 	private static final String PASSWORD_PATTERN = "^[a-zA-Z0-9]{8,}$";
 
-	public HandleLoginAttempt(JTextField userField, JPasswordField passwordField, JButton loginButton) {
+	public HandleLoginAttempt(JTextField userField, JPasswordField passwordField, JButton loginButton,
+			PanelLogin panelLogin) {
 		super();
 		this.userField = userField;
 		this.passwordField = passwordField;
 		this.loginButton = loginButton;
+		this.panelLogin = panelLogin;
 		this.loginButton.addActionListener(this);
 	}
 
@@ -62,6 +65,8 @@ public class HandleLoginAttempt implements ActionListener {
 			if (this.user != null) {
 				JOptionPane.showMessageDialog(null, "Welcome, " + username + "Access granted.", "Login successful",
 						JOptionPane.INFORMATION_MESSAGE);
+				
+				this.panelLogin.loginSuccessful(user);
 			} else {
 
 				JOptionPane.showMessageDialog(null, "Error loading user data. Please try again.", "Internal Error",
