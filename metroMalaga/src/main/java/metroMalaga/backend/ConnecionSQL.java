@@ -5,11 +5,11 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnecionSQL {
-	private final String RUTA = "jdbc:mysql://localhost/";
+	private final String RUTA = "jdbc:mysql://localhost/prueba";
 	private final String USUARIO = "root";
 	private final String PASS = "";
 
-	public Connection conectar() {
+	public Connection connect() {
 		Connection con = null;
 		try {
 			con = DriverManager.getConnection(RUTA, USUARIO, PASS);
