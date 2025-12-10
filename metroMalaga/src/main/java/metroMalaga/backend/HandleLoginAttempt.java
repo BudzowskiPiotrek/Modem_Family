@@ -24,6 +24,11 @@ public class HandleLoginAttempt implements ActionListener {
 		this.userField = userField;
 		this.passwordField = passwordField;
 		this.loginButton = loginButton;
+		this.loginButton.addActionListener(this);
+	}
+
+	public Usuario getUser() {
+		return user;
 	}
 
 	@Override
@@ -49,10 +54,22 @@ public class HandleLoginAttempt implements ActionListener {
 			return;
 		}
 
-		if (sl.authenticateUser(username, password)) {
+		boolean isAuthenticated = sl.authenticateUser(username, password);
+
+		if (isAuthenticated) {
 			this.user = sl.getUserData(username);
+
+			if (this.user != null) {
+				JOptionPane.showMessageDialog(null, "Welcome, " + username + "Access granted.", "Login successful",
+						JOptionPane.INFORMATION_MESSAGE);
+			} else {
+
+				JOptionPane.showMessageDialog(null, "Error loading user data. Please try again.", "Internal Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
 		} else {
-			JOptionPane.showMessageDialog(null, "", "", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Incorrect username or password. Please try again.",
+					"Authentication Error", JOptionPane.WARNING_MESSAGE);
 			return;
 		}
 	}
