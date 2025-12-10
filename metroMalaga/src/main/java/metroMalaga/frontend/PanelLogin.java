@@ -4,6 +4,10 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import metroMalaga.backend.HandleLoginAttempt;
+import metroMalaga.backend.PlaceholderPasswordFieldHandler;
+import metroMalaga.backend.PlaceholderTextFieldHandler;
+
 public class PanelLogin extends JFrame {
 
 	private JTextField userField;
@@ -15,6 +19,9 @@ public class PanelLogin extends JFrame {
 		settingsFrame();
 		settingsComponents();
 		addComponentsFrame();
+		
+		HandleLoginAttempt handler = new HandleLoginAttempt(userField,passwordField ,buttonLogin);
+		
 	}
 
 	private void settingsComponents() {
@@ -56,7 +63,7 @@ public class PanelLogin extends JFrame {
 		buttonLogin.setBounds(150, 150, 100, 40);
 		buttonLogin.setBackground(Color.RED);
 		buttonLogin.setForeground(Color.BLACK);
-		buttonLogin.setText("Login");
+		buttonLogin.setText("LOGIN");
 		buttonLogin.setFocusPainted(false);
 		buttonLogin.setBorder(new EmptyBorder(12, 20, 12, 20));
         buttonLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -67,6 +74,7 @@ public class PanelLogin extends JFrame {
 		passwordField.setBounds(100, 50, 200, 30);
 		passwordField.setForeground(Color.GRAY);
 		passwordField.setText("Password");
+		passwordField.addFocusListener(new PlaceholderPasswordFieldHandler(passwordField, "Password"));
 	}
 
 	private void settingsUser() {
@@ -74,6 +82,7 @@ public class PanelLogin extends JFrame {
 		userField.setBounds(100, 50, 200, 30);
 		userField.setForeground(Color.GRAY);
 		userField.setText("Username");
+		userField.addFocusListener(new PlaceholderTextFieldHandler(userField, "Username"));
 	}
 
 	private void settingsFrame() {
