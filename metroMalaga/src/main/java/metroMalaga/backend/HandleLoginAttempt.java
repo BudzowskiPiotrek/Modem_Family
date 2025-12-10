@@ -14,6 +14,7 @@ public class HandleLoginAttempt implements ActionListener {
 	private final JPasswordField passwordField;
 	private final JButton loginButton;
 	private Usuario user;
+	private ServiceLogin sl = new ServiceLogin();
 
 	private static final String USERNAME_PATTERN = "^[a-zA-Z0-9]+$";
 	private static final String PASSWORD_PATTERN = "^[a-zA-Z0-9]{8,}$";
@@ -45,6 +46,13 @@ public class HandleLoginAttempt implements ActionListener {
 			JOptionPane.showMessageDialog(null,
 					"The password must be at least 8 characters long and contain only letters and numbers.",
 					"Format Error", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
+		if (sl.authenticateUser(username, password)) {
+			this.user = sl.getUserData(username);
+		} else {
+			JOptionPane.showMessageDialog(null, "", "", JOptionPane.WARNING_MESSAGE);
 			return;
 		}
 	}
