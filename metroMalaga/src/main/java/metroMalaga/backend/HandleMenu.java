@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 import metroMalaga.Clases.Usuario;
-import metroMalaga.frontend.PanelMenu;
+import metroMalaga.frontend.menu.PanelMenu;
 
 public class HandleMenu implements ActionListener {
 	private ArrayList<JButton> buttonsMenu;
@@ -16,8 +16,7 @@ public class HandleMenu implements ActionListener {
 	
 
 
-	public HandleMenu(ArrayList<JButton> buttonsMenu, PanelMenu panelMenu, Usuario user) {
-		super();
+	public HandleMenu(PanelMenu panelMenu, ArrayList<JButton> buttonsMenu, Usuario user) {
 		this.buttonsMenu = buttonsMenu;
 		this.panelMenu = panelMenu;
 		this.user = user;
@@ -26,7 +25,7 @@ public class HandleMenu implements ActionListener {
 			button.addActionListener(this);
 		}
 	}
-	
+
 	public Usuario getUser() {
 		return user;
 	}

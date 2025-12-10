@@ -1,4 +1,4 @@
-package metroMalaga.frontend;
+package metroMalaga.frontend.menu;
 
 import java.awt.Color;
 import java.awt.event.MouseEvent;
