@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import metroMalaga.Clases.Usuario;
 import metroMalaga.backend.HandleLoginAttempt;
 import metroMalaga.backend.PlaceholderPasswordFieldHandler;
 import metroMalaga.backend.PlaceholderTextFieldHandler;
@@ -23,6 +24,14 @@ public class PanelLogin extends JFrame {
 		HandleLoginAttempt handler = new HandleLoginAttempt(userField,passwordField ,buttonLogin);
 		
 	}
+	
+	public void loginSuccessful(Usuario user) {
+        this.setVisible(false);
+
+        PanelMenu panelMenu = new PanelMenu(user); 
+        panelMenu.setVisible(true);
+        this.dispose();
+    }
 
 	private void settingsComponents() {
 		settingsLabel();
