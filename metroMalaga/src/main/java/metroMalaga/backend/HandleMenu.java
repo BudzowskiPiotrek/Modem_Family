@@ -13,14 +13,12 @@ public class HandleMenu implements ActionListener {
 	private ArrayList<JButton> buttonsMenu;
 	private final PanelMenu panelMenu;
 	private Usuario user;
-	
-
 
 	public HandleMenu(PanelMenu panelMenu, ArrayList<JButton> buttonsMenu, Usuario user) {
 		this.buttonsMenu = buttonsMenu;
 		this.panelMenu = panelMenu;
 		this.user = user;
-		
+
 		for (JButton button : buttonsMenu) {
 			button.addActionListener(this);
 		}
@@ -29,25 +27,25 @@ public class HandleMenu implements ActionListener {
 	public Usuario getUser() {
 		return user;
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String nameButton;
-		
-		for (JButton button: buttonsMenu) {
+
+		for (JButton button : buttonsMenu) {
 			nameButton = button.getText();
 			if (nameButton.equalsIgnoreCase("CRUD")) {
 				this.panelMenu.pressedButton(user, nameButton);
 			} else if (nameButton.equalsIgnoreCase("FTP")) {
 				this.panelMenu.pressedButton(user, nameButton);
-			}else if(nameButton.equalsIgnoreCase("SMTP")) {
+			} else if (nameButton.equalsIgnoreCase("SMTP")) {
 				this.panelMenu.pressedButton(user, nameButton);
 			} else if (nameButton.equalsIgnoreCase("Salir")) {
 				this.panelMenu.pressedButton(user, nameButton);
 			}
-			
+
 		}
-		
+
 	}
 
 }
