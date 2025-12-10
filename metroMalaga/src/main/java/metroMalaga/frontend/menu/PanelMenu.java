@@ -1,4 +1,4 @@
-package metroMalaga.frontend;
+package metroMalaga.frontend.menu;
 
 import javax.swing.JFrame;
 

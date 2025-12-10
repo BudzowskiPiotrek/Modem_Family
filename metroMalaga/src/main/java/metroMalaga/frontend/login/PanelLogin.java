@@ -10,7 +10,7 @@ import javax.swing.border.MatteBorder;
 
 import metroMalaga.Clases.Usuario;
 import metroMalaga.backend.HandleLoginAttempt;
-import metroMalaga.frontend.PanelMenu;
+import metroMalaga.frontend.menu.PanelMenu;
 
 public class PanelLogin extends JFrame {
 
