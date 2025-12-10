@@ -65,17 +65,19 @@ public class HandleLoginAttempt implements ActionListener {
 			if (this.user != null) {
 				JOptionPane.showMessageDialog(null, "Welcome, " + username + "Access granted.", "Login successful",
 						JOptionPane.INFORMATION_MESSAGE);
-				
-				sl.registerLog(username,"Successful login attempt");
+
+				sl.registerLog(username, "Successful login attempt");
 				this.panelLogin.loginSuccessful(user);
 			} else {
-				sl.registerLog(username,"Login attempt failed");
+
 				JOptionPane.showMessageDialog(null, "Error loading user data. Please try again.", "Internal Error",
 						JOptionPane.ERROR_MESSAGE);
 			}
 		} else {
 			JOptionPane.showMessageDialog(null, "Incorrect username or password. Please try again.",
 					"Authentication Error", JOptionPane.WARNING_MESSAGE);
+			
+			sl.registerLog(username, "Login attempt failed");
 			return;
 		}
 	}
