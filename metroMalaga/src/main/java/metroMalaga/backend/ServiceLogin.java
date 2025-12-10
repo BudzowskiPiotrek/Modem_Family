@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import javax.swing.JOptionPane;
 
@@ -45,5 +46,18 @@ public class ServiceLogin {
 			JOptionPane.showMessageDialog(null, errorMessage, "Error SQL", JOptionPane.ERROR_MESSAGE);
 		}
 		return user;
+	}
+
+	public void registerLog(String user, String description) {
+		final String SQL = "INSERT INTO login_logs (user, description) VALUES (?, ?)";
+
+		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
+			ps.setString(1, user);
+			ps.setString(2, description);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			String errorMessage = "CRITICAL LOGGING ERROR: Could not register log entry. Detail: " + e.getMessage();
+			System.err.println(errorMessage);
+		}
 	}
 }
