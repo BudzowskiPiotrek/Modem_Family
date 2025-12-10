@@ -1,16 +1,6 @@
 package metroMalaga.frontend;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.util.ArrayList;
-
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -76,6 +66,7 @@ public class PanelLogin extends JFrame {
 		passwordField = new JPasswordField(20);
 		passwordField.setBounds(100, 50, 200, 30);
 		passwordField.setForeground(Color.GRAY);
+		passwordField.setText("Password");
 	}
 
 	private void settingsUser() {
