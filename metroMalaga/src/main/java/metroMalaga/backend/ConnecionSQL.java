@@ -9,7 +9,7 @@ public class ConnecionSQL {
 	private final String USUARIO = "root";
 	private final String PASS = "";
 
-	public Connection conectar() {
+	public Connection connect() {
 		Connection con = null;
 		try {
 			con = DriverManager.getConnection(RUTA, USUARIO, PASS);
