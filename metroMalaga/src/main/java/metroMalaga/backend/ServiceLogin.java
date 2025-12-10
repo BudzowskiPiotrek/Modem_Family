@@ -49,7 +49,7 @@ public class ServiceLogin {
 	}
 
 	public void registerLog(String user, String description) {
-		final String SQL = "INSERT INTO login_logs (user, description) VALUES (?, ?)";
+		final String SQL = "INSERT INTO loginlogs (user, description) VALUES (?, ?)";
 
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, user);
