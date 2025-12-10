@@ -1,7 +1,10 @@
 package metroMalaga;
 
+import metroMalaga.frontend.login.PanelLogin;
+
 public class Main {
 	public static void main(String[] args) {
-		System.out.println("Hola Modem Family");
+		PanelLogin panelLogin = new PanelLogin();
+		panelLogin.setVisible(true);
 	}
 }
