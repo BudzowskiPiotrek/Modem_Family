@@ -1,4 +1,4 @@
-package metroMalaga.frontend;
+package metroMalaga.frontend.login;
 
 import java.awt.Color;
 import java.awt.event.FocusEvent;

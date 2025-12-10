@@ -1,4 +1,4 @@
-package metroMalaga.frontend;
+package metroMalaga.frontend.login;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -10,6 +10,7 @@ import javax.swing.border.MatteBorder;
 
 import metroMalaga.Clases.Usuario;
 import metroMalaga.backend.HandleLoginAttempt;
+import metroMalaga.frontend.PanelMenu;
 
 public class PanelLogin extends JFrame {
 

@@ -7,7 +7,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import metroMalaga.Clases.Usuario;
-import metroMalaga.frontend.PanelLogin;
+import metroMalaga.frontend.login.PanelLogin;
 
 public class HandleLoginAttempt implements ActionListener {
 	private final JTextField userField;

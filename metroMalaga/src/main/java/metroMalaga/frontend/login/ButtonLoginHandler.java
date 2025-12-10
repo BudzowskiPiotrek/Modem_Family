@@ -1,4 +1,4 @@
-package metroMalaga.frontend;
+package metroMalaga.frontend.login;
 
 import java.awt.Color;
 import java.awt.event.MouseEvent;
@@ -17,7 +17,6 @@ public class ButtonLoginHandler implements MouseListener {
     private final MatteBorder defaultBorder;
     private final MatteBorder hoverBorder;
 
-    // Constructor completo
     public ButtonLoginHandler(JButton button, 
                              Color defaultBackground, Color defaultForeground,
                              Color hoverBackground, Color hoverForeground,
@@ -31,7 +30,6 @@ public class ButtonLoginHandler implements MouseListener {
         this.hoverBorder = hoverBorder;
     }
 
-    // Constructor simplificado (sin bordes)
     public ButtonLoginHandler(JButton button, 
                              Color defaultBackground, Color defaultForeground,
                              Color hoverBackground, Color hoverForeground) {
@@ -41,17 +39,14 @@ public class ButtonLoginHandler implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // No necesario para el efecto hover
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // No necesario para el efecto hover
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        // No necesario para el efecto hover
     }
 
     @Override
