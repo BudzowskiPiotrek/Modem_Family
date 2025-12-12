@@ -51,9 +51,22 @@ public class FTPTableModel extends AbstractTableModel {
 		case 1:
 			return file.getName();
 		case 2:
-			return "";
+			return file;
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		if (columnIndex == 2) {
+			return FTPFile.class; // <-- La columna 2 contiene objetos FTPFile (que se renderizarán como botones)
+		}
+		return super.getColumnClass(columnIndex);
+	}
+
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return columnIndex == 2; // Solo permitimos editar (clicar) la columna de botones
 	}
 }

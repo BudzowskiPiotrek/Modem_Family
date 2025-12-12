@@ -1,6 +1,7 @@
 package metroMalaga.frontend.ftp;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,54 +18,71 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Clases.FTPTableModel;
 import metroMalaga.Clases.Usuario;
+import metroMalaga.backend.HandleFTPbtnUpFile;
 import metroMalaga.backend.HandleFTPlist;
 import metroMalaga.backend.ServiceFTP;
 
 public class PanelFTP extends JFrame {
-public static void main(String[] args) {
-	PanelFTP p = new PanelFTP(new Usuario());
-}
+	public static void main(String[] args) {
+		PanelFTP p = new PanelFTP(new Usuario());
+	}
+
 	private Usuario user;
 	private FTPTableModel ftpModel;
 	private JTable fileTable;
 	private JTextField searchField;
 	private JButton uploadButton;
+	private ServiceFTP service;
 
 	public PanelFTP(Usuario user) {
-		ServiceFTP service = new ServiceFTP("readwrite"); // + user.getNombre()
+		service = new ServiceFTP("readwrite");// + user.getNombre()
 		FTPFile[] fileArray = service.listAllFiles();
 		List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
 		this.ftpModel = new FTPTableModel(initialFiles);
-	
+
 		initializeComponents();
 		attachListeners();
 		setupFrameConfiguration();
 		setupLayout();
-
 	}
+
 	private void initializeComponents() {
-        this.fileTable = new JTable(this.ftpModel);
-        this.searchField = new JTextField(20);
-        this.uploadButton = new JButton("+");
-    }
+		this.fileTable = new JTable(this.ftpModel);
+		this.searchField = new JTextField(20);
+		this.uploadButton = new JButton("+");
+		fileTable.getColumnModel().getColumn(2).setCellRenderer(new ButtonsRenderer());
+		fileTable.setRowHeight(30);
+	}
+
 	private void attachListeners() {
 		HandleFTPlist listener = new HandleFTPlist(searchField, ftpModel);
+		HandleFTPbtnUpFile listenerUp = new HandleFTPbtnUpFile(uploadButton, service, ftpModel);
 	}
-	private void setupFrameConfiguration() {
-        this.setTitle("FTP Manager - "); // + user.getNombre()
-        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
-        this.setLayout(new BorderLayout()); 
-        this.setSize(800, 600); 
-        this.setLocationRelativeTo(null); 
-    }
-    
-    private void setupLayout() {
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.add(new JLabel("Filtrar:")); 
-        bottomPanel.add(this.searchField);
-        this.add(new JScrollPane(fileTable), BorderLayout.CENTER);
-        this.add(bottomPanel, BorderLayout.SOUTH);
-        this.setVisible(true);
-    }
 
+	private void setupFrameConfiguration() {
+		this.setTitle("FTP Manager - "); // + user.getNombre()
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setLayout(new BorderLayout());
+		this.setSize(800, 600);
+		this.setLocationRelativeTo(null);
+		this.setResizable(false);
+	}
+
+	private void setupLayout() {
+		JPanel actionPanel = new JPanel();
+		actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		actionPanel.add(this.uploadButton);
+
+		JPanel filterPanel = new JPanel();
+		filterPanel.add(new JLabel("Filtrar:"));
+		filterPanel.add(this.searchField);
+
+		JPanel tableContainer = new JPanel(new BorderLayout());
+		tableContainer.add(new JScrollPane(fileTable), BorderLayout.CENTER);
+		tableContainer.add(actionPanel, BorderLayout.SOUTH);
+
+		this.add(tableContainer, BorderLayout.CENTER);
+		this.add(filterPanel, BorderLayout.SOUTH);
+		this.setVisible(true);
+	}
 }
