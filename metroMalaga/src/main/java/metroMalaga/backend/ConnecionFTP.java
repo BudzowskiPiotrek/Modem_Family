@@ -1,49 +1,53 @@
 package metroMalaga.backend;
 
 import java.io.IOException;
-
+import javax.swing.JOptionPane;
 import org.apache.commons.net.ftp.FTPClient;
 
 public class ConnecionFTP {
-	private final String SERVER = "127.0.0.1";
-	private final int PORT = 21;
-	private final String USER = "test_user";
-	private final String PASS = "password123";
-	
-	public FTPClient connect() {
-        FTPClient ftpClient = new FTPClient();
-        boolean loggedIn = false;
-        
-        try {
-            ftpClient.connect(SERVER, PORT);
-            if (!ftpClient.isConnected()) {
-                System.err.println("ERROR FTP: Conexión de red fallida.");
-                return null;
-            }
-            ftpClient.enterLocalPassiveMode();
+	private static final String SERVER = "127.0.0.1";
+	private static final int PORT = 21;
+	private String user="";
+	private static final String PASS = "pasword123";
 
-            loggedIn = ftpClient.login(USER, PASS);
-            
-            if (loggedIn) {
+	public ConnecionFTP(String tipo) {
+		if(tipo.equalsIgnoreCase("readwrite")) {
+			this.user="metroWriteRead";
+		}else if (tipo.equalsIgnoreCase("write")) {
+			this.user="metroWrite";
+		}else if (tipo.equalsIgnoreCase("read")) {
+			this.user="metroRead";
+		}
+	}
 
-                ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
-                System.out.println("Conexión FTP y login exitosos.");
-                return ftpClient;
-            } else {
-                System.err.println("ERROR FTP: Login fallido. Revise credenciales. Código: " + ftpClient.getReplyCode());
-                ftpClient.disconnect();
-                return null;
-            }
+	public FTPClient getConnection() {
+		FTPClient ftpClient = new FTPClient();
+		try {
+			ftpClient.connect(SERVER, PORT);
+			boolean login = ftpClient.login(user, PASS);
+			if (login) {
+				ftpClient.enterLocalPassiveMode();
+				return ftpClient;
+			} else {
+				closeConnection(ftpClient);
+			}
+		} catch (IOException e) {
+			String errorMessage = "Could not connect to the FTP Server at " + SERVER + ":" + PORT
+					+ ". The server may be offline or the firewall is blocking access." + e.getMessage();
+			JOptionPane.showMessageDialog(null, errorMessage, "Error FTP", JOptionPane.ERROR_MESSAGE);
+		}
+		return null;
+	}
 
-        } catch (IOException ex) {
-            System.err.println("ERROR FTP: Fallo de I/O o red. Detalle: " + ex.getMessage());
-            if (ftpClient.isConnected()) {
-                try {
-                    ftpClient.disconnect();
-                } catch (IOException e) {
-                }
-            }
-            return null;
-        }
-    }
+	public void closeConnection(FTPClient ftpClient) {
+		if (ftpClient != null && ftpClient.isConnected()) {
+			try {
+				ftpClient.logout();
+				ftpClient.disconnect();
+			} catch (IOException e) {
+				String errorMessage = "Error while disconnecting FTP: " + e.getMessage();
+				JOptionPane.showMessageDialog(null, errorMessage, "Error FTP", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
 }
