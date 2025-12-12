@@ -7,12 +7,12 @@ import org.apache.commons.net.ftp.FTPClient;
 public class ConnecionFTP {
 	private static final String SERVER = "127.0.0.1";
 	private static final int PORT = 21;
-	private String user="";
+	private String user;
 	private static final String PASS = "pasword123";
 
 	public ConnecionFTP(String tipo) {
 		if(tipo.equalsIgnoreCase("readwrite")) {
-			this.user="metroWriteRead";
+			this.user="metro";
 		}else if (tipo.equalsIgnoreCase("write")) {
 			this.user="metroWrite";
 		}else if (tipo.equalsIgnoreCase("read")) {
@@ -28,8 +28,13 @@ public class ConnecionFTP {
 			if (login) {
 				ftpClient.enterLocalPassiveMode();
 				return ftpClient;
-			} else {
+			}else {
 				closeConnection(ftpClient);
+				JOptionPane.showMessageDialog(null, 
+	                "Login Failed for user: " + user + ". Check password in ConnecionFTP.java and user privileges on FileZilla Server.", 
+	                "Authentication Error", 
+	                JOptionPane.ERROR_MESSAGE);
+
 			}
 		} catch (IOException e) {
 			String errorMessage = "Could not connect to the FTP Server at " + SERVER + ":" + PORT
