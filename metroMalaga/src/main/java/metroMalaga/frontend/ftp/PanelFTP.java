@@ -18,20 +18,19 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Clases.FTPTableModel;
 import metroMalaga.Clases.Usuario;
+import metroMalaga.backend.ButtonsEditor;
+import metroMalaga.backend.HandleFTPbtnReturn;
 import metroMalaga.backend.HandleFTPbtnUpFile;
+import metroMalaga.backend.HandleFTPdoubleClick;
 import metroMalaga.backend.HandleFTPlist;
 import metroMalaga.backend.ServiceFTP;
 
 public class PanelFTP extends JFrame {
-	public static void main(String[] args) {
-		PanelFTP p = new PanelFTP(new Usuario());
-	}
-
 	private Usuario user;
 	private FTPTableModel ftpModel;
 	private JTable fileTable;
 	private JTextField searchField;
-	private JButton uploadButton;
+	private JButton uploadButton, upButton, returnButton;
 	private ServiceFTP service;
 
 	public PanelFTP(Usuario user) {
@@ -50,13 +49,19 @@ public class PanelFTP extends JFrame {
 		this.fileTable = new JTable(this.ftpModel);
 		this.searchField = new JTextField(20);
 		this.uploadButton = new JButton("+");
+		this.upButton = new JButton("Up");
+		this.returnButton = new JButton("Return");
+		ButtonsEditor buttonsEditor = new ButtonsEditor(this.service, this.ftpModel);
 		fileTable.getColumnModel().getColumn(2).setCellRenderer(new ButtonsRenderer());
+		fileTable.getColumnModel().getColumn(2).setCellEditor(buttonsEditor);
 		fileTable.setRowHeight(30);
 	}
 
 	private void attachListeners() {
 		HandleFTPlist listener = new HandleFTPlist(searchField, ftpModel);
 		HandleFTPbtnUpFile listenerUp = new HandleFTPbtnUpFile(uploadButton, service, ftpModel);
+		HandleFTPbtnReturn listenerReturn = new HandleFTPbtnReturn(upButton, service, ftpModel);
+		HandleFTPdoubleClick listenerClick = new HandleFTPdoubleClick(fileTable, service, ftpModel);
 	}
 
 	private void setupFrameConfiguration() {
@@ -72,6 +77,8 @@ public class PanelFTP extends JFrame {
 		JPanel actionPanel = new JPanel();
 		actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		actionPanel.add(this.uploadButton);
+		actionPanel.add(this.upButton);
+		actionPanel.add(this.returnButton);
 
 		JPanel filterPanel = new JPanel();
 		filterPanel.add(new JLabel("Filtrar:"));
