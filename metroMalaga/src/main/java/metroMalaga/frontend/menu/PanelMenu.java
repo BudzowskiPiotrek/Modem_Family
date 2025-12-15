@@ -49,19 +49,7 @@ public class PanelMenu extends JFrame {
 		this.setVisible(true);
 	}
 
-	public void pressedButton(Usuario user, String nameButton) {
-		
-
-		if (nameButton.equals("CRUD")) {
-			PanelCrud panelCrud = new PanelCrud(user);
-			panelCrud.setVisible(true);
-		} else if (nameButton.equals("FTP")) {
-			PanelFTP panelFtp = new PanelFTP(user);
-			panelFtp.setVisible(true);
-		} else if (nameButton.equals("SMTP")) {
-			PanelSMTP panelSmtp = new PanelSMTP(user);
-			panelSmtp.setVisible(true);
-		}
+	public void disposeWindow() {
 		this.setVisible(false);
 		this.dispose();
 	}

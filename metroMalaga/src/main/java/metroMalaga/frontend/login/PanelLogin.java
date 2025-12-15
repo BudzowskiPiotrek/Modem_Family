@@ -24,7 +24,7 @@ public class PanelLogin extends JFrame {
 	private final Color P5_BLACK = new Color(20, 20, 20);
 	private final Color P5_WHITE = new Color(240, 240, 240);
 	private final Color P5_GRAY_PLACEHOLDER = new Color(150, 150, 150);
-	
+
 	private final Font P5_INPUT_FONT = new Font("SansSerif", Font.BOLD | Font.ITALIC, 24);
 	private final Font P5_BUTTON_FONT = new Font("Dialog", Font.BOLD | Font.ITALIC, 24);
 
@@ -71,47 +71,30 @@ public class PanelLogin extends JFrame {
 	}
 
 	private void settingsUser() {
-	    userField = new JTextField(20);
-	    
-	    styleP5Field(userField, "Username");
-	    
-	    MatteBorder focusedBorder = new MatteBorder(3, 3, 5, 5, P5_BRIGHT_RED);
-	    MatteBorder unfocusedBorder = new MatteBorder(3, 3, 5, 3, P5_BLACK);
-	    EmptyBorder padding = new EmptyBorder(5, 15, 5, 15);
-	    
-	    userField.addFocusListener(new PlaceholderTextFieldHandler(
-	        userField, 
-	        "Username", 
-	        P5_WHITE,             
-	        P5_WHITE,              
-	        P5_GRAY_PLACEHOLDER,   
-	        focusedBorder,         
-	        unfocusedBorder,       
-	        padding
-	    ));
+		userField = new JTextField(20);
+
+		styleP5Field(userField, "Username");
+
+		MatteBorder focusedBorder = new MatteBorder(3, 3, 5, 5, P5_BRIGHT_RED);
+		MatteBorder unfocusedBorder = new MatteBorder(3, 3, 5, 3, P5_BLACK);
+		EmptyBorder padding = new EmptyBorder(5, 15, 5, 15);
+
+		userField.addFocusListener(new PlaceholderTextFieldHandler(userField, "Username", P5_WHITE, P5_WHITE,
+				P5_GRAY_PLACEHOLDER, focusedBorder, unfocusedBorder, padding));
 	}
 
-
 	private void settingsPass() {
-	    passwordField = new JPasswordField(15);
-	    
-	    styleP5Field(passwordField, "Password");
-	    passwordField.setEchoChar((char) 0);
-	    
-	    MatteBorder focusedBorder = new MatteBorder(3, 3, 5, 5, P5_BRIGHT_RED);
-	    MatteBorder unfocusedBorder = new MatteBorder(3, 3, 5, 3, P5_BLACK);
-	    EmptyBorder padding = new EmptyBorder(5, 15, 5, 15);
-	    
-	    passwordField.addFocusListener(new PlaceholderPasswordFieldHandler(
-	        passwordField, 
-	        "Password", 
-	        P5_WHITE,
-	        P5_WHITE,
-	        P5_GRAY_PLACEHOLDER, 
-	        focusedBorder,
-	        unfocusedBorder,
-	        padding                
-	    ));
+		passwordField = new JPasswordField(15);
+
+		styleP5Field(passwordField, "Password");
+		passwordField.setEchoChar((char) 0);
+
+		MatteBorder focusedBorder = new MatteBorder(3, 3, 5, 5, P5_BRIGHT_RED);
+		MatteBorder unfocusedBorder = new MatteBorder(3, 3, 5, 3, P5_BLACK);
+		EmptyBorder padding = new EmptyBorder(5, 15, 5, 15);
+
+		passwordField.addFocusListener(new PlaceholderPasswordFieldHandler(passwordField, "Password", P5_WHITE,
+				P5_WHITE, P5_GRAY_PLACEHOLDER, focusedBorder, unfocusedBorder, padding));
 	}
 
 	private void styleP5Field(JTextField field, String placeholder) {
@@ -128,30 +111,22 @@ public class PanelLogin extends JFrame {
 	}
 
 	private void settingsButton() {
-	    buttonLogin = new JButton("LOGIN");
-	    buttonLogin.setPreferredSize(new Dimension(180, 60));
-	    buttonLogin.setBackground(P5_BRIGHT_RED);
-	    buttonLogin.setForeground(P5_WHITE);
-	    buttonLogin.setFont(P5_BUTTON_FONT);
-	    buttonLogin.setFocusPainted(false);
-	    buttonLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		buttonLogin = new JButton("LOGIN");
+		buttonLogin.setPreferredSize(new Dimension(180, 60));
+		buttonLogin.setBackground(P5_BRIGHT_RED);
+		buttonLogin.setForeground(P5_WHITE);
+		buttonLogin.setFont(P5_BUTTON_FONT);
+		buttonLogin.setFocusPainted(false);
+		buttonLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-	    MatteBorder defaultBorder = new MatteBorder(4, 4, 8, 6, P5_BLACK);
-	    MatteBorder hoverBorder = new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED);
-	    
-	    buttonLogin.setBorder(defaultBorder);
+		MatteBorder defaultBorder = new MatteBorder(4, 4, 8, 6, P5_BLACK);
+		MatteBorder hoverBorder = new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED);
 
-	    buttonLogin.addMouseListener(new ButtonLoginHandler(
-	        buttonLogin,
-	        P5_BRIGHT_RED,   
-	        P5_WHITE,     
-	        P5_BLACK,        
-	        P5_BRIGHT_RED,    
-	        defaultBorder,   
-	        hoverBorder      
-	    ));
+		buttonLogin.setBorder(defaultBorder);
+
+		buttonLogin.addMouseListener(new ButtonLoginHandler(buttonLogin, P5_BRIGHT_RED, P5_WHITE, P5_BLACK,
+				P5_BRIGHT_RED, defaultBorder, hoverBorder));
 	}
-
 
 	private void addComponentsFrame(Container container) {
 		GridBagConstraints gbc = new GridBagConstraints();
