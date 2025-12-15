@@ -7,7 +7,7 @@ import javax.swing.*;
 import javax.swing.border.MatteBorder;
 
 import metroMalaga.Clases.Usuario;
-import metroMalaga.backend.HandleMenu;
+import metroMalaga.backend.MenuSelect;
 import metroMalaga.frontend.crud.PanelCrud;
 import metroMalaga.frontend.ftp.PanelFTP;
 import metroMalaga.frontend.smtp.PanelSMTP;
@@ -45,7 +45,7 @@ public class PanelMenu extends JFrame {
 		addButtons();
 		setTitle();
 
-		HandleMenu handler = new HandleMenu(this, buttons, user);
+		MenuSelect handler = new MenuSelect(this, buttons, user);
 		this.setVisible(true);
 	}
 

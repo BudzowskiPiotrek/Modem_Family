@@ -10,7 +10,7 @@ public class FTPTableModel extends AbstractTableModel {
 
 	private List<FTPFile> masterList;
 	private List<FTPFile> currentFileList;
-	private final String[] columnNames = { "DATE", "NAME", "BUTTONS" };
+	private final String[] columnNames = { "NAME","DATE" , "SIZE", "BUTTONS" };
 
 	public FTPTableModel(List<FTPFile> initialList) {
 		this.masterList = initialList;

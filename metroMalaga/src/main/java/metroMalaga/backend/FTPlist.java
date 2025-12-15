@@ -14,12 +14,12 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Clases.FTPTableModel;
 
-public class HandleFTPlist implements DocumentListener {
+public class FTPlist implements DocumentListener {
 
 	private JTextField text;
 	private FTPTableModel ftpTable;
 
-	public HandleFTPlist(JTextField text, FTPTableModel ftpTable) {
+	public FTPlist(JTextField text, FTPTableModel ftpTable) {
 		this.ftpTable = ftpTable;
 		this.text = text;
 		this.text.getDocument().addDocumentListener(this);

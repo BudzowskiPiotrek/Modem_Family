@@ -9,7 +9,7 @@ import javax.swing.JTextField;
 import metroMalaga.Clases.Usuario;
 import metroMalaga.frontend.login.PanelLogin;
 
-public class HandleLoginAttempt implements ActionListener {
+public class LoginAttempt implements ActionListener {
 	private final JTextField userField;
 	private final JPasswordField passwordField;
 	private final JButton loginButton;
@@ -20,7 +20,7 @@ public class HandleLoginAttempt implements ActionListener {
 	private static final String USERNAME_PATTERN = "^[a-zA-Z0-9]+$";
 	private static final String PASSWORD_PATTERN = "^[a-zA-Z0-9]{8,}$";
 
-	public HandleLoginAttempt(JTextField userField, JPasswordField passwordField, JButton loginButton,
+	public LoginAttempt(JTextField userField, JPasswordField passwordField, JButton loginButton,
 			PanelLogin panelLogin) {
 		super();
 		this.userField = userField;

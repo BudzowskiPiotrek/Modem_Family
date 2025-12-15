@@ -12,13 +12,13 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Clases.FTPTableModel;
 
-public class HandleFTPdoubleClick extends MouseAdapter {
+public class FTPdoubleClick extends MouseAdapter {
 
     private final JTable ftpTable;
     private final ServiceFTP service;
     private final FTPTableModel model;
 
-    public HandleFTPdoubleClick(JTable table, ServiceFTP service, FTPTableModel model) {
+    public FTPdoubleClick(JTable table, ServiceFTP service, FTPTableModel model) {
         this.ftpTable = table;
         this.service = service;
         this.model = model;

@@ -9,7 +9,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
 import metroMalaga.Clases.Usuario;
-import metroMalaga.backend.HandleLoginAttempt;
+import metroMalaga.backend.LoginAttempt;
 import metroMalaga.frontend.menu.PanelMenu;
 
 public class PanelLogin extends JFrame {
@@ -36,7 +36,7 @@ public class PanelLogin extends JFrame {
 
 		settingsComponents();
 		addComponentsFrame(backgroundPanel);
-		HandleLoginAttempt handler = new HandleLoginAttempt(userField, passwordField, buttonLogin, this);
+		LoginAttempt handler = new LoginAttempt(userField, passwordField, buttonLogin, this);
 
 		this.getContentPane().setFocusable(true);
 		this.getContentPane().requestFocusInWindow();

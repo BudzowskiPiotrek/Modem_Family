@@ -12,12 +12,12 @@ import metroMalaga.frontend.ftp.PanelFTP;
 import metroMalaga.frontend.menu.PanelMenu;
 import metroMalaga.frontend.smtp.PanelSMTP;
 
-public class HandleMenu implements ActionListener {
+public class MenuSelect implements ActionListener {
 	private ArrayList<JButton> buttonsMenu;
 	private final PanelMenu panelMenu;
 	private Usuario user;
 
-	public HandleMenu(PanelMenu panelMenu, ArrayList<JButton> buttonsMenu, Usuario user) {
+	public MenuSelect(PanelMenu panelMenu, ArrayList<JButton> buttonsMenu, Usuario user) {
 		this.buttonsMenu = buttonsMenu;
 		this.panelMenu = panelMenu;
 		this.user = user;

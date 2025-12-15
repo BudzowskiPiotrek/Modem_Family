@@ -6,9 +6,9 @@ import javax.swing.JPanel;
 import java.awt.GridLayout;
 
 public class ButtonsPanel extends JPanel {
-	public final JButton downloadButton = new JButton("Descargar");
-	public final JButton deleteButton = new JButton("Borrar");
-	public final JButton renameButton = new JButton("Modificar");
+	public final JButton downloadButton = new JButton("📥");
+	public final JButton deleteButton = new JButton("❌");
+	public final JButton renameButton = new JButton("🖊️");
 
 	public ButtonsPanel() {
 		this.setLayout(new GridLayout(1, 3, 5, 0));

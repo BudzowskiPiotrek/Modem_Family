@@ -18,11 +18,12 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Clases.FTPTableModel;
 import metroMalaga.Clases.Usuario;
-import metroMalaga.backend.HandleFTPButtonsEditor;
-import metroMalaga.backend.HandleFTPbtnReturn;
-import metroMalaga.backend.HandleFTPbtnUpFile;
-import metroMalaga.backend.HandleFTPdoubleClick;
-import metroMalaga.backend.HandleFTPlist;
+import metroMalaga.backend.FTPButtonsEditor;
+import metroMalaga.backend.FTPbtnReturn;
+import metroMalaga.backend.FTPbtnUp;
+import metroMalaga.backend.FTPbtnUpFile;
+import metroMalaga.backend.FTPdoubleClick;
+import metroMalaga.backend.FTPlist;
 import metroMalaga.backend.ServiceFTP;
 
 public class PanelFTP extends JFrame {
@@ -48,20 +49,21 @@ public class PanelFTP extends JFrame {
 	private void initializeComponents() {
 		this.fileTable = new JTable(this.ftpModel);
 		this.searchField = new JTextField(20);
-		this.uploadButton = new JButton("+");
-		this.upButton = new JButton("Up");
+		this.uploadButton = new JButton("⬆️");
+		this.upButton = new JButton("🔙");
 		this.returnButton = new JButton("Return");
-		HandleFTPButtonsEditor buttonsEditor = new HandleFTPButtonsEditor(this.service, this.ftpModel);
+		FTPButtonsEditor buttonsEditor = new FTPButtonsEditor(this.service, this.ftpModel);
 		fileTable.getColumnModel().getColumn(2).setCellRenderer(new ButtonsRenderer());
 		fileTable.getColumnModel().getColumn(2).setCellEditor(buttonsEditor);
 		fileTable.setRowHeight(30);
 	}
 
 	private void attachListeners() {
-		HandleFTPlist listener = new HandleFTPlist(searchField, ftpModel);
-		HandleFTPbtnUpFile listenerUp = new HandleFTPbtnUpFile(uploadButton, service, ftpModel);
-		HandleFTPbtnReturn listenerReturn = new HandleFTPbtnReturn(upButton, service, ftpModel);
-		HandleFTPdoubleClick listenerClick = new HandleFTPdoubleClick(fileTable, service, ftpModel);
+		FTPlist listener = new FTPlist(searchField, ftpModel);
+		FTPbtnUpFile listenerFile = new FTPbtnUpFile(uploadButton, service, ftpModel);
+		FTPbtnUp listenerUp = new FTPbtnUp(upButton, service, ftpModel);
+		FTPdoubleClick listenerClick = new FTPdoubleClick(fileTable, service, ftpModel);
+		FTPbtnReturn listenerReturMenu = new FTPbtnReturn(this, returnButton, user);
 	}
 
 	private void setupFrameConfiguration() {

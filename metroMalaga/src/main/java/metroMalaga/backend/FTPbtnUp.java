@@ -13,12 +13,12 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Clases.FTPTableModel;
 
-public class HandleFTPbtnReturn implements ActionListener {
+public class FTPbtnUp implements ActionListener {
 
 	private final ServiceFTP service;
 	private final FTPTableModel model;
 
-	public HandleFTPbtnReturn(JButton button, ServiceFTP service, FTPTableModel model) {
+	public FTPbtnUp(JButton button, ServiceFTP service, FTPTableModel model) {
 		this.service = service;
 		this.model = model;
 		button.addActionListener(this);
