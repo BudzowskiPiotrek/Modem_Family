@@ -45,8 +45,7 @@ public class HandleMenu implements ActionListener {
 			PanelSMTP panelSmtp = new PanelSMTP(user);
 			panelSmtp.setVisible(true);
 		}
-		PanelMenu menu = (PanelMenu) button.getParent();
-		menu.disposeWindow();
+		panelMenu.disposeWindow();
 
 	}
 
