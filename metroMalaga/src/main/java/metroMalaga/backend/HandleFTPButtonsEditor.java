@@ -18,14 +18,14 @@ import org.apache.commons.net.ftp.FTPFile;
 import metroMalaga.Clases.FTPTableModel;
 import metroMalaga.frontend.ftp.ButtonsPanel;
 
-public class ButtonsEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
+public class HandleFTPButtonsEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
 
 	private final ButtonsPanel panel; 
 	private FTPFile currentFile;
 	private final ServiceFTP service; 
 	private final FTPTableModel model; 
 
-	public ButtonsEditor(ServiceFTP service, FTPTableModel model) {
+	public HandleFTPButtonsEditor(ServiceFTP service, FTPTableModel model) {
 		this.service = service;
 		this.model = model;
 		this.panel = new ButtonsPanel(); 

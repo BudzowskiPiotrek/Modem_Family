@@ -18,7 +18,7 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Clases.FTPTableModel;
 import metroMalaga.Clases.Usuario;
-import metroMalaga.backend.ButtonsEditor;
+import metroMalaga.backend.HandleFTPButtonsEditor;
 import metroMalaga.backend.HandleFTPbtnReturn;
 import metroMalaga.backend.HandleFTPbtnUpFile;
 import metroMalaga.backend.HandleFTPdoubleClick;
@@ -51,7 +51,7 @@ public class PanelFTP extends JFrame {
 		this.uploadButton = new JButton("+");
 		this.upButton = new JButton("Up");
 		this.returnButton = new JButton("Return");
-		ButtonsEditor buttonsEditor = new ButtonsEditor(this.service, this.ftpModel);
+		HandleFTPButtonsEditor buttonsEditor = new HandleFTPButtonsEditor(this.service, this.ftpModel);
 		fileTable.getColumnModel().getColumn(2).setCellRenderer(new ButtonsRenderer());
 		fileTable.getColumnModel().getColumn(2).setCellEditor(buttonsEditor);
 		fileTable.setRowHeight(30);
