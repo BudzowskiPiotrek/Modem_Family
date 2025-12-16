@@ -2,12 +2,10 @@ package metroMalaga.frontend.smtp;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.*;
 import javax.swing.text.JTextComponent;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.util.Arrays;
 
 import metroMalaga.Clases.Usuario;

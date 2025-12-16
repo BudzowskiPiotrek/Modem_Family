@@ -62,7 +62,6 @@ public class HandleSMTP {
 		});
 
 		Message message = new MimeMessage(session);
-		// Basic backend validations
 		if (recipient == null || recipient.isEmpty())
 			throw new Exception("The recipient cannot be empty.");
 
@@ -88,11 +87,9 @@ public class HandleSMTP {
 		Transport.send(message);
 	}
 
-	// --- FETCH EMAILS (POP3 + AUTOMATIC IMAP SYNC) ---
 	public List<EmailModel> fetchEmails() {
 		List<EmailModel> emailList = new ArrayList<>();
 
-		// 1. POP3 PHASE: BASIC DOWNLOAD
 		try {
 			Properties props = new Properties();
 			props.put("mail.pop3.host", POP3_HOST);
@@ -123,7 +120,6 @@ public class HandleSMTP {
 					String sender = (fromAddresses != null && fromAddresses.length > 0) ? fromAddresses[0].toString()
 							: "Unknown";
 
-					// FILTER: Skip my own sent emails
 					if (sender.contains(userEmail))
 						continue;
 
@@ -168,10 +164,6 @@ public class HandleSMTP {
 		return emailList;
 	}
 
-	/**
-	 * MAGIC METHOD: Connects via IMAP briefly, gets the IDs of read emails, and
-	 * updates our POP3 list and local database.
-	 */
 	private void syncReadStatusWithGmail(List<EmailModel> currentList) {
 		try {
 			Properties props = new Properties();
@@ -186,14 +178,11 @@ public class HandleSMTP {
 			Folder emailFolder = store.getFolder("INBOX");
 			emailFolder.open(Folder.READ_ONLY);
 
-			// Search ONLY for messages that have the SEEN flag (Read)
-			// This is much more efficient than downloading everything
 			Message[] seenMessages = emailFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), true));
 			FetchProfile fp = new FetchProfile();
-			fp.add(FetchProfile.Item.ENVELOPE); // We need the Message-ID
+			fp.add(FetchProfile.Item.ENVELOPE); 
 			emailFolder.fetch(seenMessages, fp);
 
-			// Create a quick set with read IDs from the server
 			Set<String> serverReadIds = new HashSet<>();
 			for (Message msg : seenMessages) {
 				if (msg instanceof MimeMessage) {
@@ -201,7 +190,6 @@ public class HandleSMTP {
 				}
 			}
 
-			// Update our local list and save
 			boolean saveChanges = false;
 			for (EmailModel localMail : currentList) {
 				if (serverReadIds.contains(localMail.getUniqueId())) {
@@ -221,11 +209,9 @@ public class HandleSMTP {
 
 		} catch (Exception e) {
 			System.out.println("Could not sync status with Gmail (IMAP): " + e.getMessage());
-			// Do not throw fatal error, simply keep the list as it was in POP3
 		}
 	}
 
-	// --- PARSERS AND DOWNLOAD (Same as before) ---
 	private void parseMultipart(Multipart multipart, List<String> attachments) {
 		try {
 			for (int i = 0; i < multipart.getCount(); i++) {
