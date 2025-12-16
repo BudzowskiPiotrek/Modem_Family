@@ -1,4 +1,4 @@
-package metroMalaga.frontend.smtp;
+package metroMalaga.View;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -8,8 +8,12 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.Arrays;
 
-import metroMalaga.Clases.Usuario;
-import metroMalaga.backend.smtp.*;
+import metroMalaga.Model.Usuario;
+import metroMalaga.Controller.smtp.ButtonHandleSMTP;
+import metroMalaga.Controller.smtp.ButtonHoverHandle;
+import metroMalaga.Controller.smtp.FieldFocusHandle;
+import metroMalaga.Controller.smtp.HandleSMTP;
+
 
 public class PanelSMTP extends JFrame {
 

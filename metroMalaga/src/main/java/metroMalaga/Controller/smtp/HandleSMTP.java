@@ -1,9 +1,9 @@
-package metroMalaga.backend.smtp;
+package metroMalaga.Controller.smtp;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import jakarta.mail.search.FlagTerm;
-import metroMalaga.Clases.EmailModel;
+import metroMalaga.Model.EmailModel;
 
 import java.io.*;
 import java.util.*;

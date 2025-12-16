@@ -37,7 +37,7 @@ public class ServiceLogin {
 			ps.setString(1, usuario);
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					user = new Usuario();
+					user = null;
 				}
 			}
 

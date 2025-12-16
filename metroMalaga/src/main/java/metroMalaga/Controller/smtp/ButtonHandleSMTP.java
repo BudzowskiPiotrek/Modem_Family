@@ -1,4 +1,4 @@
-package metroMalaga.backend.smtp;
+package metroMalaga.Controller.smtp;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -14,7 +14,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-import metroMalaga.Clases.EmailModel;
+import metroMalaga.Model.EmailModel;
 
 public class ButtonHandleSMTP extends MouseAdapter implements ActionListener {
 

@@ -1,4 +1,4 @@
-package metroMalaga.backend.smtp;
+package metroMalaga.Controller.smtp;
 
 import java.util.Properties;
 
