@@ -31,13 +31,16 @@ public class ServiceLogin {
 	}
 
 	public Usuario getUserData(String usuario) {
-		Usuario user = null;
+		Usuario user = new Usuario(null, null, null);
 		final String SQL = "SELECT * FROM usuarios WHERE username = ?";
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					user = null;
+					user.setUsernameApp(rs.getString(1));
+					;
+					user.setPasswordApp(rs.getString(2));
+					;
 				}
 			}
 
