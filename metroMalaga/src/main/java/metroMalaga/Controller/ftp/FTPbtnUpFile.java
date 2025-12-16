@@ -13,15 +13,21 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.Common;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
+import metroMalaga.Model.Usuario;
 
 public class FTPbtnUpFile implements ActionListener {
 
 	private ServiceFTP service;
 	private FTPTableModel model;
+	private Common cn;
+	private Usuario user;
 
-	public FTPbtnUpFile(JButton button, ServiceFTP service, FTPTableModel model) {
+	public FTPbtnUpFile(JButton button, ServiceFTP service, FTPTableModel model, Usuario user) {
+		this.cn = new Common();
+		this.user = user;
 		this.service = service;
 		this.model = model;
 		button.addActionListener(this);
@@ -43,6 +49,7 @@ public class FTPbtnUpFile implements ActionListener {
 				boolean success = service.uploadFile(localFile.getAbsolutePath(), remoteFileName);
 
 				if (success) {
+					cn.registerLog(user.getUsernameApp(), "File uploaded:" + remoteFileName);
 					JOptionPane.showMessageDialog(null, "File uploaded successfully:" + remoteFileName);
 
 					FTPFile[] updatedFilesArray = service.listAllFiles();
@@ -56,8 +63,8 @@ public class FTPbtnUpFile implements ActionListener {
 							JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, "I/O error during upload: " + ex.getMessage(),
-						"Error de Subida", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "I/O error during upload: " + ex.getMessage(), "Error de Subida",
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}

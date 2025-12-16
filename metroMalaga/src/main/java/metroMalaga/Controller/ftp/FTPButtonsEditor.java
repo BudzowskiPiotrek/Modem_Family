@@ -15,8 +15,10 @@ import javax.swing.table.TableCellEditor;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.Common;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
+import metroMalaga.Model.Usuario;
 
 public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
 
@@ -24,8 +26,12 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 	private FTPFile currentFile;
 	private final ServiceFTP service;
 	private final FTPTableModel model;
+	private Common cn;
+	private Usuario user;
 
-	public FTPButtonsEditor(ServiceFTP service, FTPTableModel model) {
+	public FTPButtonsEditor(ServiceFTP service, FTPTableModel model, Usuario user) {
+		this.cn = new Common();
+		this.user = user;
 		this.service = service;
 		this.model = model;
 		this.panel = new FTPButtonsPanel();
@@ -95,6 +101,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				boolean success = service.downloadFile(file.getName(), localFilePath);
 
 				if (success) {
+					cn.registerLog(user.getUsernameApp(), "File downloaded:" + localFilePath);
 					JOptionPane.showMessageDialog(null, "File successfully downloaded to:\n" + localFilePath);
 				} else {
 					JOptionPane.showMessageDialog(null, "Error: The folder cannot be downloaded", "DownloadError",
@@ -117,6 +124,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				boolean success = service.deleteFile(file.getName());
 
 				if (success) {
+					cn.registerLog(user.getUsernameApp(), "File delete:" + file.getName());
 					JOptionPane.showMessageDialog(null, "File successfully deleted.");
 					updateTable();
 				} else {
@@ -137,6 +145,8 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				boolean success = service.renameFile(file.getName(), newName.trim());
 
 				if (success) {
+					cn.registerLog(user.getUsernameApp(),
+							"File renamed :" + file.getName() + " for: " + newName.trim());
 					JOptionPane.showMessageDialog(null, "File renamed successfully.");
 					updateTable();
 				} else {

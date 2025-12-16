@@ -12,6 +12,7 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Controller.ftp.FTPRefreshThread;
+import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.CrudFrontend;
@@ -78,7 +79,8 @@ public class MenuSelect implements ActionListener {
 			break;
 
 		case "SMTP":
-			PanelSMTP panelSmtp = new PanelSMTP(user);
+			HandleSMTP handleSmtp = new HandleSMTP();
+			PanelSMTP panelSmtp = new PanelSMTP(user, handleSmtp);
 			panelSmtp.setVisible(true);
 			break;
 

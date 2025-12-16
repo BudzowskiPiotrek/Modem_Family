@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.Common;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
 

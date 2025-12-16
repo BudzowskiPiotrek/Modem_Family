@@ -22,8 +22,6 @@ import org.apache.commons.net.ftp.FTPFile;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Controller.ftp.FTPButtonsEditor;
 import metroMalaga.Controller.ftp.FTPButtonsRenderer;
-import metroMalaga.Controller.ftp.FTPRefreshThread;
-import metroMalaga.Controller.ftp.FTPbtnRefresh;
 import metroMalaga.Controller.ftp.FTPbtnReturn;
 import metroMalaga.Controller.ftp.FTPbtnUp;
 import metroMalaga.Controller.ftp.FTPbtnUpFile;
@@ -37,9 +35,8 @@ public class PanelFTP extends JFrame {
 	private FTPTableModel ftpModel;
 	private JTable fileTable;
 	private JTextField searchField;
-	private JButton uploadButton, upButton, returnButton, reloadButton;
+	private JButton uploadButton, upButton, returnButton;
 	private ServiceFTP service;
-	
 
 	private static final Color ACCENT_RED = new Color(220, 53, 69);
 	private static final Color BACKGROUND_LIGHT = Color.WHITE;
@@ -53,6 +50,18 @@ public class PanelFTP extends JFrame {
 		attachListeners();
 		setupFrameConfiguration();
 		setupLayout();
+	}
+
+	private void initializeComponents() {
+		this.fileTable = new JTable(this.ftpModel);
+		this.searchField = new JTextField(20);
+		this.uploadButton = new JButton("⤒");
+		this.upButton = new JButton("🔙");
+		this.returnButton = new JButton("Return");
+		FTPButtonsEditor buttonsEditor = new FTPButtonsEditor(this.service, this.ftpModel, user);
+		fileTable.getColumnModel().getColumn(3).setCellRenderer(new FTPButtonsRenderer());
+		fileTable.getColumnModel().getColumn(3).setCellEditor(buttonsEditor);
+		fileTable.setRowHeight(30);
 	}
 
 	private void applyStyle() {
@@ -81,12 +90,10 @@ public class PanelFTP extends JFrame {
 		styleButton(uploadButton, ACCENT_RED, Color.WHITE);
 		styleButton(upButton, Color.GRAY, Color.WHITE);
 		styleButton(returnButton, ACCENT_RED, Color.WHITE);
-		styleButton(reloadButton, new Color(108, 117, 125), Color.WHITE);
 
 		uploadButton.setFont(modernFont);
 		upButton.setFont(modernFont);
 		returnButton.setFont(modernFont);
-		reloadButton.setFont(modernFont);
 	}
 
 	private void styleButton(JButton button, Color background, Color foreground) {
@@ -96,26 +103,12 @@ public class PanelFTP extends JFrame {
 		button.setBorder(new EmptyBorder(8, 15, 8, 15));
 	}
 
-	private void initializeComponents() {
-		this.fileTable = new JTable(this.ftpModel);
-		this.searchField = new JTextField(20);
-		this.uploadButton = new JButton("⤒");
-		this.upButton = new JButton("🔙");
-		this.returnButton = new JButton("Return");
-		this.reloadButton = new JButton("↻");
-		FTPButtonsEditor buttonsEditor = new FTPButtonsEditor(this.service, this.ftpModel);
-		fileTable.getColumnModel().getColumn(3).setCellRenderer(new FTPButtonsRenderer());
-		fileTable.getColumnModel().getColumn(3).setCellEditor(buttonsEditor);
-		fileTable.setRowHeight(30);
-	}
-
 	private void attachListeners() {
 		FTPlist listener = new FTPlist(searchField, ftpModel);
-		FTPbtnUpFile listenerFile = new FTPbtnUpFile(uploadButton, service, ftpModel);
+		FTPbtnUpFile listenerFile = new FTPbtnUpFile(uploadButton, service, ftpModel, user);
 		FTPbtnUp listenerUp = new FTPbtnUp(upButton, service, ftpModel);
 		FTPdoubleClick listenerClick = new FTPdoubleClick(fileTable, service, ftpModel);
 		FTPbtnReturn listenerReturMenu = new FTPbtnReturn(this, returnButton, user);
-		FTPbtnRefresh listenerRefresh = new FTPbtnRefresh(reloadButton, service, ftpModel);
 	}
 
 	private void setupFrameConfiguration() {
@@ -133,7 +126,6 @@ public class PanelFTP extends JFrame {
 		actionPanel.add(this.uploadButton);
 		actionPanel.add(this.upButton);
 		actionPanel.add(this.returnButton);
-		actionPanel.add(this.reloadButton);
 		actionPanel.setBackground(HEADER_GRAY);
 
 		JPanel filterPanel = new JPanel();
