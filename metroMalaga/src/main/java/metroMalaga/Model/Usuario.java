@@ -1,4 +1,4 @@
-package metroMalaga.Clases;
+package metroMalaga.Model;
 
 public class Usuario {
     private String usernameApp;   
