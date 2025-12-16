@@ -16,7 +16,7 @@ public class ServiceLogin {
 
 	public boolean authenticateUser(String usuario, String password) {
 
-		final String SQL = "SELECT id FROM usuarios WHERE username = ? AND password = ?";
+		final String SQL = "SELECT username FROM usuarios WHERE username = ? AND password = ?";
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);
 			ps.setString(2, password);
@@ -49,7 +49,9 @@ public class ServiceLogin {
 	}
 
 	public void registerLog(String user, String description) {
+
 		final String SQL = "INSERT INTO logs (user, description) VALUES (?, ?)";
+
 
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, user);
