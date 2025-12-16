@@ -2,8 +2,6 @@ package metroMalaga.View;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -39,6 +37,7 @@ public class PanelFTP extends JFrame {
 	public PanelFTP(Usuario user, ServiceFTP service, List<FTPFile> initialFiles) {
 		this.service = service;
 		this.ftpModel = new FTPTableModel(initialFiles, service);
+
 		initializeComponents();
 		attachListeners();
 		setupFrameConfiguration();
@@ -74,6 +73,14 @@ public class PanelFTP extends JFrame {
 		this.setSize(800, 600);
 		this.setLocationRelativeTo(null);
 		this.setResizable(false);
+
+		// Add window listener to disconnect notification system on close
+		this.addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent e) {
+				service.disconnectNotifications();
+			}
+		});
 	}
 
 	private void setupLayout() {

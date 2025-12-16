@@ -20,6 +20,9 @@ public class FTPTableModel extends AbstractTableModel {
 		this.masterList = initialList;
 		this.currentFileList = initialList;
 		this.service = service;
+
+		// Auto-register this table model with the service for notifications
+		service.setTableModel(this);
 	}
 
 	public List<FTPFile> getMasterList() {
@@ -51,23 +54,23 @@ public class FTPTableModel extends AbstractTableModel {
 		FTPFile file = currentFileList.get(rowIndex);
 
 		switch (columnIndex) {
-		case 0:
-			return file.getName();
-		case 1:
-			long size;
-			if (file.isDirectory()) {
-	            size = service.calculateDirectorySize(file.getName()); 
-	        } else {
-	            size = file.getSize();
-	        }
-			return Common.formatSize(size);
-		case 2:
-			Date date = file.getTimestamp().getTime();
-			return DATE_FORMAT.format(date);
-		case 3:
-			return file;
-		default:
-			return null;
+			case 0:
+				return file.getName();
+			case 1:
+				long size;
+				if (file.isDirectory()) {
+					size = service.calculateDirectorySize(file.getName());
+				} else {
+					size = file.getSize();
+				}
+				return Common.formatSize(size);
+			case 2:
+				Date date = file.getTimestamp().getTime();
+				return DATE_FORMAT.format(date);
+			case 3:
+				return file;
+			default:
+				return null;
 		}
 	}
 
