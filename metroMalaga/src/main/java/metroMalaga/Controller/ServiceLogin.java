@@ -48,17 +48,4 @@ public class ServiceLogin {
 		}
 		return user;
 	}
-
-	public void registerLog(String user, String description) {
-		final String SQL = "INSERT INTO logs (username, accion) VALUES (?, ?)";
-
-		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
-			ps.setString(1, user);
-			ps.setString(2, description);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			String errorMessage = "CRITICAL LOGGING ERROR: Could not register log entry. Detail: " + e.getMessage();
-			System.err.println(errorMessage);
-		}
-	}
 }
