@@ -2,6 +2,7 @@ package metroMalaga.backend.smtp;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import jakarta.mail.search.FlagTerm;
 import metroMalaga.Clases.EmailModel;
 
 import java.io.*;
@@ -16,35 +17,36 @@ public class HandleSMTP {
 	private String userEmail;
 	private String appPassword;
 
-	private final File archivoLeidos = new File("leidos_db.dat");
-	private Set<String> leidosLocalmente = new HashSet<>();
+	private final File readEmailsFile = new File("read_emails_db.dat");
+	private Set<String> locallyRead = new HashSet<>();
 
 	public boolean login(String email, String password) {
 		this.userEmail = email;
 		this.appPassword = password;
-		cargarLeidosDesdeArchivo();
+		loadReadFromDisk();
 		return true;
 	}
 
-	private void cargarLeidosDesdeArchivo() {
-		if (!archivoLeidos.exists())
+	private void loadReadFromDisk() {
+		if (!readEmailsFile.exists())
 			return;
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivoLeidos))) {
-			leidosLocalmente = (Set<String>) ois.readObject();
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(readEmailsFile))) {
+			locallyRead = (Set<String>) ois.readObject();
 		} catch (Exception e) {
-			leidosLocalmente = new HashSet<>();
+			locallyRead = new HashSet<>();
 		}
 	}
 
-	private void guardarLeidosEnArchivo() {
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(archivoLeidos))) {
-			oos.writeObject(leidosLocalmente);
+	private void saveReadToDisk() {
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(readEmailsFile))) {
+			oos.writeObject(locallyRead);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void sendEmail(String recipient, String subject, String body, List<File> attachments) {
+	// --- SEND EMAIL ---
+	public void sendEmail(String recipient, String subject, String body, List<File> attachments) throws Exception {
 		Properties props = new Properties();
 		props.put("mail.smtp.auth", "true");
 		props.put("mail.smtp.starttls.enable", "true");
@@ -60,44 +62,46 @@ public class HandleSMTP {
 		});
 
 		Message message = new MimeMessage(session);
-		try {
-			message.setFrom(new InternetAddress(userEmail));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
-			message.setSubject(subject);
+		// Basic backend validations
+		if (recipient == null || recipient.isEmpty())
+			throw new Exception("The recipient cannot be empty.");
 
-			Multipart multipart = new MimeMultipart();
-			BodyPart messageBodyPart = new MimeBodyPart();
-			messageBodyPart.setText(body);
-			multipart.addBodyPart(messageBodyPart);
+		message.setFrom(new InternetAddress(userEmail));
+		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
+		message.setSubject(subject);
 
-			if (attachments != null && !attachments.isEmpty()) {
-				for (File file : attachments) {
-					if (file.exists()) {
-						MimeBodyPart attachPart = new MimeBodyPart();
-						attachPart.attachFile(file);
-						multipart.addBodyPart(attachPart);
-					}
+		Multipart multipart = new MimeMultipart();
+		BodyPart messageBodyPart = new MimeBodyPart();
+		messageBodyPart.setText(body);
+		multipart.addBodyPart(messageBodyPart);
+
+		if (attachments != null && !attachments.isEmpty()) {
+			for (File file : attachments) {
+				if (file.exists()) {
+					MimeBodyPart attachPart = new MimeBodyPart();
+					attachPart.attachFile(file);
+					multipart.addBodyPart(attachPart);
 				}
 			}
-			message.setContent(multipart);
-			Transport.send(message);
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+		message.setContent(multipart);
+		Transport.send(message);
 	}
 
+	// --- FETCH EMAILS (POP3 + AUTOMATIC IMAP SYNC) ---
 	public List<EmailModel> fetchEmails() {
 		List<EmailModel> emailList = new ArrayList<>();
-		Properties props = new Properties();
-		props.put("mail.pop3.host", POP3_HOST);
-		props.put("mail.pop3.port", "995");
-		props.put("mail.pop3.starttls.enable", "true");
-		props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 
-		Session session = Session.getDefaultInstance(props);
-		Store store;
+		// 1. POP3 PHASE: BASIC DOWNLOAD
 		try {
-			store = session.getStore("pop3");
+			Properties props = new Properties();
+			props.put("mail.pop3.host", POP3_HOST);
+			props.put("mail.pop3.port", "995");
+			props.put("mail.pop3.starttls.enable", "true");
+			props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+
+			Session session = Session.getDefaultInstance(props);
+			Store store = session.getStore("pop3");
 			store.connect(POP3_HOST, "recent:" + userEmail, appPassword);
 
 			Folder emailFolder = store.getFolder("INBOX");
@@ -116,21 +120,16 @@ public class HandleSMTP {
 					Message msg = messages[i];
 
 					Address[] fromAddresses = msg.getFrom();
-					String sender;
-					if (fromAddresses != null && fromAddresses.length > 0) {
-						sender = fromAddresses[0].toString();
-					} else {
-						sender = "Unknown";
-					}
+					String sender = (fromAddresses != null && fromAddresses.length > 0) ? fromAddresses[0].toString()
+							: "Unknown";
 
-					if (sender.contains(userEmail)) {
+					// FILTER: Skip my own sent emails
+					if (sender.contains(userEmail))
 						continue;
-					}
 
 					String uid = "";
-					if (msg instanceof MimeMessage) {
+					if (msg instanceof MimeMessage)
 						uid = ((MimeMessage) msg).getMessageID();
-					}
 
 					String bodyText = "";
 					List<String> attachments = new ArrayList<>();
@@ -143,23 +142,25 @@ public class HandleSMTP {
 							bodyText = (String) content;
 						}
 					} catch (Exception e) {
-						bodyText = "[Contenido no legible sin descargar]";
+						bodyText = "[Complex Content]";
 					}
 
 					EmailModel email = new EmailModel(msg.getMessageNumber(), sender, msg.getSubject(), bodyText);
 					email.setUniqueId(uid);
 					email.setAttachmentNames(attachments);
 
-					if (leidosLocalmente.contains(uid)) {
-						email.setRead(true);
-					} else {
-						email.setRead(false);
-					}
+					// Initial status based on local memory
+					email.setRead(locallyRead.contains(uid));
+
 					emailList.add(email);
 				}
 			}
 			emailFolder.close(false);
 			store.close();
+
+			if (!emailList.isEmpty()) {
+				syncReadStatusWithGmail(emailList);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -167,6 +168,64 @@ public class HandleSMTP {
 		return emailList;
 	}
 
+	/**
+	 * MAGIC METHOD: Connects via IMAP briefly, gets the IDs of read emails, and
+	 * updates our POP3 list and local database.
+	 */
+	private void syncReadStatusWithGmail(List<EmailModel> currentList) {
+		try {
+			Properties props = new Properties();
+			props.put("mail.store.protocol", "imaps");
+			props.put("mail.imaps.host", IMAP_HOST);
+			props.put("mail.imaps.port", "993");
+
+			Session session = Session.getDefaultInstance(props);
+			Store store = session.getStore("imaps");
+			store.connect(IMAP_HOST, userEmail, appPassword);
+
+			Folder emailFolder = store.getFolder("INBOX");
+			emailFolder.open(Folder.READ_ONLY);
+
+			// Search ONLY for messages that have the SEEN flag (Read)
+			// This is much more efficient than downloading everything
+			Message[] seenMessages = emailFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), true));
+			FetchProfile fp = new FetchProfile();
+			fp.add(FetchProfile.Item.ENVELOPE); // We need the Message-ID
+			emailFolder.fetch(seenMessages, fp);
+
+			// Create a quick set with read IDs from the server
+			Set<String> serverReadIds = new HashSet<>();
+			for (Message msg : seenMessages) {
+				if (msg instanceof MimeMessage) {
+					serverReadIds.add(((MimeMessage) msg).getMessageID());
+				}
+			}
+
+			// Update our local list and save
+			boolean saveChanges = false;
+			for (EmailModel localMail : currentList) {
+				if (serverReadIds.contains(localMail.getUniqueId())) {
+					localMail.setRead(true);
+					if (!locallyRead.contains(localMail.getUniqueId())) {
+						locallyRead.add(localMail.getUniqueId());
+						saveChanges = true;
+					}
+				}
+			}
+
+			if (saveChanges)
+				saveReadToDisk();
+
+			emailFolder.close(false);
+			store.close();
+
+		} catch (Exception e) {
+			System.out.println("Could not sync status with Gmail (IMAP): " + e.getMessage());
+			// Do not throw fatal error, simply keep the list as it was in POP3
+		}
+	}
+
+	// --- PARSERS AND DOWNLOAD (Same as before) ---
 	private void parseMultipart(Multipart multipart, List<String> attachments) {
 		try {
 			for (int i = 0; i < multipart.getCount(); i++) {
@@ -201,25 +260,19 @@ public class HandleSMTP {
 	}
 
 	public void downloadEmailComplete(String uid, File destinationFile) {
-		Properties props = new Properties();
-		props.put("mail.pop3.host", POP3_HOST);
-		props.put("mail.pop3.port", "995");
-		props.put("mail.pop3.starttls.enable", "true");
-		props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-
-		Session session = Session.getDefaultInstance(props);
-		Store store;
 		try {
-			store = session.getStore("pop3");
+			Properties props = new Properties();
+			props.put("mail.pop3.host", POP3_HOST);
+			props.put("mail.pop3.port", "995");
+			props.put("mail.pop3.starttls.enable", "true");
+			props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+			Session session = Session.getDefaultInstance(props);
+			Store store = session.getStore("pop3");
 			store.connect(POP3_HOST, "recent:" + userEmail, appPassword);
-
 			Folder emailFolder = store.getFolder("INBOX");
 			emailFolder.open(Folder.READ_ONLY);
-
 			Message[] messages = emailFolder.getMessages();
 			Message targetMsg = null;
-
-			// Buscamos el mensaje por UID
 			for (int i = messages.length - 1; i >= 0; i--) {
 				if (messages[i] instanceof MimeMessage) {
 					if (((MimeMessage) messages[i]).getMessageID().equals(uid)) {
@@ -229,13 +282,10 @@ public class HandleSMTP {
 				}
 			}
 			if (targetMsg == null)
-				throw new Exception("Mensaje no encontrado.");
-
-			// ESCRIBIMOS EL MENSAJE ENTERO EN EL ARCHIVO
+				throw new Exception("Message not found.");
 			try (FileOutputStream fos = new FileOutputStream(destinationFile)) {
 				targetMsg.writeTo(fos);
 			}
-
 			emailFolder.close(false);
 			store.close();
 		} catch (Exception e) {
@@ -244,15 +294,14 @@ public class HandleSMTP {
 	}
 
 	public void deleteEmail(String subjectToDelete, String senderToDelete) {
-		Properties props = new Properties();
-		props.put("mail.pop3.host", POP3_HOST);
-		props.put("mail.pop3.port", "995");
-		props.put("mail.pop3.starttls.enable", "true");
-		props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-		Session session = Session.getDefaultInstance(props);
-		Store store;
 		try {
-			store = session.getStore("pop3");
+			Properties props = new Properties();
+			props.put("mail.pop3.host", POP3_HOST);
+			props.put("mail.pop3.port", "995");
+			props.put("mail.pop3.starttls.enable", "true");
+			props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+			Session session = Session.getDefaultInstance(props);
+			Store store = session.getStore("pop3");
 			store.connect(POP3_HOST, "recent:" + userEmail, appPassword);
 			Folder emailFolder = store.getFolder("INBOX");
 			emailFolder.open(Folder.READ_WRITE);
@@ -277,10 +326,8 @@ public class HandleSMTP {
 			}
 			if (found)
 				emailFolder.close(true);
-			else {
+			else
 				emailFolder.close(false);
-				throw new Exception("No encontrado.");
-			}
 			store.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -290,21 +337,19 @@ public class HandleSMTP {
 	public void updateReadStatusIMAP(String subject, String sender, String uid, boolean markAsRead) {
 		if (markAsRead) {
 			if (uid != null)
-				leidosLocalmente.add(uid);
+				locallyRead.add(uid);
 		} else {
 			if (uid != null)
-				leidosLocalmente.remove(uid);
+				locallyRead.remove(uid);
 		}
-		guardarLeidosEnArchivo();
-		Properties props = new Properties();
-		props.put("mail.store.protocol", "imaps");
-		props.put("mail.imaps.host", IMAP_HOST);
-		props.put("mail.imaps.port", "993");
-		Session session = Session.getDefaultInstance(props);
-		Store store;
-
+		saveReadToDisk();
 		try {
-			store = session.getStore("imaps");
+			Properties props = new Properties();
+			props.put("mail.store.protocol", "imaps");
+			props.put("mail.imaps.host", IMAP_HOST);
+			props.put("mail.imaps.port", "993");
+			Session session = Session.getDefaultInstance(props);
+			Store store = session.getStore("imaps");
 			store.connect(IMAP_HOST, userEmail, appPassword);
 			Folder emailFolder = store.getFolder("INBOX");
 			emailFolder.open(Folder.READ_WRITE);
@@ -324,8 +369,8 @@ public class HandleSMTP {
 			}
 			emailFolder.close(true);
 			store.close();
-		} catch (Exception e1) {
-			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

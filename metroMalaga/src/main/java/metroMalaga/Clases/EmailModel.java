@@ -10,7 +10,6 @@ public class EmailModel {
 	private String content;
 	private boolean isRead;
 	private String uniqueId;
-	// NUEVO: Lista de nombres de archivos adjuntos
 	private List<String> attachmentNames;
 
 	public EmailModel(int messageNumber, String sender, String subject, String content) {
@@ -56,7 +55,6 @@ public class EmailModel {
 		this.uniqueId = uniqueId;
 	}
 
-	// NUEVOS GETTER/SETTER PARA ADJUNTOS
 	public List<String> getAttachmentNames() {
 		return attachmentNames;
 	}
@@ -65,7 +63,6 @@ public class EmailModel {
 		this.attachmentNames = attachmentNames;
 	}
 
-	// Método auxiliar para saber si tiene adjuntos
 	public boolean hasAttachments() {
 		return attachmentNames != null && !attachmentNames.isEmpty();
 	}

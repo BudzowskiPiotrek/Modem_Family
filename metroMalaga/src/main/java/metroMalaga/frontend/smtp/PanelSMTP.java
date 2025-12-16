@@ -26,15 +26,12 @@ public class PanelSMTP extends JFrame {
 	private JTable emailTable;
 	private DefaultTableModel tableModel;
 
-	// Redactar
 	private JButton btnSend, btnAttach, btnClearAttach;
 	private JLabel lblAttachedFile;
 	private List<File> attachmentsList = new ArrayList<>();
 
-	// Inbox
 	private JButton btnRefresh, btnDelete, btnToggleRead;
-	// BOTÓN DE DESCARGA
-	private JButton btnDownloadEmail; // Ahora descarga el .EML completo
+	private JButton btnDownloadEmail;
 
 	public PanelSMTP(Usuario usuario) {
 		this.loggedUser = usuario;
@@ -55,32 +52,36 @@ public class PanelSMTP extends JFrame {
 		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		// --- TOP: REDACTAR ---
+		// --- TOP: COMPOSE ---
 		JPanel composePanel = new JPanel(new BorderLayout(5, 5));
-		composePanel.setBorder(new TitledBorder("Redactar"));
+		composePanel.setBorder(new TitledBorder("Compose"));
 
 		JPanel fieldsPanel = new JPanel(new GridLayout(2, 2));
-		fieldsPanel.add(new JLabel("Para:"));
+		fieldsPanel.add(new JLabel("To:"));
 		txtTo = new JTextField();
 		fieldsPanel.add(txtTo);
-		fieldsPanel.add(new JLabel("Asunto:"));
+		fieldsPanel.add(new JLabel("Subject:"));
 		txtSubject = new JTextField();
 		fieldsPanel.add(txtSubject);
 
 		txtBody = new JTextArea(3, 20);
 
 		JPanel bottomComposePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		btnAttach = new JButton("Adjuntar (+)");
-		btnClearAttach = new JButton("X");
+		btnAttach = new JButton("Attach (+)");
+		btnClearAttach = new JButton("Clear");
 		btnClearAttach.setForeground(Color.RED);
-		lblAttachedFile = new JLabel("0 archivos");
+
+		// Wider label to see names
+		lblAttachedFile = new JLabel("No file selected");
 		lblAttachedFile.setForeground(Color.GRAY);
-		btnSend = new JButton("Enviar Email");
+		lblAttachedFile.setPreferredSize(new Dimension(300, 20));
+
+		btnSend = new JButton("Send Email");
 
 		bottomComposePanel.add(btnAttach);
 		bottomComposePanel.add(btnClearAttach);
 		bottomComposePanel.add(lblAttachedFile);
-		bottomComposePanel.add(Box.createHorizontalStrut(30));
+		bottomComposePanel.add(Box.createHorizontalStrut(10));
 		bottomComposePanel.add(btnSend);
 
 		composePanel.add(fieldsPanel, BorderLayout.NORTH);
@@ -89,9 +90,9 @@ public class PanelSMTP extends JFrame {
 
 		// --- BOTTOM: INBOX ---
 		JPanel inboxPanel = new JPanel(new BorderLayout(5, 5));
-		inboxPanel.setBorder(new TitledBorder("Bandeja de Entrada"));
+		inboxPanel.setBorder(new TitledBorder("Inbox"));
 
-		String[] columns = { "Estado", "Remitente", "Asunto" };
+		String[] columns = { "Status", "Sender", "Subject" };
 		tableModel = new DefaultTableModel(columns, 0) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
@@ -101,7 +102,7 @@ public class PanelSMTP extends JFrame {
 		emailTable = new JTable(tableModel);
 		emailTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		txtViewer = new JTextArea("Selecciona un correo...");
+		txtViewer = new JTextArea("Select an email...");
 		txtViewer.setLineWrap(true);
 		txtViewer.setEditable(false);
 		txtViewer.setBackground(new Color(245, 245, 245));
@@ -111,14 +112,11 @@ public class PanelSMTP extends JFrame {
 		splitInbox.setDividerLocation(500);
 
 		JPanel buttonPanel = new JPanel(new FlowLayout());
-		btnRefresh = new JButton("Actualizar");
-		btnToggleRead = new JButton("Marcar Leído/No Leído");
-
-		// BOTÓN DESCARGAR COMPLETO
-		btnDownloadEmail = new JButton("Descargar Email (.eml)");
+		btnRefresh = new JButton("Refresh");
+		btnToggleRead = new JButton("Mark Read/Unread");
+		btnDownloadEmail = new JButton("Download (.eml)");
 		btnDownloadEmail.setEnabled(false);
-
-		btnDelete = new JButton("Eliminar");
+		btnDelete = new JButton("Delete");
 		btnDelete.setForeground(Color.RED);
 
 		buttonPanel.add(btnRefresh);
@@ -139,78 +137,103 @@ public class PanelSMTP extends JFrame {
 
 	private void setupEvents() {
 
-		// --- ADJUNTAR Y ENVIAR ---
 		btnAttach.addActionListener(e -> {
 			JFileChooser fileChooser = new JFileChooser();
 			fileChooser.setMultiSelectionEnabled(true);
 			if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				attachmentsList.addAll(Arrays.asList(fileChooser.getSelectedFiles()));
-				lblAttachedFile.setText(attachmentsList.size() + " archivos listos");
+
+				StringBuilder sb = new StringBuilder();
+				for (File f : attachmentsList) {
+					sb.append(f.getName()).append(", ");
+				}
+				String text = sb.toString();
+				if (text.length() > 2)
+					text = text.substring(0, text.length() - 2);
+				if (text.length() > 40)
+					text = text.substring(0, 40) + "...";
+
+				lblAttachedFile.setText(text);
 				lblAttachedFile.setForeground(new Color(0, 100, 0));
+				lblAttachedFile.setToolTipText(sb.toString());
 			}
 		});
 
 		btnClearAttach.addActionListener(e -> {
 			attachmentsList.clear();
-			lblAttachedFile.setText("0 archivos");
+			lblAttachedFile.setText("No file selected");
 			lblAttachedFile.setForeground(Color.GRAY);
+			lblAttachedFile.setToolTipText(null);
 		});
 
 		btnSend.addActionListener(e -> {
+			String recipient = txtTo.getText().trim();
+			String subject = txtSubject.getText().trim();
+			String body = txtBody.getText().trim();
+
+			if (recipient.isEmpty()) {
+				JOptionPane.showMessageDialog(this, "Error: The 'To' field is required.", "Missing Data",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if (!recipient.contains("@") || !recipient.contains(".")) {
+				JOptionPane.showMessageDialog(this, "Error: The recipient email does not seem valid.",
+						"Incorrect Format", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if (subject.isEmpty()) {
+				int confirm = JOptionPane.showConfirmDialog(this,
+						"The subject is empty. Do you want to send the email without a subject?", "Empty Subject",
+						JOptionPane.YES_NO_OPTION);
+				if (confirm != JOptionPane.YES_OPTION)
+					return;
+			}
+
 			new Thread(() -> {
 				try {
 					btnSend.setEnabled(false);
-					btnSend.setText("Enviando...");
-					backend.sendEmail(txtTo.getText(), txtSubject.getText(), txtBody.getText(), attachmentsList);
-					SwingUtilities.invokeLater(() -> {
-						JOptionPane.showMessageDialog(this, "Enviado.");
-						txtTo.setText("");
-						txtSubject.setText("");
-						txtBody.setText("");
-						attachmentsList.clear();
-						lblAttachedFile.setText("0 archivos");
-						btnSend.setText("Enviar Email");
-						btnSend.setEnabled(true);
-					});
+					btnSend.setText("Sending...");
+					backend.sendEmail(recipient, subject, body, attachmentsList);
+					JOptionPane.showMessageDialog(this, "Email sent successfully.");
+					txtTo.setText("");
+					txtSubject.setText("");
+					txtBody.setText("");
+					attachmentsList.clear();
+					lblAttachedFile.setText("No file selected");
+					lblAttachedFile.setForeground(Color.GRAY);
+					btnSend.setText("Send Email");
+					btnSend.setEnabled(true);
 				} catch (Exception ex) {
-					SwingUtilities.invokeLater(() -> {
-						JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
-						btnSend.setEnabled(true);
-					});
+					JOptionPane.showMessageDialog(this, "Error sending: " + ex.getMessage(), "Critical Error",
+					JOptionPane.ERROR_MESSAGE);
+					btnSend.setText("Send Email");
+					btnSend.setEnabled(true);
 				}
 			}).start();
 		});
 
-		// --- INBOX ---
 		btnRefresh.addActionListener(e -> {
 			new Thread(() -> {
-				SwingUtilities.invokeLater(() -> {
-					btnRefresh.setEnabled(false);
-					tableModel.setRowCount(0);
-					txtViewer.setText("Cargando...");
-				});
+				btnRefresh.setEnabled(false);
+				tableModel.setRowCount(0);
+				txtViewer.setText("Syncing with Gmail...");
 				try {
 					currentEmailList = backend.fetchEmails();
-					SwingUtilities.invokeLater(() -> {
-						for (EmailModel mail : currentEmailList) {
-							String status = mail.isRead() ? "LEÍDO" : "NO LEÍDO";
-							// Icono clip si tiene adjuntos
-							String subjectDisplay = mail.getSubject() + (mail.hasAttachments() ? " 📎" : "");
-							tableModel.addRow(new Object[] { status, mail.getSender(), subjectDisplay });
-						}
-						txtViewer.setText("Actualizado.");
-						btnRefresh.setEnabled(true);
-					});
+					for (EmailModel mail : currentEmailList) {
+						String status = mail.isRead() ? "READ" : "UNREAD";
+						String subjectDisplay = mail.getSubject() + (mail.hasAttachments() ? " 📎" : "");
+						tableModel.addRow(new Object[] { status, mail.getSender(), subjectDisplay });
+					}
+					txtViewer.setText("Inbox updated and synced.\n" + currentEmailList.size() + " messages.");
+					btnRefresh.setEnabled(true);
 				} catch (Exception ex) {
-					SwingUtilities.invokeLater(() -> {
-						txtViewer.setText("Error.");
-						btnRefresh.setEnabled(true);
-					});
+					txtViewer.setText("Connection Error.");
+					JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+					btnRefresh.setEnabled(true);
 				}
 			}).start();
 		});
 
-		// --- SELECCIONAR CORREO (Habilita botón descargar) ---
 		emailTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -218,32 +241,25 @@ public class PanelSMTP extends JFrame {
 				if (row >= 0 && row < currentEmailList.size()) {
 					EmailModel mail = currentEmailList.get(row);
 
-					String infoAdjuntos = "";
+					String attachmentsInfo = "";
 					if (mail.hasAttachments()) {
-						infoAdjuntos = "\n\n[ESTE CORREO TIENE " + mail.getAttachmentNames().size()
-								+ " ARCHIVOS ADJUNTOS]\n";
+						attachmentsInfo = "\n\n=== ATTACHMENTS ===\n";
 						for (String n : mail.getAttachmentNames())
-							infoAdjuntos += "- " + n + "\n";
+							attachmentsInfo += "- " + n + "\n";
 					}
-
-					// Siempre permitimos descargar el correo completo (.eml), tenga adjuntos o no
 					btnDownloadEmail.setEnabled(true);
-
-					txtViewer.setText("DE: " + mail.getSender() + "\nASUNTO: " + mail.getSubject()
-							+ "\n----------------\n" + mail.getContent() + infoAdjuntos);
+					txtViewer.setText("FROM: " + mail.getSender() + "\nSUBJECT: " + mail.getSubject()
+							+ "\n----------------\n" + mail.getContent() + attachmentsInfo);
 				}
 			}
 		});
 
-		// --- BOTÓN DESCARGAR EMAIL COMPLETO ---
 		btnDownloadEmail.addActionListener(e -> {
 			int row = emailTable.getSelectedRow();
 			if (row == -1)
 				return;
 			EmailModel mail = currentEmailList.get(row);
-
 			JFileChooser fileChooser = new JFileChooser();
-			// Sugerimos nombre seguro para el archivo
 			String safeSubject = mail.getSubject().replaceAll("[^a-zA-Z0-9.-]", "_");
 			if (safeSubject.length() > 20)
 				safeSubject = safeSubject.substring(0, 20);
@@ -251,37 +267,29 @@ public class PanelSMTP extends JFrame {
 
 			if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 				File dest = fileChooser.getSelectedFile();
-				// Asegurar extensión .eml
-				if (!dest.getName().toLowerCase().endsWith(".eml")) {
+				if (!dest.getName().toLowerCase().endsWith(".eml"))
 					dest = new File(dest.getAbsolutePath() + ".eml");
-				}
-
 				final File finalDest = dest;
 				new Thread(() -> {
 					try {
 						backend.downloadEmailComplete(mail.getUniqueId(), finalDest);
-						SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this,
-								"Email guardado en: " + finalDest.getAbsolutePath()));
 					} catch (Exception ex) {
-						SwingUtilities.invokeLater(
-								() -> JOptionPane.showMessageDialog(this, "Error descargando: " + ex.getMessage()));
 					}
 				}).start();
 			}
 		});
 
-		// (Resto de botones ToggleRead y Delete igual)
 		btnToggleRead.addActionListener(e -> {
 			int row = emailTable.getSelectedRow();
 			if (row == -1)
 				return;
 			EmailModel mail = currentEmailList.get(row);
-			boolean nuevoEstado = !mail.isRead();
-			mail.setRead(nuevoEstado);
-			tableModel.setValueAt(nuevoEstado ? "LEÍDO" : "NO LEÍDO", row, 0);
+			boolean newStatus = !mail.isRead();
+			mail.setRead(newStatus);
+			tableModel.setValueAt(newStatus ? "READ" : "UNREAD", row, 0);
 			new Thread(() -> {
 				try {
-					backend.updateReadStatusIMAP(mail.getSubject(), mail.getSender(), mail.getUniqueId(), nuevoEstado);
+					backend.updateReadStatusIMAP(mail.getSubject(), mail.getSender(), mail.getUniqueId(), newStatus);
 				} catch (Exception ex) {
 				}
 			}).start();
@@ -291,18 +299,16 @@ public class PanelSMTP extends JFrame {
 			int row = emailTable.getSelectedRow();
 			if (row == -1)
 				return;
-			if (JOptionPane.showConfirmDialog(this, "¿Borrar?", "Confirmar",
+			if (JOptionPane.showConfirmDialog(this, "Delete?", "Confirm",
 					JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
 				return;
 			EmailModel mail = currentEmailList.get(row);
 			new Thread(() -> {
 				try {
 					backend.deleteEmail(mail.getSubject(), mail.getSender());
-					SwingUtilities.invokeLater(() -> {
-						currentEmailList.remove(row);
-						tableModel.removeRow(row);
-						txtViewer.setText("Eliminado.");
-					});
+					currentEmailList.remove(row);
+					tableModel.removeRow(row);
+					txtViewer.setText("Deleted.");
 				} catch (Exception ex) {
 				}
 			}).start();
