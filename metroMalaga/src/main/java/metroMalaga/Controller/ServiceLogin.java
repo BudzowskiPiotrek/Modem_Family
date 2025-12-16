@@ -41,6 +41,7 @@ public class ServiceLogin {
 					;
 					user.setPasswordApp(rs.getString(2));
 					;
+					user.setEmailReal(rs.getString(3));
 				}
 			}
 

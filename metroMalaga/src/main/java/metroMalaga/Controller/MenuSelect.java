@@ -43,8 +43,9 @@ public class MenuSelect implements ActionListener {
 		
 		switch (nameButton) {
 		case "CRUD":
-			CrudFrontend crud= new CrudFrontend(user);
-			crud.setVisible(true);
+			CrudFrontend crudView= new CrudFrontend(user);
+			CrudController crudControl=new CrudController(crudView);
+			crudView.setVisible(true);
 			break;
 
 		case "FTP":
