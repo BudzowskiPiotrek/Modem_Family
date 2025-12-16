@@ -1,317 +1,330 @@
 package metroMalaga.frontend.smtp;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.*;
+import javax.swing.plaf.basic.BasicScrollBarUI;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 import metroMalaga.Clases.Usuario;
+import metroMalaga.backend.smtp.ButtonHandleSMTP;
+import metroMalaga.backend.smtp.ButtonHoverHandle;
 import metroMalaga.backend.smtp.HandleSMTP;
-import metroMalaga.Clases.EmailModel;
 
 public class PanelSMTP extends JFrame {
 
-	private HandleSMTP backend;
-	private Usuario loggedUser;
-	private List<EmailModel> currentEmailList;
+    private HandleSMTP backend;
+    private Usuario loggedUser;
 
-	private JTextField txtTo, txtSubject;
-	private JTextArea txtBody, txtViewer;
-	private JTable emailTable;
-	private DefaultTableModel tableModel;
+    // --- UI COMPONENTS ---
+    private JTextField txtTo, txtSubject;
+    private JTextArea txtBody, txtViewer;
+    private JTable emailTable;
+    private DefaultTableModel tableModel;
 
-	private JButton btnSend, btnAttach, btnClearAttach;
-	private JLabel lblAttachedFile;
-	private List<File> attachmentsList = new ArrayList<>();
+    private JButton btnSend, btnAttach, btnClearAttach;
+    private JLabel lblAttachedFile;
+    private JButton btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail;
 
-	private JButton btnRefresh, btnDelete, btnToggleRead;
-	private JButton btnDownloadEmail;
+    // --- STYLE CONSTANTS ---
+    private final Color P5_RED = new Color(220, 20, 60);
+    private final Color P5_BRIGHT_RED = new Color(255, 0, 0);
+    private final Color P5_BLACK = new Color(26, 26, 26); // #1A1A1A
+    private final Color P5_WHITE = new Color(240, 240, 240);
+    private final Color P5_GRAY_PLACEHOLDER = new Color(150, 150, 150);
 
-	public PanelSMTP(Usuario usuario) {
-		this.loggedUser = usuario;
-		this.backend = new HandleSMTP();
-		this.currentEmailList = new ArrayList<>();
+    private final Font P5_HEADER_FONT = new Font("SansSerif", Font.BOLD | Font.ITALIC, 20);
+    private final Font P5_TEXT_FONT = new Font("SansSerif", Font.BOLD, 14);
+    private final Font P5_BUTTON_FONT = new Font("Dialog", Font.BOLD | Font.ITALIC, 16);
 
-		backend.login(usuario.getEmailReal(), usuario.getPasswordApp());
+    public PanelSMTP(Usuario usuario) {
+        this.loggedUser = usuario;
+        this.backend = new HandleSMTP();
 
-		setTitle("Email Manager - " + usuario.getUsernameApp());
-		setSize(950, 750);
-		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        backend.login(usuario.getEmailReal(), usuario.getPasswordApp());
 
-		initComponents();
-	}
+        settingsFrame();
 
-	private void initComponents() {
-		JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel backgroundPanel = new JPanel(new BorderLayout(15, 15));
+        backgroundPanel.setBackground(P5_RED);
+        backgroundPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
+        setContentPane(backgroundPanel);
 
-		// --- TOP: COMPOSE ---
-		JPanel composePanel = new JPanel(new BorderLayout(5, 5));
-		composePanel.setBorder(new TitledBorder("Compose"));
+        initComponents(backgroundPanel);
+        
+        // --- ATTACH LOGIC AND VISUAL LISTENERS ---
+        registerListeners();
+    }
 
-		JPanel fieldsPanel = new JPanel(new GridLayout(2, 2));
-		fieldsPanel.add(new JLabel("To:"));
-		txtTo = new JTextField();
-		fieldsPanel.add(txtTo);
-		fieldsPanel.add(new JLabel("Subject:"));
-		txtSubject = new JTextField();
-		fieldsPanel.add(txtSubject);
+    private void settingsFrame() {
+        setTitle("Phantom Thieves Mail - " + loggedUser.getUsernameApp());
+        setSize(1000, 800);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
 
-		txtBody = new JTextArea(3, 20);
+    private void initComponents(JPanel mainContainer) {
+        // --- 1. COMPOSE PANEL ---
+        JPanel composePanel = new JPanel(new BorderLayout(10, 10));
+        stylePanel(composePanel, "COMPOSE MESSAGE");
 
-		JPanel bottomComposePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		btnAttach = new JButton("Attach (+)");
-		btnClearAttach = new JButton("Clear");
-		btnClearAttach.setForeground(Color.RED);
+        JPanel fieldsPanel = new JPanel(new GridBagLayout());
+        fieldsPanel.setBackground(P5_BLACK);
 
-		// Wider label to see names
-		lblAttachedFile = new JLabel("No file selected");
-		lblAttachedFile.setForeground(Color.GRAY);
-		lblAttachedFile.setPreferredSize(new Dimension(300, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-		btnSend = new JButton("Send Email");
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.1;
+        fieldsPanel.add(createLabel("To:"), gbc);
 
-		bottomComposePanel.add(btnAttach);
-		bottomComposePanel.add(btnClearAttach);
-		bottomComposePanel.add(lblAttachedFile);
-		bottomComposePanel.add(Box.createHorizontalStrut(10));
-		bottomComposePanel.add(btnSend);
+        gbc.gridx = 1; gbc.weightx = 0.9;
+        txtTo = new JTextField();
+        styleP5Field(txtTo);
+        fieldsPanel.add(txtTo, gbc);
 
-		composePanel.add(fieldsPanel, BorderLayout.NORTH);
-		composePanel.add(new JScrollPane(txtBody), BorderLayout.CENTER);
-		composePanel.add(bottomComposePanel, BorderLayout.SOUTH);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.1;
+        fieldsPanel.add(createLabel("Subject:"), gbc);
 
-		// --- BOTTOM: INBOX ---
-		JPanel inboxPanel = new JPanel(new BorderLayout(5, 5));
-		inboxPanel.setBorder(new TitledBorder("Inbox"));
+        gbc.gridx = 1; gbc.weightx = 0.9;
+        txtSubject = new JTextField();
+        styleP5Field(txtSubject);
+        fieldsPanel.add(txtSubject, gbc);
 
-		String[] columns = { "Status", "Sender", "Subject" };
-		tableModel = new DefaultTableModel(columns, 0) {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-		emailTable = new JTable(tableModel);
-		emailTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        txtBody = new JTextArea(5, 20);
+        styleP5TextArea(txtBody);
+        JScrollPane scrollBody = styleScrollPane(new JScrollPane(txtBody));
 
-		txtViewer = new JTextArea("Select an email...");
-		txtViewer.setLineWrap(true);
-		txtViewer.setEditable(false);
-		txtViewer.setBackground(new Color(245, 245, 245));
+        JPanel bottomComposePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        bottomComposePanel.setBackground(P5_BLACK);
 
-		JSplitPane splitInbox = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(emailTable),
-				new JScrollPane(txtViewer));
-		splitInbox.setDividerLocation(500);
+        btnAttach = createP5Button("Attach (+)", false);
+        btnClearAttach = createP5Button("Clear", true); // True = dark button
+        
+        lblAttachedFile = new JLabel("NO FILES");
+        lblAttachedFile.setForeground(P5_GRAY_PLACEHOLDER);
+        lblAttachedFile.setFont(P5_TEXT_FONT);
+        lblAttachedFile.setPreferredSize(new Dimension(250, 30));
 
-		JPanel buttonPanel = new JPanel(new FlowLayout());
-		btnRefresh = new JButton("Refresh");
-		btnToggleRead = new JButton("Mark Read/Unread");
-		btnDownloadEmail = new JButton("Download (.eml)");
-		btnDownloadEmail.setEnabled(false);
-		btnDelete = new JButton("Delete");
-		btnDelete.setForeground(Color.RED);
+        btnSend = createP5Button("SEND CARD", false);
+        btnSend.setBackground(P5_WHITE);
+        btnSend.setForeground(P5_BLACK);
 
-		buttonPanel.add(btnRefresh);
-		buttonPanel.add(btnToggleRead);
-		buttonPanel.add(btnDownloadEmail);
-		buttonPanel.add(btnDelete);
+        bottomComposePanel.add(btnAttach);
+        bottomComposePanel.add(btnClearAttach);
+        bottomComposePanel.add(lblAttachedFile);
+        bottomComposePanel.add(Box.createHorizontalStrut(20));
+        bottomComposePanel.add(btnSend);
 
-		inboxPanel.add(splitInbox, BorderLayout.CENTER);
-		inboxPanel.add(buttonPanel, BorderLayout.SOUTH);
+        composePanel.add(fieldsPanel, BorderLayout.NORTH);
+        composePanel.add(scrollBody, BorderLayout.CENTER);
+        composePanel.add(bottomComposePanel, BorderLayout.SOUTH);
 
-		JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, composePanel, inboxPanel);
-		mainSplit.setDividerLocation(300);
-		mainPanel.add(mainSplit, BorderLayout.CENTER);
-		setContentPane(mainPanel);
+        // --- 2. INBOX PANEL ---
+        JPanel inboxPanel = new JPanel(new BorderLayout(10, 10));
+        stylePanel(inboxPanel, "INBOX / COGNITION");
 
-		setupEvents();
-	}
+        String[] columns = { "Status", "Sender", "Subject" };
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        emailTable = new JTable(tableModel);
+        styleP5Table(emailTable);
+        JScrollPane scrollTable = styleScrollPane(new JScrollPane(emailTable));
 
-	private void setupEvents() {
+        txtViewer = new JTextArea("Select a target...");
+        styleP5TextArea(txtViewer);
+        txtViewer.setEditable(false);
+        JScrollPane scrollViewer = styleScrollPane(new JScrollPane(txtViewer));
 
-		btnAttach.addActionListener(e -> {
-			JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setMultiSelectionEnabled(true);
-			if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				attachmentsList.addAll(Arrays.asList(fileChooser.getSelectedFiles()));
+        JSplitPane splitInbox = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollTable, scrollViewer);
+        splitInbox.setDividerLocation(500);
+        splitInbox.setDividerSize(5);
+        splitInbox.setBackground(P5_BLACK);
+        splitInbox.setBorder(null);
 
-				StringBuilder sb = new StringBuilder();
-				for (File f : attachmentsList) {
-					sb.append(f.getName()).append(", ");
-				}
-				String text = sb.toString();
-				if (text.length() > 2)
-					text = text.substring(0, text.length() - 2);
-				if (text.length() > 40)
-					text = text.substring(0, 40) + "...";
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        buttonPanel.setBackground(P5_BLACK);
 
-				lblAttachedFile.setText(text);
-				lblAttachedFile.setForeground(new Color(0, 100, 0));
-				lblAttachedFile.setToolTipText(sb.toString());
-			}
-		});
+        btnRefresh = createP5Button("REFRESH", false);
+        btnToggleRead = createP5Button("READ/UNREAD", false);
+        btnDownloadEmail = createP5Button("DOWNLOAD .EML", false);
+        btnDownloadEmail.setEnabled(false);
 
-		btnClearAttach.addActionListener(e -> {
-			attachmentsList.clear();
-			lblAttachedFile.setText("No file selected");
-			lblAttachedFile.setForeground(Color.GRAY);
-			lblAttachedFile.setToolTipText(null);
-		});
+        btnDelete = createP5Button("ELIMINATE", true); // Dark/Red button
 
-		btnSend.addActionListener(e -> {
-			String recipient = txtTo.getText().trim();
-			String subject = txtSubject.getText().trim();
-			String body = txtBody.getText().trim();
+        buttonPanel.add(btnRefresh);
+        buttonPanel.add(btnToggleRead);
+        buttonPanel.add(btnDownloadEmail);
+        buttonPanel.add(btnDelete);
 
-			if (recipient.isEmpty()) {
-				JOptionPane.showMessageDialog(this, "Error: The 'To' field is required.", "Missing Data",
-						JOptionPane.WARNING_MESSAGE);
-				return;
-			}
-			if (!recipient.contains("@") || !recipient.contains(".")) {
-				JOptionPane.showMessageDialog(this, "Error: The recipient email does not seem valid.",
-						"Incorrect Format", JOptionPane.WARNING_MESSAGE);
-				return;
-			}
-			if (subject.isEmpty()) {
-				int confirm = JOptionPane.showConfirmDialog(this,
-						"The subject is empty. Do you want to send the email without a subject?", "Empty Subject",
-						JOptionPane.YES_NO_OPTION);
-				if (confirm != JOptionPane.YES_OPTION)
-					return;
-			}
+        inboxPanel.add(splitInbox, BorderLayout.CENTER);
+        inboxPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-			new Thread(() -> {
-				try {
-					btnSend.setEnabled(false);
-					btnSend.setText("Sending...");
-					backend.sendEmail(recipient, subject, body, attachmentsList);
-					JOptionPane.showMessageDialog(this, "Email sent successfully.");
-					txtTo.setText("");
-					txtSubject.setText("");
-					txtBody.setText("");
-					attachmentsList.clear();
-					lblAttachedFile.setText("No file selected");
-					lblAttachedFile.setForeground(Color.GRAY);
-					btnSend.setText("Send Email");
-					btnSend.setEnabled(true);
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(this, "Error sending: " + ex.getMessage(), "Critical Error",
-					JOptionPane.ERROR_MESSAGE);
-					btnSend.setText("Send Email");
-					btnSend.setEnabled(true);
-				}
-			}).start();
-		});
+        // --- 3. MAIN SPLIT ---
+        JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, composePanel, inboxPanel);
+        mainSplit.setDividerLocation(380);
+        mainSplit.setBackground(P5_RED);
+        mainSplit.setBorder(null);
+        mainSplit.setDividerSize(10);
 
-		btnRefresh.addActionListener(e -> {
-			new Thread(() -> {
-				btnRefresh.setEnabled(false);
-				tableModel.setRowCount(0);
-				txtViewer.setText("Syncing with Gmail...");
-				try {
-					currentEmailList = backend.fetchEmails();
-					for (EmailModel mail : currentEmailList) {
-						String status = mail.isRead() ? "READ" : "UNREAD";
-						String subjectDisplay = mail.getSubject() + (mail.hasAttachments() ? " 📎" : "");
-						tableModel.addRow(new Object[] { status, mail.getSender(), subjectDisplay });
-					}
-					txtViewer.setText("Inbox updated and synced.\n" + currentEmailList.size() + " messages.");
-					btnRefresh.setEnabled(true);
-				} catch (Exception ex) {
-					txtViewer.setText("Connection Error.");
-					JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
-					btnRefresh.setEnabled(true);
-				}
-			}).start();
-		});
+        mainSplit.setUI(new javax.swing.plaf.basic.BasicSplitPaneUI() {
+            public javax.swing.plaf.basic.BasicSplitPaneDivider createDefaultDivider() {
+                return new javax.swing.plaf.basic.BasicSplitPaneDivider(this) {
+                    public void setBorder(Border b) {}
+                    @Override
+                    public void paint(Graphics g) {
+                        g.setColor(P5_RED);
+                        g.fillRect(0, 0, getSize().width, getSize().height);
+                        super.paint(g);
+                    }
+                };
+            }
+        });
 
-		emailTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				int row = emailTable.getSelectedRow();
-				if (row >= 0 && row < currentEmailList.size()) {
-					EmailModel mail = currentEmailList.get(row);
+        mainContainer.add(mainSplit, BorderLayout.CENTER);
+    }
 
-					String attachmentsInfo = "";
-					if (mail.hasAttachments()) {
-						attachmentsInfo = "\n\n=== ATTACHMENTS ===\n";
-						for (String n : mail.getAttachmentNames())
-							attachmentsInfo += "- " + n + "\n";
-					}
-					btnDownloadEmail.setEnabled(true);
-					txtViewer.setText("FROM: " + mail.getSender() + "\nSUBJECT: " + mail.getSubject()
-							+ "\n----------------\n" + mail.getContent() + attachmentsInfo);
-				}
-			}
-		});
+    // --- LISTENER REGISTRATION METHOD (Separated) ---
+    private void registerListeners() {
+        
+        // 1. LOGIC CONTROLLER (Passing all components via Constructor)
+        ButtonHandleSMTP logicController = new ButtonHandleSMTP(
+            this, backend, txtTo, txtSubject, txtBody, lblAttachedFile, 
+            btnSend, btnAttach, btnClearAttach, btnRefresh, btnToggleRead, btnDownloadEmail, btnDelete,
+            emailTable, tableModel, txtViewer
+        );
 
-		btnDownloadEmail.addActionListener(e -> {
-			int row = emailTable.getSelectedRow();
-			if (row == -1)
-				return;
-			EmailModel mail = currentEmailList.get(row);
-			JFileChooser fileChooser = new JFileChooser();
-			String safeSubject = mail.getSubject().replaceAll("[^a-zA-Z0-9.-]", "_");
-			if (safeSubject.length() > 20)
-				safeSubject = safeSubject.substring(0, 20);
-			fileChooser.setSelectedFile(new File(safeSubject + ".eml"));
+        // Logic Assignments
+        btnAttach.addActionListener(logicController);
+        btnClearAttach.addActionListener(logicController);
+        btnSend.addActionListener(logicController);
+        btnRefresh.addActionListener(logicController);
+        btnToggleRead.addActionListener(logicController);
+        btnDownloadEmail.addActionListener(logicController);
+        btnDelete.addActionListener(logicController);
+        
+        // Mouse listener for table click
+        emailTable.addMouseListener(logicController);
 
-			if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-				File dest = fileChooser.getSelectedFile();
-				if (!dest.getName().toLowerCase().endsWith(".eml"))
-					dest = new File(dest.getAbsolutePath() + ".eml");
-				final File finalDest = dest;
-				new Thread(() -> {
-					try {
-						backend.downloadEmailComplete(mail.getUniqueId(), finalDest);
-					} catch (Exception ex) {
-					}
-				}).start();
-			}
-		});
+        // 2. VISUAL HOVER CONTROLLERS (Using ButtonHoverHandler)
+        
+        // Standard Red Buttons
+        addHoverEffect(btnAttach, P5_BRIGHT_RED, P5_WHITE, P5_BLACK, P5_WHITE);
+        addHoverEffect(btnRefresh, P5_BRIGHT_RED, P5_WHITE, P5_BLACK, P5_WHITE);
+        addHoverEffect(btnToggleRead, P5_BRIGHT_RED, P5_WHITE, P5_BLACK, P5_WHITE);
+        addHoverEffect(btnDownloadEmail, P5_BRIGHT_RED, P5_WHITE, P5_BLACK, P5_WHITE);
+        
+        // Send Button (White to Red)
+        addHoverEffect(btnSend, P5_WHITE, P5_BLACK, P5_BRIGHT_RED, P5_WHITE);
+        
+        // Dark Buttons (Clear & Delete)
+        addHoverEffect(btnClearAttach, P5_BLACK, P5_BRIGHT_RED, P5_BRIGHT_RED, P5_WHITE);
+        addHoverEffect(btnDelete, P5_BLACK, P5_BRIGHT_RED, P5_BRIGHT_RED, P5_WHITE);
+    }
 
-		btnToggleRead.addActionListener(e -> {
-			int row = emailTable.getSelectedRow();
-			if (row == -1)
-				return;
-			EmailModel mail = currentEmailList.get(row);
-			boolean newStatus = !mail.isRead();
-			mail.setRead(newStatus);
-			tableModel.setValueAt(newStatus ? "READ" : "UNREAD", row, 0);
-			new Thread(() -> {
-				try {
-					backend.updateReadStatusIMAP(mail.getSubject(), mail.getSender(), mail.getUniqueId(), newStatus);
-				} catch (Exception ex) {
-				}
-			}).start();
-		});
+    private void addHoverEffect(JButton btn, Color bg, Color fg, Color hoverBg, Color hoverFg) {
+        MatteBorder defaultBorder = new MatteBorder(2, 2, 4, 2, hoverBg); 
+        MatteBorder hoverBorder = new MatteBorder(2, 2, 4, 2, fg);
+        
+        btn.setBorder(defaultBorder);
+        btn.addMouseListener(new ButtonHoverHandle(
+            btn, bg, fg, hoverBg, hoverFg, defaultBorder, hoverBorder
+        ));
+    }
 
-		btnDelete.addActionListener(e -> {
-			int row = emailTable.getSelectedRow();
-			if (row == -1)
-				return;
-			if (JOptionPane.showConfirmDialog(this, "Delete?", "Confirm",
-					JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
-				return;
-			EmailModel mail = currentEmailList.get(row);
-			new Thread(() -> {
-				try {
-					backend.deleteEmail(mail.getSubject(), mail.getSender());
-					currentEmailList.remove(row);
-					tableModel.removeRow(row);
-					txtViewer.setText("Deleted.");
-				} catch (Exception ex) {
-				}
-			}).start();
-		});
-	}
+    // --- STYLE METHODS ---
+    private void stylePanel(JPanel panel, String title) {
+        panel.setBackground(P5_BLACK);
+        TitledBorder border = BorderFactory.createTitledBorder(new MatteBorder(4, 4, 4, 4, P5_BLACK), title);
+        border.setTitleColor(P5_WHITE);
+        border.setTitleFont(P5_HEADER_FONT);
+        border.setTitleJustification(TitledBorder.LEFT);
+        panel.setBorder(new CompoundBorder(new MatteBorder(2, 2, 5, 2, P5_BLACK), 
+                new CompoundBorder(new MatteBorder(2, 2, 2, 2, P5_WHITE), new EmptyBorder(10, 10, 10, 10))));
+    }
+
+    private JLabel createLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(P5_BRIGHT_RED);
+        label.setFont(P5_TEXT_FONT);
+        return label;
+    }
+
+    private void styleP5Field(JTextField field) {
+        field.setPreferredSize(new Dimension(200, 35));
+        field.setBackground(P5_BLACK);
+        field.setForeground(P5_WHITE);
+        field.setCaretColor(P5_BRIGHT_RED);
+        field.setFont(P5_TEXT_FONT);
+        MatteBorder unfocusedBorder = new MatteBorder(2, 2, 4, 2, P5_WHITE);
+        MatteBorder focusedBorder = new MatteBorder(2, 2, 4, 2, P5_BRIGHT_RED);
+        field.setBorder(new CompoundBorder(unfocusedBorder, new EmptyBorder(2, 5, 2, 5)));
+        field.addFocusListener(new FocusListener() {
+            public void focusGained(FocusEvent e) { field.setBorder(new CompoundBorder(focusedBorder, new EmptyBorder(2, 5, 2, 5))); }
+            public void focusLost(FocusEvent e) { field.setBorder(new CompoundBorder(unfocusedBorder, new EmptyBorder(2, 5, 2, 5))); }
+        });
+    }
+
+    private void styleP5TextArea(JTextArea area) {
+        area.setBackground(P5_BLACK);
+        area.setForeground(P5_WHITE);
+        area.setCaretColor(P5_BRIGHT_RED);
+        area.setFont(P5_TEXT_FONT);
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setBorder(new EmptyBorder(10, 10, 10, 10));
+    }
+
+    private JScrollPane styleScrollPane(JScrollPane scroll) {
+        scroll.setBorder(new MatteBorder(2, 2, 2, 2, P5_WHITE));
+        scroll.setBackground(P5_BLACK);
+        scroll.getViewport().setBackground(P5_BLACK);
+        scroll.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() { this.thumbColor = P5_BRIGHT_RED; this.trackColor = P5_BLACK; }
+        });
+        return scroll;
+    }
+
+    private JButton createP5Button(String text, boolean dark) {
+        JButton btn = new JButton(text);
+        btn.setPreferredSize(new Dimension(140, 40));
+        btn.setFont(P5_BUTTON_FONT);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        if (dark) {
+            btn.setBackground(P5_BLACK);
+            btn.setForeground(P5_BRIGHT_RED);
+        } else {
+            btn.setBackground(P5_BRIGHT_RED);
+            btn.setForeground(P5_WHITE);
+        }
+        return btn;
+    }
+
+    private void styleP5Table(JTable table) {
+        table.setBackground(P5_BLACK);
+        table.setForeground(P5_WHITE);
+        table.setFont(P5_TEXT_FONT);
+        table.setRowHeight(30);
+        table.setGridColor(P5_RED);
+        table.setSelectionBackground(P5_BRIGHT_RED);
+        table.setSelectionForeground(P5_BLACK);
+        JTableHeader header = table.getTableHeader();
+        header.setBackground(P5_RED);
+        header.setForeground(P5_BLACK);
+        header.setFont(P5_HEADER_FONT);
+        header.setBorder(new MatteBorder(0, 0, 2, 0, P5_WHITE));
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setBackground(P5_BLACK);
+        renderer.setForeground(P5_WHITE);
+        table.setDefaultRenderer(Object.class, renderer);
+    }
 }
