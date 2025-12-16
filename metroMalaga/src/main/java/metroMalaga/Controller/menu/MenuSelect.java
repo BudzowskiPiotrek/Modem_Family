@@ -17,7 +17,6 @@ import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.CrudFrontend;
-import metroMalaga.View.PanelCrud;
 import metroMalaga.View.PanelFTP;
 import metroMalaga.View.PanelMenu;
 import metroMalaga.View.PanelSMTP;
