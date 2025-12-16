@@ -30,7 +30,7 @@ public class FTPbtnUpFile implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setDialogTitle("Seleccionar archivo para subir");
+		fileChooser.setDialogTitle("Select file to upload");
 
 		int result = fileChooser.showOpenDialog(null);
 
@@ -43,22 +43,20 @@ public class FTPbtnUpFile implements ActionListener {
 				boolean success = service.uploadFile(localFile.getAbsolutePath(), remoteFileName);
 
 				if (success) {
-					JOptionPane.showMessageDialog(null, "Archivo subido con éxito: " + remoteFileName);
+					JOptionPane.showMessageDialog(null, "File uploaded successfully:" + remoteFileName);
 
 					FTPFile[] updatedFilesArray = service.listAllFiles();
 
-					// 2. Convertir el Array a una Lista
 					List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
 
-					// 3. Actualizar el modelo con la Lista
 					model.setData(updatedFilesList);
 
 				} else {
-					JOptionPane.showMessageDialog(null, "Fallo al subir el archivo.", "Error de Subida",
+					JOptionPane.showMessageDialog(null, "File upload failed.", "Upload Error",
 							JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, "Error de E/S durante la subida: " + ex.getMessage(),
+				JOptionPane.showMessageDialog(null, "I/O error during upload: " + ex.getMessage(),
 						"Error de Subida", JOptionPane.ERROR_MESSAGE);
 			}
 		}
