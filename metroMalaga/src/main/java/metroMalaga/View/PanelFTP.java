@@ -45,6 +45,7 @@ public class PanelFTP extends JFrame {
 	public PanelFTP(Usuario user, ServiceFTP service, List<FTPFile> initialFiles, FTPTableModel ftpModel) {
 		this.service = service;
 		this.ftpModel = ftpModel;
+		this.user = user;
 		initializeComponents();
 		applyStyle();
 		attachListeners();
@@ -112,7 +113,7 @@ public class PanelFTP extends JFrame {
 	}
 
 	private void setupFrameConfiguration() {
-		this.setTitle("FTP Manager - " + user.getUsernameApp());
+		this.setTitle("FTP Manager - " + user.getUsernameApp().toUpperCase());
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setLayout(new BorderLayout());
 		this.setSize(800, 600);

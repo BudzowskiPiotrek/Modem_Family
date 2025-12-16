@@ -33,16 +33,19 @@ public class ServiceLogin {
 
 	public Usuario getUserData(String usuario) {
 		Usuario user = null;
-		// 	CORREGIR CONSULTA
-		final String SQL = "SELECT * FROM usuarios WHERE username = ?";
+		final String SQL = "SELECT u.username, u.password, u.direccion_correo, "
+				+ "r.id, r.nombre AS rol_nombre, r.permisos FROM usuarios u JOIN roles r ON u.id_rol = r.id "
+				+ "WHERE u.username = ?";
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					user = new Usuario(rs.getString(2), rs.getString(3), rs.getString(4), new Rol(0, "", ""));
+					Rol rol = new Rol(rs.getInt("id"), rs.getString("permisos"), rs.getString("rol_nombre"));
+
+					user = new Usuario(rs.getString("username"), rs.getString("password"),
+							rs.getString("direccion_correo"), rol);
 				}
 			}
-
 		} catch (SQLException e) {
 			String errorMessage = "Error retrieving user data:" + e.getMessage();
 			JOptionPane.showMessageDialog(null, errorMessage, "Error SQL", JOptionPane.ERROR_MESSAGE);

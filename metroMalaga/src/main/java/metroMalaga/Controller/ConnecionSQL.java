@@ -16,8 +16,8 @@ public class ConnecionSQL {
 		try {
 			con = DriverManager.getConnection(RUTA, USUARIO, PASS);
 		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null, "", "",
-					JOptionPane.ERROR_MESSAGE);
+			String errorMessage = "CRITICAL DATABASE ERROR: Could not establish connection. Detail: " + e.getMessage();
+			JOptionPane.showMessageDialog(null, errorMessage, "SQL Connection Error", JOptionPane.ERROR_MESSAGE);
 		}
 		return con;
 	}
