@@ -1,6 +1,6 @@
 package metroMalaga;
 
-import metroMalaga.frontend.login.PanelLogin;
+import metroMalaga.View.PanelLogin;
 
 public class Main {
 	public static void main(String[] args) {
