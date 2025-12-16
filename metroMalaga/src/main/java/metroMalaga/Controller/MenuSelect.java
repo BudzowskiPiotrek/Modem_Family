@@ -11,6 +11,7 @@ import javax.swing.*;
 import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Model.Usuario;
+import metroMalaga.View.CrudFrontend;
 import metroMalaga.View.PanelCrud;
 import metroMalaga.View.PanelFTP;
 import metroMalaga.View.PanelMenu;
@@ -42,8 +43,8 @@ public class MenuSelect implements ActionListener {
 		
 		switch (nameButton) {
 		case "CRUD":
-			PanelCrud panelCrud = new PanelCrud(user);
-			panelCrud.setVisible(true);
+			CrudFrontend crud= new CrudFrontend(user);
+			crud.setVisible(true);
 			break;
 
 		case "FTP":

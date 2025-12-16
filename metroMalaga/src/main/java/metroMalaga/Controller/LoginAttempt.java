@@ -64,7 +64,7 @@ public class LoginAttempt implements ActionListener {
 			this.user = sl.getUserData(username);
 
 			if (this.user != null) {
-				JOptionPane.showMessageDialog(null, "Welcome, " + username + "Access granted.", "Login successful",
+				JOptionPane.showMessageDialog(null, "Welcome " + username + ", Access granted.", "Login successful",
 						JOptionPane.INFORMATION_MESSAGE);
 
 				sl.registerLog(username, "Successful login attempt");
