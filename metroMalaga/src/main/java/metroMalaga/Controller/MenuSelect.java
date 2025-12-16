@@ -10,6 +10,7 @@ import javax.swing.*;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.PanelCrud;
 import metroMalaga.View.PanelFTP;
@@ -56,7 +57,8 @@ public class MenuSelect implements ActionListener {
 			break;
 
 		case "SMTP":
-			PanelSMTP panelSmtp = new PanelSMTP(user);
+			HandleSMTP handleSmtp = new HandleSMTP();
+			PanelSMTP panelSmtp = new PanelSMTP(user, handleSmtp);
 			panelSmtp.setVisible(true);
 			break;
 
