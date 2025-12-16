@@ -101,7 +101,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				boolean success = service.downloadFile(file.getName(), localFilePath);
 
 				if (success) {
-					cn.registerLog(user.getUsernameApp(), "File downloaded:" + localFilePath);
+					// cn.registerLog(user.getUsernameApp(), "File downloaded:" + localFilePath);
 					JOptionPane.showMessageDialog(null, "File successfully downloaded to:\n" + localFilePath);
 				} else {
 					JOptionPane.showMessageDialog(null, "Error: The folder cannot be downloaded", "DownloadError",
@@ -124,7 +124,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				boolean success = service.deleteFile(file.getName());
 
 				if (success) {
-					cn.registerLog(user.getUsernameApp(), "File delete:" + file.getName());
+					// cn.registerLog(user.getUsernameApp(), "File delete:" + file.getName());
 					JOptionPane.showMessageDialog(null, "File successfully deleted.");
 					updateTable();
 				} else {
@@ -145,8 +145,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				boolean success = service.renameFile(file.getName(), newName.trim());
 
 				if (success) {
-					cn.registerLog(user.getUsernameApp(),
-							"File renamed :" + file.getName() + " for: " + newName.trim());
+					// cn.registerLog(user.getUsernameApp(),"File renamed :" + file.getName() + " for: " + newName.trim());
 					JOptionPane.showMessageDialog(null, "File renamed successfully.");
 					updateTable();
 				} else {

@@ -10,6 +10,7 @@ import javax.swing.JTextField;
 import metroMalaga.Controller.ServiceLogin;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.PanelLogin;
+import metroMalaga.View.PanelMenu;
 
 public class LoginAttempt implements ActionListener {
 	private final JTextField userField;
@@ -69,7 +70,11 @@ public class LoginAttempt implements ActionListener {
 						JOptionPane.INFORMATION_MESSAGE);
 
 				sl.registerLog(username, "Successful login attempt");
-				this.panelLogin.loginSuccessful(user);
+				PanelMenu panelMenu = new PanelMenu(user);
+				panelMenu.setVisible(true);
+				this.panelLogin.loginSuccessful();
+
+				
 			} else {
 
 				JOptionPane.showMessageDialog(null, "Error loading user data. Please try again.", "Internal Error",
