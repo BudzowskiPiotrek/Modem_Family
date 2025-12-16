@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,6 +10,11 @@ import javax.swing.*;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.CrudController;
+import metroMalaga.Controller.ServiceFTP;
+import metroMalaga.Controller.ftp.FTPRefreshThread;
+import metroMalaga.Controller.smtp.HandleSMTP;
+import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.CrudFrontend;
 import metroMalaga.View.PanelCrud;
@@ -49,16 +54,35 @@ public class MenuSelect implements ActionListener {
 			break;
 
 		case "FTP":
-			ServiceFTP service = new ServiceFTP("readwrite"); // + user.getNombre()
+
+			ServiceFTP service = new ServiceFTP("readwrite");
 			FTPFile[] fileArray = service.listAllFiles();
 			List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
 
-			PanelFTP panelFtp = new PanelFTP(user, service, initialFiles);
+	        FTPTableModel ftpModel = new FTPTableModel(initialFiles, service); 
+	        PanelFTP panelFtp = new PanelFTP(user, service, initialFiles, ftpModel); 
+	        
+	        FTPRefreshThread refreshThread = new FTPRefreshThread(service, ftpModel); 
+	        refreshThread.start();
+	        
+	        panelFtp.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+	        
+	        panelFtp.addWindowListener(new java.awt.event.WindowAdapter() {
+	            @Override
+	            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+	                if (refreshThread != null) {
+	                    refreshThread.stopRunning();
+	                }
+	                panelFtp.dispose(); 
+	            }
+	        });
+
 			panelFtp.setVisible(true);
 			break;
 
 		case "SMTP":
-			PanelSMTP panelSmtp = new PanelSMTP(user);
+			HandleSMTP handleSmtp = new HandleSMTP();
+			PanelSMTP panelSmtp = new PanelSMTP(user, handleSmtp);
 			panelSmtp.setVisible(true);
 			break;
 
