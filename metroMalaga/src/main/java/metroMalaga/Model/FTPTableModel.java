@@ -83,4 +83,6 @@ public class FTPTableModel extends AbstractTableModel {
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return columnIndex == 3;
 	}
+
+	
 }

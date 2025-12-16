@@ -97,7 +97,7 @@ public class ServiceFTP {
 			return false;
 		}
 	}
-
+	
 	public boolean deleteFile(String remoteFilePath) {
 		try {
 			return ftpClient.deleteFile(remoteFilePath);
