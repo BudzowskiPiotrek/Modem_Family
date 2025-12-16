@@ -14,10 +14,6 @@ public class Usuario {
 		this.rol = rol;
 	}
 
-	public Usuario(String string, String string2, String string3, Object rol2) {
-		// TODO Auto-generated constructor stub
-	}
-
 	public String getUsernameApp() {
 		return usernameApp;
 	}
