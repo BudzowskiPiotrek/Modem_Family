@@ -112,12 +112,21 @@ public class PanelFTP extends JFrame {
 	}
 
 	private void setupFrameConfiguration() {
-		this.setTitle("FTP Manager - "); // + user.getNombre()
+		this.setTitle("FTP Manager - " + user.getUsernameApp());
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setLayout(new BorderLayout());
 		this.setSize(800, 600);
 		this.setLocationRelativeTo(null);
 		this.setResizable(false);
+
+		// este lisening aqui no deberia estar
+		// Add window listener to disconnect notification system on close
+		this.addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent e) {
+				service.disconnectNotifications();
+			}
+		});
 	}
 
 	private void setupLayout() {
