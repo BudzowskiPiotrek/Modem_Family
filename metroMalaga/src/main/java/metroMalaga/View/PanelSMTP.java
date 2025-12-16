@@ -36,6 +36,8 @@ public class PanelSMTP extends JFrame {
 	private final Font F_HEADER = new Font("Segoe UI", Font.BOLD, 16);
 	private final Font F_TEXT = new Font("Segoe UI", Font.PLAIN, 14);
 
+	
+
 	public PanelSMTP(Usuario usuario, HandleSMTP handleSmtp) {
 		this.loggedUser = usuario;
 		this.backend = handleSmtp;

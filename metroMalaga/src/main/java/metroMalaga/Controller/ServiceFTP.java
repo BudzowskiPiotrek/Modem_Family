@@ -9,17 +9,22 @@ import java.io.OutputStream;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
+
+import metroMalaga.Controller.Server.NotificationController;
+import metroMalaga.Controller.Server.NotificationServer;
+import metroMalaga.Model.FTPTableModel;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
-
-import metroMalaga.Model.FTPTableModel;
 
 public class ServiceFTP {
 
 	private FTPClient ftpClient;
 	private ConnecionFTP conFTP;
 	private String user;
+	
+	// ????
 	private NotificationController notificationController;
 	private boolean notificationsInitialized = false;
 	private String ftpServerHost;
@@ -37,49 +42,8 @@ public class ServiceFTP {
 		}
 		try {
 			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
-			// Get the FTP server host from ConnecionFTP
-			this.ftpServerHost = conFTP.getServerHost();
 		} catch (IOException e) {
 			showError("Error configuring FTP connection", e);
-		}
-
-		// Auto-initialize notification system based on FTP server location
-		initializeNotificationSystem();
-	}
-
-	/**
-	 * Initialize notification system: start server if we're on the server host,
-	 * otherwise connect as client to the server
-	 */
-	private void initializeNotificationSystem() {
-		if (NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
-			// We are on the notification server host, start the server
-			NotificationServer.getInstance().start();
-			System.out.println("Running as NOTIFICATION SERVER (FTP server at " + ftpServerHost + ")");
-		} else {
-			// We are a remote client, will connect to notification server when table model
-			// is set
-			System.out.println("Running as NOTIFICATION CLIENT (will connect to server at " + ftpServerHost + ")");
-		}
-	}
-
-	/**
-	 * Set the table model and initialize notifications if not already initialized.
-	 * This must be called after creating the FTPTableModel.
-	 * 
-	 * @param tableModel The FTP table model to update when notifications are
-	 *                   received
-	 */
-	public void setTableModel(FTPTableModel tableModel) {
-		if (!notificationsInitialized && tableModel != null) {
-			// Only create notification controller (client) if we're NOT running as server
-			if (!NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
-				// Create notification controller with the server host
-				this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
-			} else {
-				System.out.println("Running as server - no client connection needed");
-			}
-			notificationsInitialized = true;
 		}
 	}
 
@@ -129,11 +93,7 @@ public class ServiceFTP {
 		}
 
 		try (InputStream inputStream = new FileInputStream(localFile)) {
-			boolean success = ftpClient.storeFile(remoteFilePath, inputStream);
-			if (success && notificationController != null) {
-				notificationController.notifyChange("UPLOAD", remoteFilePath);
-			}
-			return success;
+			return ftpClient.storeFile(remoteFilePath, inputStream);
 		} catch (IOException e) {
 			showError("Error uploading file: " + remoteFilePath, e);
 			return false;
@@ -151,11 +111,7 @@ public class ServiceFTP {
 
 	public boolean deleteFile(String remoteFilePath) {
 		try {
-			boolean success = ftpClient.deleteFile(remoteFilePath);
-			if (success && notificationController != null) {
-				notificationController.notifyChange("DELETE", remoteFilePath);
-			}
-			return success;
+			return ftpClient.deleteFile(remoteFilePath);
 		} catch (IOException e) {
 			showError("Could not delete file: " + remoteFilePath, e);
 			return false;
@@ -164,11 +120,7 @@ public class ServiceFTP {
 
 	public boolean renameFile(String remoteFrom, String remoteTo) {
 		try {
-			boolean success = ftpClient.rename(remoteFrom, remoteTo);
-			if (success && notificationController != null) {
-				notificationController.notifyChange("RENAME", remoteFrom + " -> " + remoteTo);
-			}
-			return success;
+			return ftpClient.rename(remoteFrom, remoteTo);
 		} catch (IOException e) {
 			showError("Could not rename file", e);
 			return false;
@@ -220,6 +172,42 @@ public class ServiceFTP {
 	private void showError(String message, Exception e) {
 		JOptionPane.showMessageDialog(null, message + "\nDetails: " + e.getMessage(), "FTP Error",
 				JOptionPane.ERROR_MESSAGE);
+	}
+
+	/**
+	 * Initialize notification system: start server if we're on the server host,
+	 * otherwise connect as client to the server
+	 */
+	private void initializeNotificationSystem() {
+		if (NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
+			// We are on the notification server host, start the server
+			NotificationServer.getInstance().start();
+			System.out.println("Running as NOTIFICATION SERVER (FTP server at " + ftpServerHost + ")");
+		} else {
+			// We are a remote client, will connect to notification server when table model
+			// is set
+			System.out.println("Running as NOTIFICATION CLIENT (will connect to server at " + ftpServerHost + ")");
+		}
+	}
+
+	/**
+	 * Set the table model and initialize notifications if not already initialized.
+	 * This must be called after creating the FTPTableModel.
+	 * 
+	 * @param tableModel The FTP table model to update when notifications are
+	 *                   received
+	 */
+	public void setTableModel(FTPTableModel tableModel) {
+		if (!notificationsInitialized && tableModel != null) {
+			// Only create notification controller (client) if we're NOT running as server
+			if (!NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
+				// Create notification controller with the server host
+				this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
+			} else {
+				System.out.println("Running as server - no client connection needed");
+			}
+			notificationsInitialized = true;
+		}
 	}
 
 	/**
