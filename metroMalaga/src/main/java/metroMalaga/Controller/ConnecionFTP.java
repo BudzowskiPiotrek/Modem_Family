@@ -5,18 +5,18 @@ import javax.swing.JOptionPane;
 import org.apache.commons.net.ftp.FTPClient;
 
 public class ConnecionFTP {
-	private static final String SERVER = "192.168.1.41";
+	private static final String SERVER = "127.0.0.1";
 	private static final int PORT = 21;
 	private String user;
-	private static final String PASS = "pasword123";
+	private static final String PASS = "proyecto";
 
 	public ConnecionFTP(String tipo) {
 		if(tipo.equalsIgnoreCase("readwrite")) {
-			this.user="metro";
+			this.user="proyecto";
 		}else if (tipo.equalsIgnoreCase("write")) {
-			this.user="metroWrite";
+			this.user="write";
 		}else if (tipo.equalsIgnoreCase("read")) {
-			this.user="metroRead";
+			this.user="read";
 		}
 	}
 
