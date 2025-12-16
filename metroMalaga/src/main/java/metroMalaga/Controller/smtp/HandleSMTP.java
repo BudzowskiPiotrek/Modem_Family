@@ -45,7 +45,6 @@ public class HandleSMTP {
 		}
 	}
 
-	// --- SEND EMAIL ---
 	public void sendEmail(String recipient, String subject, String body, List<File> attachments) throws Exception {
 		Properties props = new Properties();
 		props.put("mail.smtp.auth", "true");
@@ -145,7 +144,6 @@ public class HandleSMTP {
 					email.setUniqueId(uid);
 					email.setAttachmentNames(attachments);
 
-					// Initial status based on local memory
 					email.setRead(locallyRead.contains(uid));
 
 					emailList.add(email);

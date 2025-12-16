@@ -8,6 +8,7 @@ import java.util.Date;
 
 import javax.swing.JOptionPane;
 
+import metroMalaga.Model.Rol;
 import metroMalaga.Model.Usuario;
 
 public class ServiceLogin {
@@ -31,7 +32,7 @@ public class ServiceLogin {
 	}
 
 	public Usuario getUserData(String usuario) {
-		Usuario user = new Usuario(null, null, null);
+		Usuario user = new Usuario(null, null, null, null);
 		final String SQL = "SELECT * FROM usuarios WHERE username = ?";
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);
@@ -41,6 +42,8 @@ public class ServiceLogin {
 					;
 					user.setPasswordApp(rs.getString(2));
 					;
+					user.setEmailReal(rs.getString(3));
+					
 				}
 			}
 
