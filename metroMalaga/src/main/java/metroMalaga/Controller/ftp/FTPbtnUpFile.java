@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.ftp;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
 
 public class FTPbtnUpFile implements ActionListener {

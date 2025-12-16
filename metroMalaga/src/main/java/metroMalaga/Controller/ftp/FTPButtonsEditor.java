@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.ftp;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -15,6 +15,7 @@ import javax.swing.table.TableCellEditor;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
 
 public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {

@@ -8,10 +8,10 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
-import metroMalaga.Controller.LoginAttempt;
-import metroMalaga.Controller.LoginButton;
-import metroMalaga.Controller.LoginPlaceholderPasswordFieldHandler;
-import metroMalaga.Controller.LoginPlaceholderTextFieldHandler;
+import metroMalaga.Controller.login.LoginAttempt;
+import metroMalaga.Controller.login.LoginButton;
+import metroMalaga.Controller.login.LoginPlaceholderPasswordFieldHandler;
+import metroMalaga.Controller.login.LoginPlaceholderTextFieldHandler;
 import metroMalaga.Model.Usuario;
 
 public class PanelLogin extends JFrame {

@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.login;
 
 import java.awt.Color;
 import java.awt.event.MouseEvent;
