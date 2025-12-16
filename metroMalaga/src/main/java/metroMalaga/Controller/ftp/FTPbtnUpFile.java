@@ -49,13 +49,12 @@ public class FTPbtnUpFile implements ActionListener {
 				boolean success = service.uploadFile(localFile.getAbsolutePath(), remoteFileName);
 
 				if (success) {
-					cn.registerLog(user.getUsernameApp(), "File uploaded:" + remoteFileName);
+
 					JOptionPane.showMessageDialog(null, "File uploaded successfully:" + remoteFileName);
-
+					
+					cn.registerLog(user.getUsernameApp(), "File uploaded:" + remoteFileName);
 					FTPFile[] updatedFilesArray = service.listAllFiles();
-
 					List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
-
 					model.setData(updatedFilesList);
 
 				} else {

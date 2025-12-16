@@ -33,32 +33,23 @@ public class ServiceLogin {
 
 	public Usuario getUserData(String usuario) {
 		Usuario user = null;
-		final String SQL = "SELECT * FROM usuarios WHERE username = ?";
+		final String SQL = "SELECT u.username, u.password, u.direccion_correo, "
+				+ "r.id, r.nombre AS rol_nombre, r.permisos FROM usuarios u JOIN roles r ON u.id_rol = r.id "
+				+ "WHERE u.username = ?";
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					user = new Usuario(rs.getString(1), rs.getString(2), rs.getString(3), new Rol(0, "", ""));
+					Rol rol = new Rol(rs.getInt("id"), rs.getString("permisos"), rs.getString("rol_nombre"));
+
+					user = new Usuario(rs.getString("username"), rs.getString("password"),
+							rs.getString("direccion_correo"), rol);
 				}
 			}
-
 		} catch (SQLException e) {
 			String errorMessage = "Error retrieving user data:" + e.getMessage();
 			JOptionPane.showMessageDialog(null, errorMessage, "Error SQL", JOptionPane.ERROR_MESSAGE);
 		}
 		return user;
-	}
-
-	public void registerLog(String user, String description) {
-		final String SQL = "INSERT INTO logs (username, accion) VALUES (?, ?)";
-
-		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
-			ps.setString(1, user);
-			ps.setString(2, description);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			String errorMessage = "CRITICAL LOGGING ERROR: Could not register log entry. Detail: " + e.getMessage();
-			System.err.println(errorMessage);
-		}
 	}
 }
