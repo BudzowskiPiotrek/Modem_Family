@@ -22,12 +22,6 @@ public class EmailModel {
 		this.attachmentNames = new ArrayList<>();
 	}
 
-	
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-
 	// Getters y Setters
 	public int getMessageNumber() {
 		return messageNumber;
@@ -71,5 +65,9 @@ public class EmailModel {
 
 	public boolean hasAttachments() {
 		return attachmentNames != null && !attachmentNames.isEmpty();
+	}
+
+	public void setContent(String content) {
+		this.content = content;
 	}
 }

@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.login;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,8 +7,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import metroMalaga.Controller.Common;
+import metroMalaga.Controller.ServiceLogin;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.PanelLogin;
+import metroMalaga.View.PanelMenu;
 
 public class LoginAttempt implements ActionListener {
 	private final JTextField userField;
@@ -17,6 +20,7 @@ public class LoginAttempt implements ActionListener {
 	private Usuario user;
 	private final PanelLogin panelLogin;
 	private ServiceLogin sl = new ServiceLogin();
+	private Common cn = new Common();
 
 	private static final String USERNAME_PATTERN = "^[a-zA-Z0-9]+$";
 	private static final String PASSWORD_PATTERN = "^[a-zA-Z0-9]{8,}$";
@@ -67,8 +71,12 @@ public class LoginAttempt implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Welcome, " + username + "Access granted.", "Login successful",
 						JOptionPane.INFORMATION_MESSAGE);
 
-				sl.registerLog(username, "Successful login attempt");
-				this.panelLogin.loginSuccessful(user);
+				cn.registerLog(username, "Successful login attempt");
+				PanelMenu panelMenu = new PanelMenu(user);
+				panelMenu.setVisible(true);
+				this.panelLogin.loginSuccessful();
+
+				
 			} else {
 
 				JOptionPane.showMessageDialog(null, "Error loading user data. Please try again.", "Internal Error",
@@ -78,7 +86,7 @@ public class LoginAttempt implements ActionListener {
 			JOptionPane.showMessageDialog(null, "Incorrect username or password. Please try again.",
 					"Authentication Error", JOptionPane.WARNING_MESSAGE);
 			
-			sl.registerLog(username, "Login attempt failed");
+			cn.registerLog(username, "Login attempt failed");
 			return;
 		}
 	}

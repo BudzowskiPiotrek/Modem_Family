@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.ftp;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,14 +13,21 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.Common;
+import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
+import metroMalaga.Model.Usuario;
 
 public class FTPbtnUpFile implements ActionListener {
 
 	private ServiceFTP service;
 	private FTPTableModel model;
+	private Common cn;
+	private Usuario user;
 
-	public FTPbtnUpFile(JButton button, ServiceFTP service, FTPTableModel model) {
+	public FTPbtnUpFile(JButton button, ServiceFTP service, FTPTableModel model, Usuario user) {
+		this.cn = new Common();
+		this.user = user;
 		this.service = service;
 		this.model = model;
 		button.addActionListener(this);
@@ -29,7 +36,7 @@ public class FTPbtnUpFile implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setDialogTitle("Seleccionar archivo para subir");
+		fileChooser.setDialogTitle("Select file to upload");
 
 		int result = fileChooser.showOpenDialog(null);
 
@@ -42,23 +49,25 @@ public class FTPbtnUpFile implements ActionListener {
 				boolean success = service.uploadFile(localFile.getAbsolutePath(), remoteFileName);
 
 				if (success) {
-					JOptionPane.showMessageDialog(null, "Archivo subido con éxito: " + remoteFileName);
+
+					JOptionPane.showMessageDialog(null, "File uploaded successfully:" + remoteFileName);
+
+					cn.registerLog(user.getUsernameApp(), "File uploaded:" + remoteFileName);
+
+					// Notify other clients about the upload
+					service.notifyFTPChange("UPLOAD", remoteFileName);
 
 					FTPFile[] updatedFilesArray = service.listAllFiles();
-
-					// 2. Convertir el Array a una Lista
 					List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
-
-					// 3. Actualizar el modelo con la Lista
 					model.setData(updatedFilesList);
 
 				} else {
-					JOptionPane.showMessageDialog(null, "Fallo al subir el archivo.", "Error de Subida",
+					JOptionPane.showMessageDialog(null, "File upload failed.", "Upload Error",
 							JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, "Error de E/S durante la subida: " + ex.getMessage(),
-						"Error de Subida", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "I/O error during upload: " + ex.getMessage(), "Error de Subida",
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
