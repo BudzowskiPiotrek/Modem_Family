@@ -10,7 +10,7 @@ import javax.swing.border.LineBorder;
 
 public class FieldFocusHandle extends FocusAdapter {
 
-    private final JComponent component; // Puede ser JTextField o JTextArea
+    private final JComponent component;
     private final Color normalColor;
     private final Color focusColor;
 
@@ -22,7 +22,6 @@ public class FieldFocusHandle extends FocusAdapter {
 
     @Override
     public void focusGained(FocusEvent e) {
-        // Al hacer clic dentro: Borde Color Acento
         component.setBorder(new CompoundBorder(
             new LineBorder(focusColor, 1), 
             new EmptyBorder(2, 5, 2, 5)
@@ -31,7 +30,6 @@ public class FieldFocusHandle extends FocusAdapter {
 
     @Override
     public void focusLost(FocusEvent e) {
-        // Al salir fuera: Borde Color Normal
         component.setBorder(new CompoundBorder(
             new LineBorder(normalColor, 1), 
             new EmptyBorder(2, 5, 2, 5)

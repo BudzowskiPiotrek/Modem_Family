@@ -1,34 +1,31 @@
 package metroMalaga.Controller.smtp.tasks;
 
-import metroMalaga.Controller.smtp.HandleSMTP;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
 import java.io.File;
+import javax.swing.JOptionPane;
+import metroMalaga.Controller.smtp.HandleSMTP;
 
 public class DownloadEmailTask implements Runnable {
-    
-    private final HandleSMTP backend;
-    private final String uniqueId;
-    private final File destination;
-    private final Component parentView;
-    
-    public DownloadEmailTask(HandleSMTP backend, String uniqueId, 
-                            File destination, Component parentView) {
-        this.backend = backend;
-        this.uniqueId = uniqueId;
-        this.destination = destination;
-        this.parentView = parentView;
-    }
-    
-    @Override
-    public void run() {
-        try {
-            backend.downloadEmailComplete(uniqueId, destination);
-            JOptionPane.showMessageDialog(parentView, 
-                "Email Downloaded: " + destination.getAbsolutePath());
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(parentView, 
-                "Error: " + ex.getMessage());
-        }
-    }
+
+	private final HandleSMTP backend;
+	private final Component parentView;
+	private final String uid;
+	private final File dest;
+
+	public DownloadEmailTask(HandleSMTP backend, Component parentView, String uid, File dest) {
+		this.backend = backend;
+		this.parentView = parentView;
+		this.uid = uid;
+		this.dest = dest;
+	}
+
+	@Override
+	public void run() {
+		try {
+			backend.downloadEmailComplete(uid, dest);
+			JOptionPane.showMessageDialog(parentView, "Saved: " + dest.getAbsolutePath());
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(parentView, "Error: " + e.getMessage());
+		}
+	}
 }
