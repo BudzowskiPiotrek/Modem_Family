@@ -217,6 +217,20 @@ public class ServiceFTP {
 	}
 
 	/**
+	 * Notify all clients about an FTP change
+	 * This method should be called after successful FTP operations (upload, delete,
+	 * rename, etc.)
+	 * 
+	 * @param action   The type of action (UPLOAD, DELETE, RENAME, etc.)
+	 * @param filePath The affected file path
+	 */
+	public void notifyFTPChange(String action, String filePath) {
+		if (notificationController != null) {
+			notificationController.notifyChange(action, filePath);
+		}
+	}
+
+	/**
 	 * Set the notification controller for broadcasting FTP changes
 	 * 
 	 * @param controller The notification controller
