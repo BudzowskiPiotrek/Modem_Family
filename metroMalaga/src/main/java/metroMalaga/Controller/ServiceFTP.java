@@ -46,14 +46,27 @@ public class ServiceFTP {
 		}
 		initializeNotificationSystem();
 	}
-	
-	public boolean makeDirectory(String path) {
-	    try {
-	        return ftpClient.makeDirectory(path);
-	    } catch (IOException e) {
-	        showError("Error al crear el directorio: " + path, e);
-	        return false;
-	    }
+
+	public synchronized boolean makeDirectory(String path) {
+		try {
+			// Check if connection is still alive, reconnect if needed
+			if (!isConnected()) {
+				System.out.println("FTP connection lost, attempting to reconnect...");
+				reconnect();
+			}
+
+			return ftpClient.makeDirectory(path);
+		} catch (IOException e) {
+			// If we get an error, try to reconnect and retry once
+			System.err.println("Error creating directory, attempting reconnect: " + e.getMessage());
+			try {
+				reconnect();
+				return ftpClient.makeDirectory(path);
+			} catch (IOException retryEx) {
+				showError("Error al crear el directorio: " + path, retryEx);
+				return false;
+			}
+		}
 	}
 
 	public synchronized FTPFile[] listAllFiles() {
@@ -199,10 +212,17 @@ public class ServiceFTP {
 		}
 	}
 
-	public long calculateDirectorySize(String directoryName) {
+	public synchronized long calculateDirectorySize(String directoryName) {
 		long totalSize = 0;
 		String originalDirectory = getCurrentDirectory();
+
 		try {
+			// Check if connection is still alive, reconnect if needed
+			if (!isConnected()) {
+				System.out.println("FTP connection lost, attempting to reconnect...");
+				reconnect();
+			}
+
 			if (ftpClient.changeWorkingDirectory(directoryName)) {
 				FTPFile[] files = ftpClient.listFiles();
 				for (FTPFile file : files) {
@@ -216,15 +236,23 @@ public class ServiceFTP {
 					}
 				}
 				ftpClient.changeWorkingDirectory("..");
-
 			}
 		} catch (IOException e) {
-			showError("Error calculando tamaño recursivo para: " + directoryName, e);
+			// Try to reconnect and retry
+			System.err.println("Error calculating directory size, attempting reconnect: " + e.getMessage());
+			try {
+				reconnect();
+				// Don't retry the whole operation, just return 0 for this directory
+				// to avoid infinite recursion if reconnection keeps failing
+			} catch (IOException reconnectEx) {
+				System.err.println("Could not reconnect: " + reconnectEx.getMessage());
+			}
 		}
+
 		try {
 			ftpClient.changeWorkingDirectory(originalDirectory);
 		} catch (IOException e) {
-			showError("Error al regresar al directorio original.", e);
+			System.err.println("Error al regresar al directorio original: " + e.getMessage());
 		}
 
 		return totalSize;
