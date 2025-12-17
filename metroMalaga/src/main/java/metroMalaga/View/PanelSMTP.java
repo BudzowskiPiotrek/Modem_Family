@@ -6,7 +6,6 @@ import javax.swing.table.*;
 import javax.swing.text.JTextComponent;
 
 import java.awt.*;
-import java.util.Arrays;
 
 import metroMalaga.Model.Usuario;
 import metroMalaga.Controller.smtp.ButtonHandleSMTP;
@@ -14,13 +13,11 @@ import metroMalaga.Controller.smtp.ButtonHoverHandle;
 import metroMalaga.Controller.smtp.FieldFocusHandle;
 import metroMalaga.Controller.smtp.HandleSMTP;
 
-
 public class PanelSMTP extends JFrame {
 
 	private final HandleSMTP backend;
 	private final Usuario loggedUser;
 
-	// UI Components
 	private JTextField txtTo, txtSubject;
 	private JTextArea txtBody, txtViewer;
 	private JTable emailTable;
@@ -28,7 +25,6 @@ public class PanelSMTP extends JFrame {
 	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail;
 	private JLabel lblAttachedFile;
 
-	// Colors & Fonts
 	private final Color BG_MAIN = new Color(245, 247, 250);
 	private final Color BG_PANEL = Color.WHITE;
 	private final Color TXT_DARK = new Color(50, 50, 50);
@@ -60,7 +56,6 @@ public class PanelSMTP extends JFrame {
 	}
 
 	private void initUI() {
-		// --- COMPOSE PANEL ---
 		JPanel pCompose = createStyledPanel("New Message");
 		JPanel pFields = new JPanel(new GridBagLayout());
 		pFields.setBackground(BG_PANEL);
@@ -76,7 +71,6 @@ public class PanelSMTP extends JFrame {
 		txtBody = createTextArea();
 		JScrollPane scrollBody = createScrollPane(txtBody);
 
-		// Buttons Compose
 		JPanel pButtonsCompose = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
 		pButtonsCompose.setBackground(BG_PANEL);
 
@@ -101,7 +95,6 @@ public class PanelSMTP extends JFrame {
 		pCompose.add(scrollBody, BorderLayout.CENTER);
 		pCompose.add(pButtonsCompose, BorderLayout.SOUTH);
 
-		// --- INBOX PANEL ---
 		JPanel pInbox = createStyledPanel("Inbox");
 
 		String[] cols = { "Status", "Sender", "Subject" };
@@ -123,7 +116,6 @@ public class PanelSMTP extends JFrame {
 		split.setBorder(null);
 		split.setBackground(BG_MAIN);
 
-		// Buttons Inbox
 		JPanel pButtonsInbox = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 		pButtonsInbox.setBackground(BG_PANEL);
 
@@ -141,7 +133,6 @@ public class PanelSMTP extends JFrame {
 		pInbox.add(split, BorderLayout.CENTER);
 		pInbox.add(pButtonsInbox, BorderLayout.SOUTH);
 
-		// --- MAIN SPLIT ---
 		JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, pCompose, pInbox);
 		mainSplit.setDividerLocation(380);
 		mainSplit.setBorder(null);
@@ -152,27 +143,16 @@ public class PanelSMTP extends JFrame {
 	}
 
 	private void registerListeners() {
-		ButtonHandleSMTP logic = new ButtonHandleSMTP(this, backend, txtTo, txtSubject, txtBody, lblAttachedFile,
-				btnSend, btnAttach, btnClearAttach, btnRefresh, btnToggleRead, btnDownloadEmail, btnDelete, emailTable,
-				tableModel, txtViewer);
+		new ButtonHandleSMTP(this, backend);
 
-		for (JButton btn : Arrays.asList(btnAttach, btnClearAttach, btnSend, btnRefresh, btnToggleRead,
-				btnDownloadEmail, btnDelete)) {
-			btn.addActionListener(logic);
-		}
-		emailTable.addMouseListener(logic);
-
-		// Visual Effects
 		applyHover(btnAttach, BG_PANEL, TXT_DARK, false);
 		applyHover(btnRefresh, BG_PANEL, TXT_DARK, false);
 		applyHover(btnToggleRead, BG_PANEL, TXT_DARK, false);
 		applyHover(btnDownloadEmail, BG_PANEL, TXT_DARK, false);
-		applyHover(btnSend, BG_PANEL, C_ACCENT, false); // Accent
-		applyHover(btnClearAttach, C_DANGER, Color.WHITE, true); // Danger
-		applyHover(btnDelete, C_DANGER, Color.WHITE, true); // Danger
+		applyHover(btnSend, BG_PANEL, C_ACCENT, false);
+		applyHover(btnClearAttach, C_DANGER, Color.WHITE, true);
+		applyHover(btnDelete, C_DANGER, Color.WHITE, true);
 	}
-
-	// --- FACTORY & STYLE METHODS (OPTIMIZED) ---
 
 	private void addGBC(JPanel p, Component c, int x, int y, double weight) {
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -197,16 +177,13 @@ public class PanelSMTP extends JFrame {
 	}
 
 	private JTextField createField() {
-        JTextField f = new JTextField();
-        f.setPreferredSize(new Dimension(200, 30));
-        styleCommon(f);
-        
-        f.setBorder(new CompoundBorder(new LineBorder(C_BORDER, 1), new EmptyBorder(2, 5, 2, 5)));
-        
-        f.addFocusListener(new FieldFocusHandle(f, C_BORDER, C_ACCENT));
-        
-        return f;
-    }
+		JTextField f = new JTextField();
+		f.setPreferredSize(new Dimension(200, 30));
+		styleCommon(f);
+		f.setBorder(new CompoundBorder(new LineBorder(C_BORDER, 1), new EmptyBorder(2, 5, 2, 5)));
+		f.addFocusListener(new FieldFocusHandle(f, C_BORDER, C_ACCENT));
+		return f;
+	}
 
 	private JTextArea createTextArea() {
 		JTextArea a = new JTextArea();
@@ -269,5 +246,61 @@ public class PanelSMTP extends JFrame {
 		MatteBorder b = new MatteBorder(1, 1, 1, 1, isDanger ? C_DANGER : (fg.equals(C_ACCENT) ? C_ACCENT : C_BORDER));
 		btn.setBorder(new CompoundBorder(b, new EmptyBorder(5, 10, 5, 10)));
 		btn.addMouseListener(new ButtonHoverHandle(btn, bg, fg, hoverBg, fg, b, b));
+	}
+
+	public JTextField getTxtTo() {
+		return txtTo;
+	}
+
+	public JTextField getTxtSubject() {
+		return txtSubject;
+	}
+
+	public JTextArea getTxtBody() {
+		return txtBody;
+	}
+
+	public JTextArea getTxtViewer() {
+		return txtViewer;
+	}
+
+	public JTable getEmailTable() {
+		return emailTable;
+	}
+
+	public DefaultTableModel getTableModel() {
+		return tableModel;
+	}
+
+	public JButton getBtnSend() {
+		return btnSend;
+	}
+
+	public JButton getBtnAttach() {
+		return btnAttach;
+	}
+
+	public JButton getBtnClearAttach() {
+		return btnClearAttach;
+	}
+
+	public JButton getBtnRefresh() {
+		return btnRefresh;
+	}
+
+	public JButton getBtnDelete() {
+		return btnDelete;
+	}
+
+	public JButton getBtnToggleRead() {
+		return btnToggleRead;
+	}
+
+	public JButton getBtnDownloadEmail() {
+		return btnDownloadEmail;
+	}
+
+	public JLabel getLblAttachedFile() {
+		return lblAttachedFile;
 	}
 }

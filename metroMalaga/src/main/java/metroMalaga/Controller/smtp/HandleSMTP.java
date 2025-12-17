@@ -2,7 +2,6 @@ package metroMalaga.Controller.smtp;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
-import jakarta.mail.search.FlagTerm;
 import metroMalaga.Model.EmailModel;
 
 import java.io.*;
@@ -10,353 +9,248 @@ import java.util.*;
 
 public class HandleSMTP {
 
-	private static final String SMTP_HOST = "smtp.gmail.com";
-	private static final String POP3_HOST = "pop.gmail.com";
-	private static final String IMAP_HOST = "imap.gmail.com";
+    private String userEmail;
+    private String appPassword;
 
-	private String userEmail;
-	private String appPassword;
+    public boolean login(String email, String password) {
+        this.userEmail = email;
+        this.appPassword = password;
+        return true;
+    }
 
-	private final File readEmailsFile = new File("read_emails_db.dat");
-	private Set<String> locallyRead = new HashSet<>();
+    public List<EmailModel> fetchEmails() {
+        List<EmailModel> emailList = new ArrayList<>();
+        try {
+            Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
+            Store store = session.getStore("imaps");
+            store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
 
-	public boolean login(String email, String password) {
-		this.userEmail = email;
-		this.appPassword = password;
-		loadReadFromDisk();
-		return true;
-	}
+            Folder emailFolder = store.getFolder("INBOX");
+            emailFolder.open(Folder.READ_ONLY);
 
-	private void loadReadFromDisk() {
-		if (!readEmailsFile.exists())
-			return;
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(readEmailsFile))) {
-			locallyRead = (Set<String>) ois.readObject();
-		} catch (Exception e) {
-			locallyRead = new HashSet<>();
-		}
-	}
+            int totalMessages = emailFolder.getMessageCount();
+            int start = Math.max(1, totalMessages - 50);
 
-	private void saveReadToDisk() {
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(readEmailsFile))) {
-			oos.writeObject(locallyRead);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            if (totalMessages > 0) {
+                Message[] messages = emailFolder.getMessages(start, totalMessages);
+                
+                FetchProfile fp = new FetchProfile();
+                fp.add(FetchProfile.Item.ENVELOPE);
+                fp.add(FetchProfile.Item.FLAGS); 
+                emailFolder.fetch(messages, fp);
 
-	// --- SEND EMAIL ---
-	public void sendEmail(String recipient, String subject, String body, List<File> attachments) throws Exception {
-		Properties props = new Properties();
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", SMTP_HOST);
-		props.put("mail.smtp.port", "587");
-		props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+                for (int i = messages.length - 1; i >= 0; i--) {
+                    Message msg = messages[i];
+                    Address[] fromAddresses = msg.getFrom();
+                    String sender = (fromAddresses != null && fromAddresses.length > 0) ? fromAddresses[0].toString() : "Unknown";
+                    
+                    if (sender.contains(userEmail)) continue;
 
-		Session session = Session.getInstance(props, new Authenticator() {
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(userEmail, appPassword);
-			}
-		});
+                    String uid = "";
+                    if (msg instanceof MimeMessage) uid = ((MimeMessage) msg).getMessageID();
 
-		Message message = new MimeMessage(session);
-		if (recipient == null || recipient.isEmpty())
-			throw new Exception("The recipient cannot be empty.");
+                    String bodyText = "[Click to load content...]";
+                    EmailModel email = new EmailModel(msg.getMessageNumber(), sender, msg.getSubject(), bodyText);
+                    email.setUniqueId(uid);
+                    email.setRead(msg.isSet(Flags.Flag.SEEN));
 
-		message.setFrom(new InternetAddress(userEmail));
-		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
-		message.setSubject(subject);
+                    emailList.add(email);
+                }
+            }
+            emailFolder.close(false);
+            store.close();
+        } catch (Exception e) { e.printStackTrace(); }
+        return emailList;
+    }
 
-		Multipart multipart = new MimeMultipart();
-		BodyPart messageBodyPart = new MimeBodyPart();
-		messageBodyPart.setText(body);
-		multipart.addBodyPart(messageBodyPart);
+    public void loadFullContent(EmailModel emailModel) {
+        try {
+            Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
+            Store store = session.getStore("imaps");
+            store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
 
-		if (attachments != null && !attachments.isEmpty()) {
-			for (File file : attachments) {
-				if (file.exists()) {
-					MimeBodyPart attachPart = new MimeBodyPart();
-					attachPart.attachFile(file);
-					multipart.addBodyPart(attachPart);
-				}
-			}
-		}
-		message.setContent(multipart);
-		Transport.send(message);
-	}
+            Folder emailFolder = store.getFolder("INBOX");
+            emailFolder.open(Folder.READ_ONLY);
 
-	public List<EmailModel> fetchEmails() {
-		List<EmailModel> emailList = new ArrayList<>();
+            Message[] messages = emailFolder.getMessages();
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            emailFolder.fetch(messages, fp);
 
-		try {
-			Properties props = new Properties();
-			props.put("mail.pop3.host", POP3_HOST);
-			props.put("mail.pop3.port", "995");
-			props.put("mail.pop3.starttls.enable", "true");
-			props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            for (int i = messages.length - 1; i >= 0; i--) {
+                if (messages[i] instanceof MimeMessage) {
+                    String serverUid = ((MimeMessage) messages[i]).getMessageID();
+                    if (serverUid.equals(emailModel.getUniqueId())) {
+                        Message msg = messages[i];
+                        
+                        String bodyText = "";
+                        List<String> attachments = new ArrayList<>();
+                        try {
+                            Object content = msg.getContent();
+                            if (content instanceof Multipart) {
+                                parseMultipart((Multipart) content, attachments);
+                                bodyText = getTextFromMultipart((Multipart) content);
+                            } else if (content instanceof String) {
+                                bodyText = (String) content;
+                            }
+                        } catch (Exception e) { bodyText = "[Error loading content]"; }
 
-			Session session = Session.getDefaultInstance(props);
-			Store store = session.getStore("pop3");
-			store.connect(POP3_HOST, "recent:" + userEmail, appPassword);
+                        emailModel.setContent(bodyText);
+                        emailModel.setAttachmentNames(attachments);
+                        break;
+                    }
+                }
+            }
+            emailFolder.close(false);
+            store.close();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
 
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_ONLY);
+    public void updateReadStatusIMAP(String uid, boolean markAsRead) {
+        try {
+            Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
+            Store store = session.getStore("imaps");
+            store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
+            
+            Folder emailFolder = store.getFolder("INBOX");
+            emailFolder.open(Folder.READ_WRITE);
 
-			int totalMessages = emailFolder.getMessageCount();
-			int start = Math.max(1, totalMessages - 100);
+            Message[] messages = emailFolder.getMessages();
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            emailFolder.fetch(messages, fp);
 
-			if (totalMessages > 0) {
-				Message[] messages = emailFolder.getMessages(start, totalMessages);
-				FetchProfile fp = new FetchProfile();
-				fp.add(FetchProfile.Item.ENVELOPE);
-				emailFolder.fetch(messages, fp);
+            for (int i = messages.length - 1; i >= 0; i--) {
+                if (((MimeMessage)messages[i]).getMessageID().equals(uid)) {
+                    messages[i].setFlag(Flags.Flag.SEEN, markAsRead);
+                    break;
+                }
+            }
+            emailFolder.close(true);
+            store.close();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
 
-				for (int i = messages.length - 1; i >= 0; i--) {
-					Message msg = messages[i];
+    public void deleteEmail(String uid) {
+        try {
+            Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
+            Store store = session.getStore("imaps");
+            store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
+            
+            Folder emailFolder = store.getFolder("INBOX");
+            emailFolder.open(Folder.READ_WRITE);
 
-					Address[] fromAddresses = msg.getFrom();
-					String sender = (fromAddresses != null && fromAddresses.length > 0) ? fromAddresses[0].toString()
-							: "Unknown";
+            Message[] messages = emailFolder.getMessages();
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            emailFolder.fetch(messages, fp);
 
-					if (sender.contains(userEmail))
-						continue;
+            for (int i = messages.length - 1; i >= 0; i--) {
+                if (((MimeMessage)messages[i]).getMessageID().equals(uid)) {
+                    messages[i].setFlag(Flags.Flag.DELETED, true);
+                    break;
+                }
+            }
+            emailFolder.close(true);
+            store.close();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
 
-					String uid = "";
-					if (msg instanceof MimeMessage)
-						uid = ((MimeMessage) msg).getMessageID();
+    public void downloadEmailComplete(String uid, File destinationFile) throws Exception {
+        Session session = Session.getInstance(EmailConfig.getPop3Properties());
+        Store store = session.getStore("pop3");
+        store.connect(EmailConfig.POP3_HOST, "recent:" + userEmail, appPassword);
 
-					String bodyText = "";
-					List<String> attachments = new ArrayList<>();
-					try {
-						Object content = msg.getContent();
-						if (content instanceof Multipart) {
-							parseMultipart((Multipart) content, attachments);
-							bodyText = getTextFromMultipart((Multipart) content);
-						} else if (content instanceof String) {
-							bodyText = (String) content;
-						}
-					} catch (Exception e) {
-						bodyText = "[Complex Content]";
-					}
+        Folder emailFolder = store.getFolder("INBOX");
+        emailFolder.open(Folder.READ_ONLY);
 
-					EmailModel email = new EmailModel(msg.getMessageNumber(), sender, msg.getSubject(), bodyText);
-					email.setUniqueId(uid);
-					email.setAttachmentNames(attachments);
+        Message[] messages = emailFolder.getMessages();
+        FetchProfile fp = new FetchProfile();
+        fp.add(FetchProfile.Item.ENVELOPE);
+        fp.add(UIDFolder.FetchProfileItem.UID);
+        emailFolder.fetch(messages, fp);
 
-					// Initial status based on local memory
-					email.setRead(locallyRead.contains(uid));
+        Message targetMsg = null;
+        for (int i = messages.length - 1; i >= 0; i--) {
+            if (messages[i] instanceof MimeMessage) {
+                String currentId = ((MimeMessage) messages[i]).getMessageID();
+                if (currentId != null && currentId.equals(uid)) {
+                    targetMsg = messages[i];
+                    break;
+                }
+            }
+        }
+        
+        if (targetMsg == null) {
+            emailFolder.close(false);
+            store.close();
+            throw new Exception("Mensaje no encontrado en POP3.");
+        }
 
-					emailList.add(email);
-				}
-			}
-			emailFolder.close(false);
-			store.close();
+        try (FileOutputStream fos = new FileOutputStream(destinationFile)) {
+            targetMsg.writeTo(fos);
+        }
 
-			if (!emailList.isEmpty()) {
-				syncReadStatusWithGmail(emailList);
-			}
+        emailFolder.close(false);
+        store.close();
+    }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return emailList;
-	}
+    public void sendEmail(String recipient, String subject, String body, List<File> attachments) throws Exception {
+        Session session = Session.getInstance(EmailConfig.getSmtpProperties(), new Authenticator() {
+            @Override protected PasswordAuthentication getPasswordAuthentication() { return new PasswordAuthentication(userEmail, appPassword); }
+        });
 
-	private void syncReadStatusWithGmail(List<EmailModel> currentList) {
-		try {
-			Properties props = new Properties();
-			props.put("mail.store.protocol", "imaps");
-			props.put("mail.imaps.host", IMAP_HOST);
-			props.put("mail.imaps.port", "993");
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(userEmail));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
+        message.setSubject(subject);
 
-			Session session = Session.getDefaultInstance(props);
-			Store store = session.getStore("imaps");
-			store.connect(IMAP_HOST, userEmail, appPassword);
+        Multipart multipart = new MimeMultipart();
+        BodyPart messageBodyPart = new MimeBodyPart();
+        messageBodyPart.setText(body);
+        multipart.addBodyPart(messageBodyPart);
 
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_ONLY);
+        if (attachments != null && !attachments.isEmpty()) {
+            for (File file : attachments) {
+                if (file.exists()) {
+                    MimeBodyPart attachPart = new MimeBodyPart();
+                    attachPart.attachFile(file);
+                    multipart.addBodyPart(attachPart);
+                }
+            }
+        }
+        message.setContent(multipart);
+        Transport.send(message);
+    }
 
-			Message[] seenMessages = emailFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), true));
-			FetchProfile fp = new FetchProfile();
-			fp.add(FetchProfile.Item.ENVELOPE); 
-			emailFolder.fetch(seenMessages, fp);
+    private void parseMultipart(Multipart multipart, List<String> attachments) {
+        try {
+            for (int i = 0; i < multipart.getCount(); i++) {
+                BodyPart bodyPart = multipart.getBodyPart(i);
+                if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition()) || (bodyPart.getFileName() != null && !bodyPart.getFileName().isEmpty())) {
+                    attachments.add(bodyPart.getFileName());
+                } else if (bodyPart.getContent() instanceof Multipart) {
+                    parseMultipart((Multipart) bodyPart.getContent(), attachments);
+                }
+            }
+        } catch (Exception e) {}
+    }
 
-			Set<String> serverReadIds = new HashSet<>();
-			for (Message msg : seenMessages) {
-				if (msg instanceof MimeMessage) {
-					serverReadIds.add(((MimeMessage) msg).getMessageID());
-				}
-			}
-
-			boolean saveChanges = false;
-			for (EmailModel localMail : currentList) {
-				if (serverReadIds.contains(localMail.getUniqueId())) {
-					localMail.setRead(true);
-					if (!locallyRead.contains(localMail.getUniqueId())) {
-						locallyRead.add(localMail.getUniqueId());
-						saveChanges = true;
-					}
-				}
-			}
-
-			if (saveChanges)
-				saveReadToDisk();
-
-			emailFolder.close(false);
-			store.close();
-
-		} catch (Exception e) {
-			System.out.println("Could not sync status with Gmail (IMAP): " + e.getMessage());
-		}
-	}
-
-	private void parseMultipart(Multipart multipart, List<String> attachments) {
-		try {
-			for (int i = 0; i < multipart.getCount(); i++) {
-				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())
-						|| (bodyPart.getFileName() != null && !bodyPart.getFileName().isEmpty())) {
-					attachments.add(bodyPart.getFileName());
-				} else if (bodyPart.getContent() instanceof Multipart) {
-					parseMultipart((Multipart) bodyPart.getContent(), attachments);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private String getTextFromMultipart(Multipart multipart) {
-		StringBuilder result = new StringBuilder();
-		try {
-			for (int i = 0; i < multipart.getCount(); i++) {
-				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (bodyPart.isMimeType("text/plain")) {
-					result.append(bodyPart.getContent());
-				} else if (bodyPart.getContent() instanceof Multipart) {
-					result.append(getTextFromMultipart((Multipart) bodyPart.getContent()));
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result.toString();
-	}
-
-	public void downloadEmailComplete(String uid, File destinationFile) {
-		try {
-			Properties props = new Properties();
-			props.put("mail.pop3.host", POP3_HOST);
-			props.put("mail.pop3.port", "995");
-			props.put("mail.pop3.starttls.enable", "true");
-			props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-			Session session = Session.getDefaultInstance(props);
-			Store store = session.getStore("pop3");
-			store.connect(POP3_HOST, "recent:" + userEmail, appPassword);
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_ONLY);
-			Message[] messages = emailFolder.getMessages();
-			Message targetMsg = null;
-			for (int i = messages.length - 1; i >= 0; i--) {
-				if (messages[i] instanceof MimeMessage) {
-					if (((MimeMessage) messages[i]).getMessageID().equals(uid)) {
-						targetMsg = messages[i];
-						break;
-					}
-				}
-			}
-			if (targetMsg == null)
-				throw new Exception("Message not found.");
-			try (FileOutputStream fos = new FileOutputStream(destinationFile)) {
-				targetMsg.writeTo(fos);
-			}
-			emailFolder.close(false);
-			store.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void deleteEmail(String subjectToDelete, String senderToDelete) {
-		try {
-			Properties props = new Properties();
-			props.put("mail.pop3.host", POP3_HOST);
-			props.put("mail.pop3.port", "995");
-			props.put("mail.pop3.starttls.enable", "true");
-			props.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-			Session session = Session.getDefaultInstance(props);
-			Store store = session.getStore("pop3");
-			store.connect(POP3_HOST, "recent:" + userEmail, appPassword);
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_WRITE);
-			Message[] messages = emailFolder.getMessages();
-			FetchProfile fp = new FetchProfile();
-			fp.add(FetchProfile.Item.ENVELOPE);
-			emailFolder.fetch(messages, fp);
-			boolean found = false;
-			for (Message msg : messages) {
-				try {
-					String currentSubject = (msg.getSubject() == null) ? "" : msg.getSubject();
-					Address[] addr = msg.getFrom();
-					String currentSender = (addr != null && addr.length > 0) ? addr[0].toString() : "";
-					if (currentSubject.trim().equalsIgnoreCase(subjectToDelete.trim())
-							&& currentSender.contains(senderToDelete)) {
-						msg.setFlag(Flags.Flag.DELETED, true);
-						found = true;
-						break;
-					}
-				} catch (Exception e) {
-				}
-			}
-			if (found)
-				emailFolder.close(true);
-			else
-				emailFolder.close(false);
-			store.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void updateReadStatusIMAP(String subject, String sender, String uid, boolean markAsRead) {
-		if (markAsRead) {
-			if (uid != null)
-				locallyRead.add(uid);
-		} else {
-			if (uid != null)
-				locallyRead.remove(uid);
-		}
-		saveReadToDisk();
-		try {
-			Properties props = new Properties();
-			props.put("mail.store.protocol", "imaps");
-			props.put("mail.imaps.host", IMAP_HOST);
-			props.put("mail.imaps.port", "993");
-			Session session = Session.getDefaultInstance(props);
-			Store store = session.getStore("imaps");
-			store.connect(IMAP_HOST, userEmail, appPassword);
-			Folder emailFolder = store.getFolder("INBOX");
-			emailFolder.open(Folder.READ_WRITE);
-			Message[] messages = emailFolder.getMessages();
-			FetchProfile fp = new FetchProfile();
-			fp.add(FetchProfile.Item.ENVELOPE);
-			emailFolder.fetch(messages, fp);
-			for (Message msg : messages) {
-				try {
-					String currentUid = (msg instanceof MimeMessage) ? ((MimeMessage) msg).getMessageID() : "";
-					if (uid != null && uid.equals(currentUid)) {
-						msg.setFlag(Flags.Flag.SEEN, markAsRead);
-						break;
-					}
-				} catch (Exception e) {
-				}
-			}
-			emailFolder.close(true);
-			store.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    private String getTextFromMultipart(Multipart multipart) {
+        StringBuilder result = new StringBuilder();
+        try {
+            for (int i = 0; i < multipart.getCount(); i++) {
+                BodyPart bodyPart = multipart.getBodyPart(i);
+                if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition()) || (bodyPart.getFileName() != null && !bodyPart.getFileName().isEmpty())) {
+                    continue; 
+                }
+                if (bodyPart.isMimeType("text/plain")) {
+                    result.append(bodyPart.getContent());
+                } else if (bodyPart.getContent() instanceof Multipart) {
+                    result.append(getTextFromMultipart((Multipart) bodyPart.getContent()));
+                }
+            }
+        } catch (Exception e) {}
+        return result.toString();
+    }
 }

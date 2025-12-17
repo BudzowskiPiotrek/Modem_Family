@@ -8,6 +8,7 @@ import java.util.Date;
 
 import javax.swing.JOptionPane;
 
+import metroMalaga.Model.Rol;
 import metroMalaga.Model.Usuario;
 
 public class ServiceLogin {
@@ -16,7 +17,7 @@ public class ServiceLogin {
 
 	public boolean authenticateUser(String usuario, String password) {
 
-		final String SQL = "SELECT username FROM usuarios WHERE username = ? AND password = ?";
+		final String SQL = "SELECT username, password FROM usuarios WHERE username = ? AND password = ?";
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);
 			ps.setString(2, password);
@@ -31,21 +32,25 @@ public class ServiceLogin {
 	}
 
 	public Usuario getUserData(String usuario) {
-		Usuario user = new Usuario(null, null, null);
-		final String SQL = "SELECT * FROM usuarios WHERE username = ?";
+		Usuario user = null;
+
+		final String SQL = "SELECT u.username, u.password, u.correo_electronico, "
+				+ "u.fk_id_rol, r.nombre AS rol_nombre, r.permiso " + "FROM usuarios u "
+				+ "JOIN roles r ON u.fk_id_rol = r.id_roles " + "WHERE u.username = ?";
+
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					user.setUsernameApp(rs.getString(1));
-					;
-					user.setPasswordApp(rs.getString(2));
-					;
+
+					Rol rol = new Rol(rs.getInt("fk_id_rol"), rs.getString("permiso"), rs.getString("rol_nombre"));
+
+					user = new Usuario(rs.getString("username"), rs.getString("password"),
+							rs.getString("correo_electronico"), rol);
 				}
 			}
-
 		} catch (SQLException e) {
-			String errorMessage = "Error retrieving user data:" + e.getMessage();
+			String errorMessage = "Error retrieving user data: " + e.getMessage();
 			JOptionPane.showMessageDialog(null, errorMessage, "Error SQL", JOptionPane.ERROR_MESSAGE);
 		}
 		return user;

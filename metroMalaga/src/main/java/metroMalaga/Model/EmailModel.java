@@ -22,6 +22,12 @@ public class EmailModel {
 		this.attachmentNames = new ArrayList<>();
 	}
 
+	
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+
 	// Getters y Setters
 	public int getMessageNumber() {
 		return messageNumber;
