@@ -1,6 +1,7 @@
 package metroMalaga.Controller;
+
 import metroMalaga.View.CrudFrontend;
-import metroMalaga.View.PanelMenu;
+import metroMalaga.Controller.menu.MenuSelect;
 
 import javax.swing.*;
 import java.sql.*;
@@ -16,14 +17,16 @@ public class CrudController {
 
     private CrudFrontend vista;
     private Connection conn;
+    private MenuSelect menuSelect;
 
     // Estado actual
     private String tablaActual;
     private List<String> nombresColumnas; // Para saber nombres al hacer queries
     private String idRegistroEdicion = null; // Si es null, es INSERT. Si tiene valor, es UPDATE.
 
-    public CrudController(CrudFrontend vista) {
+    public CrudController(CrudFrontend vista, MenuSelect menuSelect) {
         this.vista = vista;
+        this.menuSelect = menuSelect;
         this.nombresColumnas = new ArrayList<>();
 
         conectarBD();
@@ -87,10 +90,13 @@ public class CrudController {
             }
         });
 
-        vista.getBtnVolver().addActionListener(e -> {            // 1. Abrir la nueva ventana
-            new PanelMenu(vista.getUser()).setVisible(true);
-            vista.dispose(); 
-        });    }
+        vista.getBtnVolver().addActionListener(e -> {
+            // Switch back to first tab (or could be a specific tab)
+            if (menuSelect != null) {
+                menuSelect.switchToTab(0);
+            }
+        });
+    }
 
     // --- LÓGICA DE NEGOCIO ---
 

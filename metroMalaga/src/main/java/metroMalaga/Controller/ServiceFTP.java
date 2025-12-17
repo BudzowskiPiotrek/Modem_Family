@@ -47,31 +47,29 @@ public class ServiceFTP {
 		initializeNotificationSystem();
 	}
 
-	public synchronized boolean makeDirectory(String path) {
-		try {
-			// Check if connection is still alive, reconnect if needed
-			if (!isConnected()) {
-				System.out.println("FTP connection lost, attempting to reconnect...");
-				reconnect();
-			}
+	public synchronized boolean makeDirectory(String path) throws IOException {
 
-			return ftpClient.makeDirectory(path);
-		} catch (IOException e) {
-			// If we get an error, try to reconnect and retry once
-			System.err.println("Error creating directory, attempting reconnect: " + e.getMessage());
-			try {
-				reconnect();
-				return ftpClient.makeDirectory(path);
-			} catch (IOException retryEx) {
-				showError("Error al crear el directorio: " + path, retryEx);
-				return false;
+		if (!isConnected()) {
+			reconnect();
+		}
+
+		boolean created = ftpClient.makeDirectory(path);
+
+		if (!created) {
+			int replyCode = ftpClient.getReplyCode();
+
+			if (replyCode == 550) {
+				throw new IOException("DIRECTORY_EXISTS");
+			} else {
+				throw new IOException("FTP_ERROR");
 			}
 		}
+
+		return true;
 	}
 
 	public synchronized FTPFile[] listAllFiles() {
 		try {
-			// Check if connection is still alive, reconnect if needed
 			if (!isConnected()) {
 				System.out.println("FTP connection lost, attempting to reconnect...");
 				reconnect();
@@ -79,7 +77,6 @@ public class ServiceFTP {
 
 			return ftpClient.listFiles();
 		} catch (IOException e) {
-			// If we get an error, try to reconnect and retry once
 			System.err.println("Error listing files, attempting reconnect: " + e.getMessage());
 			try {
 				reconnect();
@@ -183,13 +180,37 @@ public class ServiceFTP {
 		}
 	}
 
-	public synchronized boolean deleteFile(String remoteFilePath) {
+	public synchronized boolean deleteFile(String path) {
 		try {
-			return ftpClient.deleteFile(remoteFilePath);
+			FTPFile file = ftpClient.mlistFile(path);
+			
+			if (file == null) {
+				return false;
+			}
+
+			if (file.isDirectory()) {
+				deleteDirectoryRecursive(path);
+			} else {
+				ftpClient.deleteFile(path);
+			}
+			return true;
 		} catch (IOException e) {
-			showError("Could not delete file: " + remoteFilePath, e);
+			showError("Could not delete: " + path, e);
 			return false;
 		}
+	}
+
+	private void deleteDirectoryRecursive(String dirPath) throws IOException {
+		FTPFile[] files = ftpClient.listFiles(dirPath);
+		for (FTPFile file : files) {
+			String fullPath = dirPath + "/" + file.getName();
+			if (file.isDirectory()) {
+				deleteDirectoryRecursive(fullPath);
+			} else {
+				ftpClient.deleteFile(fullPath);
+			}
+		}
+		ftpClient.removeDirectory(dirPath);
 	}
 
 	public synchronized boolean renameFile(String remoteFrom, String remoteTo) {
@@ -304,9 +325,8 @@ public class ServiceFTP {
 	}
 
 	/**
-	 * Notify all clients about an FTP change
-	 * This method should be called after successful FTP operations (upload, delete,
-	 * rename, etc.)
+	 * Notify all clients about an FTP change This method should be called after
+	 * successful FTP operations (upload, delete, rename, etc.)
 	 * 
 	 * @param action   The type of action (UPLOAD, DELETE, RENAME, etc.)
 	 * @param filePath The affected file path
@@ -335,3 +355,4 @@ public class ServiceFTP {
 		this.notificationController = controller;
 	}
 }
+
