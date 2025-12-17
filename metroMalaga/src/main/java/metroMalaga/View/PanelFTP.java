@@ -108,15 +108,6 @@ public class PanelFTP extends JFrame {
 		this.setSize(800, 600);
 		this.setLocationRelativeTo(null);
 		this.setResizable(false);
-
-		// este lisening aqui no deberia estar
-		// Add window listener to disconnect notification system on close
-		this.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-			public void windowClosing(java.awt.event.WindowEvent e) {
-				service.disconnectNotifications();
-			}
-		});
 	}
 
 	private void setupLayout() {
