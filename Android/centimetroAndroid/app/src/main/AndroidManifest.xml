@@ -21,7 +21,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ManualActivity" />
+        <activity android:name=".MenuActivity" />
+        <activity android:name=".IntroduccionActivity" />
+        <activity android:name=".LoginManualActivity" />
+        <activity android:name=".MenuManualActivity" />
+        <activity android:name=".CorreosActivity" />
+        <activity android:name=".CrudActivity" />
+        <activity android:name=".FtpActivity" />
 
     </application>
 

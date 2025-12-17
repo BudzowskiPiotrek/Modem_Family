@@ -80,7 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Método separado para mantener el código limpio
     private void loginUsuario(String usuario, String password) {
-        // Buscamos en la colección "usuarios" donde el campo "usuario" sea igual al que escribió la persona
+        // Buscamos en la colección "usuarios" donde el campo "usuario" sea igual al que
+        // escribió la persona
         db.collection("Usuarios")
                 .whereEqualTo("user", usuario)
                 .get()
@@ -94,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(MainActivity.this, "Usuario no encontrado", Toast.LENGTH_SHORT).show();
                             } else {
                                 // El usuario existe, ahora verificamos la contraseña.
-                                // Obtenemos el primer documento (asumimos que los nombres de usuario son únicos)
+                                // Obtenemos el primer documento (asumimos que los nombres de usuario son
+                                // únicos)
                                 DocumentSnapshot document = task.getResult().getDocuments().get(0);
 
                                 // Sacamos la contraseña guardada en la BD
@@ -102,21 +104,22 @@ public class MainActivity extends AppCompatActivity {
 
                                 if (passGuardada != null && passGuardada.equals(password)) {
                                     // --- LOGIN EXITOSO ---
-                                    // Aquí irías a la siguiente pantalla
-                                    Intent intent = new Intent(MainActivity.this, ManualActivity.class);
+                                    // Navegamos al MenuActivity
+                                    Intent intent = new Intent(MainActivity.this, MenuActivity.class);
                                     startActivity(intent);
                                     etUser.setText("");
                                     etPassword.setText("");
 
-
                                 } else {
                                     // La contraseña no coincide
-                                    Toast.makeText(MainActivity.this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(MainActivity.this, "Contraseña incorrecta", Toast.LENGTH_SHORT)
+                                            .show();
                                 }
                             }
                         } else {
                             // Error de conexión o de Firebase
-                            Toast.makeText(MainActivity.this, "Error al conectar: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Error al conectar: " + task.getException().getMessage(),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
