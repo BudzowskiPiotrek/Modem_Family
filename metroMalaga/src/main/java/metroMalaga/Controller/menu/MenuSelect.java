@@ -161,5 +161,4 @@ public class MenuSelect implements ChangeListener {
 			tabbedPane.setSelectedIndex(tabIndex);
 		}
 	}
-
 }

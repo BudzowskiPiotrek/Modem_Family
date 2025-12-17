@@ -1,96 +1,87 @@
 package metroMalaga.Model;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.text.SimpleDateFormat;
 import javax.swing.table.AbstractTableModel;
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.Common;
+import metroMalaga.Controller.ServiceFTP;
+
 public class FTPTableModel extends AbstractTableModel {
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private final ServiceFTP service;
+	private List<FTPFile> masterList;
+	private List<FTPFile> currentFileList;
+	private final String[] columnNames = { "NAME", "SIZE", "DATE", "BUTTONS" };
 
-    private List<FTPFile> files;
-    private List<FTPFile> filteredFiles;
+	public FTPTableModel(List<FTPFile> initialList, ServiceFTP service) {
+		this.masterList = initialList;
+		this.currentFileList = initialList;
+		this.service = service;
+	}
 
-    public FTPTableModel(List<FTPFile> files) {
-        this.files = new ArrayList<>(files);
-        this.filteredFiles = new ArrayList<>(files);
-    }
+	public List<FTPFile> getMasterList() {
+		return masterList;
+	}
 
-    @Override
-    public int getRowCount() {
-        return filteredFiles.size();
-    }
+	public void setData(List<FTPFile> newData) {
+		this.currentFileList = newData;
+		fireTableDataChanged();
+	}
 
-    @Override
-    public int getColumnCount() {
-        return 4;
-    }
+	@Override
+	public int getRowCount() {
+		return currentFileList.size();
+	}
 
-    @Override
-    public String getColumnName(int column) {
-        return Language.get(87 + column);
-    }
+	@Override
+	public int getColumnCount() {
+		return columnNames.length;
+	}
 
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        FTPFile file = filteredFiles.get(rowIndex);
-        switch (columnIndex) {
-            case 0:
-                return file.getName();
-            case 1:
-                return file.isDirectory() ? "-" : formatSize(file.getSize());
-            case 2:
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                return sdf.format(file.getTimestamp().getTime());
-            case 3:
-                return "buttons";
-            default:
-                return null;
-        }
-    }
+	@Override
+	public String getColumnName(int column) {
+		return columnNames[column];
+	}
 
-    private String formatSize(long size) {
-        if (size < 1024)
-            return size + " B";
-        if (size < 1024 * 1024)
-            return String.format("%.2f KB", size / 1024.0);
-        return String.format("%.2f MB", size / (1024.0 * 1024.0));
-    }
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		FTPFile file = currentFileList.get(rowIndex);
 
-    public void setData(List<FTPFile> newFiles) {
-        this.files = new ArrayList<>(newFiles);
-        this.filteredFiles = new ArrayList<>(newFiles);
-        fireTableDataChanged();
-    }
+		switch (columnIndex) {
+		case 0:
+			return file.getName();
+		case 1:
+			long size;
+			if (file.isDirectory()) {
+				size = service.calculateDirectorySize(file.getName());
+			} else {
+				size = file.getSize();
+			}
+			return Common.formatSize(size);
+		case 2:
+			Date date = file.getTimestamp().getTime();
+			return DATE_FORMAT.format(date);
+		case 3:
+			return file;
+		default:
+			return null;
+		}
+	}
 
-    public List<FTPFile> getMasterList() {
-        return new ArrayList<>(files);
-    }
+	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		if (columnIndex == 3) {
+			return FTPFile.class;
+		}
+		return super.getColumnClass(columnIndex);
+	}
 
-    public void filterFiles(String searchText) {
-        if (searchText == null || searchText.trim().isEmpty()) {
-            filteredFiles = new ArrayList<>(files);
-        } else {
-            filteredFiles = new ArrayList<>();
-            String lowerSearch = searchText.toLowerCase();
-            for (FTPFile file : files) {
-                if (file.getName().toLowerCase().contains(lowerSearch)) {
-                    filteredFiles.add(file);
-                }
-            }
-        }
-        fireTableDataChanged();
-    }
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return columnIndex == 3;
+	}
 
-    public FTPFile getFileAt(int row) {
-        if (row >= 0 && row < filteredFiles.size()) {
-            return filteredFiles.get(row);
-        }
-        return null;
-    }
-
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex == 3;
-    }
 }

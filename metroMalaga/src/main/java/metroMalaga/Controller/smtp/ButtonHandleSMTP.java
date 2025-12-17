@@ -13,10 +13,6 @@ import javax.swing.table.DefaultTableModel;
 
 import metroMalaga.Controller.smtp.tasks.*;
 import metroMalaga.Model.EmailModel;
-
-import metroMalaga.Model.Language;
-import metroMalaga.View.PanelMenu;
-
 import metroMalaga.View.PanelSMTP;
 
 public class ButtonHandleSMTP implements ActionListener {
@@ -29,8 +25,8 @@ public class ButtonHandleSMTP implements ActionListener {
 	private final JTextField txtSubject;
 	private final JTextArea txtBody;
 	private final JLabel lblAttachedFile;
-	private final JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnToggleRead, btnDownloadEmail, btnDelete, btnReturn, btnLanguage;
-
+	private final JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnToggleRead, btnDownloadEmail, btnDelete,
+			btnReturn;
 	private final JTable emailTable;
 	private final DefaultTableModel tableModel;
 	private final JTextArea txtViewer;
@@ -54,7 +50,6 @@ public class ButtonHandleSMTP implements ActionListener {
 		this.btnDownloadEmail = view.getBtnDownloadEmail();
 		this.btnDelete = view.getBtnDelete();
 		this.btnReturn = view.getBtnReturn();
-		this.btnLanguage = view.getBtnLanguage();
 		this.emailTable = view.getEmailTable();
 		this.tableModel = view.getTableModel();
 		this.txtViewer = view.getTxtViewer();
@@ -75,9 +70,8 @@ public class ButtonHandleSMTP implements ActionListener {
 		btnToggleRead.addActionListener(this);
 		btnDownloadEmail.addActionListener(this);
 		btnDelete.addActionListener(this);
-		btnLanguage.addActionListener(this);
-		if (btnReturn != null) btnReturn.addActionListener(this);
-		
+		if (btnReturn != null)
+			btnReturn.addActionListener(this);
 
 		MouseClickListener mouseListener = new MouseClickListener(
 				backend,
@@ -108,22 +102,14 @@ public class ButtonHandleSMTP implements ActionListener {
 		} else if (source == btnDelete) {
 			deleteEmail();
 		} else if (source == btnReturn) {
-			view.setVisible(false);
-			panelMenu.setVisible(true);
-		} else if (source == btnLanguage) {
-			toggleLanguage();
+			if (onReturnCallback != null) {
+				onReturnCallback.run();
+			}
 		}
 	}
 
-	private void toggleLanguage() {
-		if (Language.getCurrentLanguage().equals("espanol")) {
-			Language.setEnglish();
-			btnLanguage.setText("🇬🇧 EN");
-		} else {
-			Language.setSpanish();
-			btnLanguage.setText("🇪🇸 ES");
-		}
-		view.updateAllTexts();
+	public void setOnReturnCallback(Runnable callback) {
+		this.onReturnCallback = callback;
 	}
 
 	public void displayContent(EmailModel mail) {
@@ -149,7 +135,7 @@ public class ButtonHandleSMTP implements ActionListener {
 
 	private void clearAttachments() {
 		attachmentsList.clear();
-		lblAttachedFile.setText(Language.get(60));
+		lblAttachedFile.setText("NO FILES");
 		lblAttachedFile.setForeground(Color.GRAY);
 	}
 
