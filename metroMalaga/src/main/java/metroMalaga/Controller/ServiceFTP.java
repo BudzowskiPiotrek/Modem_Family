@@ -23,8 +23,6 @@ public class ServiceFTP {
 	private FTPClient ftpClient;
 	private ConnecionFTP conFTP;
 	private String user;
-
-	// ????
 	private NotificationController notificationController;
 	private boolean notificationsInitialized = false;
 	private String ftpServerHost;
@@ -47,6 +45,15 @@ public class ServiceFTP {
 			showError("Error configuring FTP connection", e);
 		}
 		initializeNotificationSystem();
+	}
+	
+	public boolean makeDirectory(String path) {
+	    try {
+	        return ftpClient.makeDirectory(path);
+	    } catch (IOException e) {
+	        showError("Error al crear el directorio: " + path, e);
+	        return false;
+	    }
 	}
 
 	public synchronized FTPFile[] listAllFiles() {
