@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import metroMalaga.Model.Usuario;
 
-public class CrudFrontend extends JFrame {
+public class CrudFrontend extends JPanel {
 
     private Usuario user;
 
@@ -42,16 +42,12 @@ public class CrudFrontend extends JFrame {
 
     public CrudFrontend(Usuario user) {
         this.user = user;
-        setTitle("Email Manager Style - Database View");
-        setSize(1100, 750);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
-        getContentPane().setBackground(COLOR_FONDO);
+        setBackground(COLOR_FONDO);
 
         camposFormulario = new ArrayList<>();
 
-        ((JPanel) getContentPane()).setBorder(new EmptyBorder(10, 10, 10, 10));
+        setBorder(new EmptyBorder(10, 10, 10, 10));
 
         crearMenuLateral();
         crearPanelCentral();
@@ -413,7 +409,8 @@ public class CrudFrontend extends JFrame {
             return "";
         }
     }
+
     public Usuario getUser() {
-    	return user;
+        return user;
     }
 }

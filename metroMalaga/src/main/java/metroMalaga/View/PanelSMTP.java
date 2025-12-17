@@ -13,18 +13,19 @@ import metroMalaga.Controller.smtp.ButtonHoverHandle;
 import metroMalaga.Controller.smtp.FieldFocusHandle;
 import metroMalaga.Controller.smtp.HandleSMTP;
 
-public class PanelSMTP extends JFrame {
+public class PanelSMTP extends JPanel {
 
 	private final HandleSMTP backend;
 	private final Usuario loggedUser;
 
-	private PanelMenu panelMenu;
 	private JTextField txtTo, txtSubject;
 	private JTextArea txtBody, txtViewer;
 	private JTable emailTable;
 	private DefaultTableModel tableModel;
-	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail,btnReturn;
+	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail,
+			btnReturn;
 	private JLabel lblAttachedFile;
+	private ButtonHandleSMTP buttonHandler;
 
 	private final Color BG_MAIN = new Color(245, 247, 250);
 	private final Color BG_PANEL = Color.WHITE;
@@ -35,26 +36,20 @@ public class PanelSMTP extends JFrame {
 	private final Font F_HEADER = new Font("Segoe UI", Font.BOLD, 16);
 	private final Font F_TEXT = new Font("Segoe UI", Font.PLAIN, 14);
 
-	public PanelSMTP(Usuario usuario,PanelMenu panelMenu) {
+	public PanelSMTP(Usuario usuario) {
 		this.loggedUser = usuario;
-		this.panelMenu=panelMenu;
 		this.backend = new HandleSMTP();
 		backend.login(usuario.getEmailReal(), usuario.getPasswordApp());
 
-		setupFrame();
+		setupPanel();
 		initUI();
 		registerListeners();
 	}
 
-	private void setupFrame() {
-		setTitle("Email Manager - " + loggedUser.getUsernameApp());
-		setSize(1000, 800);
-		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		JPanel content = new JPanel(new BorderLayout(15, 15));
-		content.setBackground(BG_MAIN);
-		content.setBorder(new EmptyBorder(15, 15, 15, 15));
-		setContentPane(content);
+	private void setupPanel() {
+		setLayout(new BorderLayout(15, 15));
+		setBackground(BG_MAIN);
+		setBorder(new EmptyBorder(15, 15, 15, 15));
 	}
 
 	private void initUI() {
@@ -81,7 +76,6 @@ public class PanelSMTP extends JFrame {
 		btnSend = createButton("Send Email", false);
 		btnSend.setBorder(new LineBorder(C_ACCENT, 1, true));
 		btnSend.setForeground(C_ACCENT);
-		
 
 		lblAttachedFile = new JLabel("No files attached");
 		lblAttachedFile.setForeground(Color.GRAY);
@@ -127,7 +121,7 @@ public class PanelSMTP extends JFrame {
 		btnDownloadEmail = createButton("Download .eml", false);
 		btnDownloadEmail.setEnabled(false);
 		btnDelete = createButton("Delete Email", true);
-		btnReturn =createButton("Return",true);
+		btnReturn = createButton("Return", true);
 
 		pButtonsInbox.add(btnRefresh);
 		pButtonsInbox.add(btnToggleRead);
@@ -148,7 +142,7 @@ public class PanelSMTP extends JFrame {
 	}
 
 	private void registerListeners() {
-		new ButtonHandleSMTP(this, backend,panelMenu);
+		buttonHandler = new ButtonHandleSMTP(this, backend);
 
 		applyHover(btnAttach, BG_PANEL, TXT_DARK, false);
 		applyHover(btnRefresh, BG_PANEL, TXT_DARK, false);
@@ -317,5 +311,11 @@ public class PanelSMTP extends JFrame {
 	public void setBtnReturn(JButton btnReturn) {
 		this.btnReturn = btnReturn;
 	}
-	
+
+	public void setOnReturnCallback(Runnable callback) {
+		if (buttonHandler != null) {
+			buttonHandler.setOnReturnCallback(callback);
+		}
+	}
+
 }
