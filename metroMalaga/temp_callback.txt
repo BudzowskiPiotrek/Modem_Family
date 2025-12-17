@@ -1,0 +1,5 @@
+	public void setOnReturnCallback(Runnable callback) {
+		if (buttonHandler != null) {
+			buttonHandler.setOnReturnCallback(callback);
+		}
+	}

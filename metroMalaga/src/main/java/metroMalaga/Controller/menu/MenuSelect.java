@@ -1,12 +1,11 @@
 package metroMalaga.Controller.menu;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.apache.commons.net.ftp.FTPFile;
 
@@ -18,7 +17,6 @@ import metroMalaga.Controller.ftp.FTPbtnUp;
 import metroMalaga.Controller.ftp.FTPbtnUpFile;
 import metroMalaga.Controller.ftp.FTPdoubleClick;
 import metroMalaga.Controller.ftp.FTPlist;
-import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.CrudFrontend;
@@ -26,19 +24,28 @@ import metroMalaga.View.PanelFTP;
 import metroMalaga.View.PanelMenu;
 import metroMalaga.View.PanelSMTP;
 
-public class MenuSelect implements ActionListener {
-	private ArrayList<JButton> buttonsMenu;
+public class MenuSelect implements ChangeListener {
 	private final PanelMenu panelMenu;
-	private Usuario user;
+	private final JTabbedPane tabbedPane;
+	private final Usuario user;
 
-	public MenuSelect(PanelMenu panelMenu, ArrayList<JButton> buttonsMenu, Usuario user) {
-		this.buttonsMenu = buttonsMenu;
+	// Track previous tab to cleanup
+	private int previousTabIndex = -1;
+
+	// Current active panels (only one at a time)
+	private CrudFrontend crudPanel;
+	private PanelFTP ftpPanel;
+	private PanelSMTP smtpPanel;
+	private ServiceFTP ftpService;
+	private CrudController crudController;
+
+	public MenuSelect(PanelMenu panelMenu, JTabbedPane tabbedPane, Usuario user) {
 		this.panelMenu = panelMenu;
+		this.tabbedPane = tabbedPane;
 		this.user = user;
 
-		for (JButton button : buttonsMenu) {
-			button.addActionListener(this);
-		}
+		// Add change listener to handle tab switching
+		tabbedPane.addChangeListener(this);
 	}
 
 	public Usuario getUser() {
@@ -46,59 +53,112 @@ public class MenuSelect implements ActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		JButton button = (JButton) e.getSource();
-		String nameButton = button.getText();
+	public void stateChanged(ChangeEvent e) {
+		int selectedIndex = tabbedPane.getSelectedIndex();
 
-		switch (nameButton) {
-		case "CRUD":
-			CrudFrontend crudView = new CrudFrontend(user);
-			CrudController crudControl = new CrudController(crudView);
-			crudView.setVisible(true);
-			break;
-
-		case "FTP":
-			startFTP();
-			break;
-
-		case "SMTP":
-			PanelSMTP panelSmtp = new PanelSMTP(user,panelMenu);
-			panelSmtp.setVisible(true);
-			break;
-
-		case "Salir":
-			break;
+		// Cleanup previous tab if it's different
+		if (previousTabIndex != -1 && previousTabIndex != selectedIndex && previousTabIndex != 3) {
+			cleanupPanel(previousTabIndex);
 		}
-		panelMenu.disposeWindow();
+
+		// Load new panel
+		switch (selectedIndex) {
+			case 0: // CRUD
+				initializeCRUD();
+				break;
+
+			case 1: // FTP
+				initializeFTP();
+				break;
+
+			case 2: // SMTP
+				initializeSMTP();
+				break;
+
+			case 3: // Salir - already has content, no cleanup needed
+				break;
+		}
+
+		// Update previous tab index
+		previousTabIndex = selectedIndex;
 	}
 
-	private void startFTP() {
-		ServiceFTP service = new ServiceFTP(user.getRol().getPermiso());
-		FTPFile[] fileArray = service.listAllFiles();
-		List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
+	private void initializeCRUD() {
+		System.out.println("Inicializando panel CRUD...");
+		crudPanel = new CrudFrontend(user);
+		crudController = new CrudController(crudPanel, this);
+		tabbedPane.setComponentAt(0, crudPanel);
+	}
 
-		FTPTableModel ftpModel = new FTPTableModel(initialFiles, service);
+	private void initializeFTP() {
+		System.out.println("Inicializando panel FTP...");
+		ftpService = new ServiceFTP(user.getRol().getPermiso());
+		FTPFile[] fileArray = ftpService.listAllFiles();
+		List<FTPFile> initialFiles = Arrays.asList(fileArray);
 
-		PanelFTP panelFtp = new PanelFTP(user, service, initialFiles, ftpModel);
-		service.setTableModel(ftpModel);
+		FTPTableModel ftpModel = new FTPTableModel(initialFiles, ftpService);
 
-		new FTPlist(panelFtp.getSearchField(), ftpModel);
-		new FTPbtnUpFile(panelFtp.getUploadButton(), service, ftpModel, user);
-		new FTPbtnUp(panelFtp.getUpButton(), service, ftpModel);
-		new FTPdoubleClick(panelFtp.getFileTable(), service, ftpModel);
-		new FTPbtnReturn(panelFtp, panelFtp.getReturnButton(), user);
-		new FTPbtnNewFolder(panelFtp.getFolderButton(), service, ftpModel, user);
-		panelFtp.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		ftpPanel = new PanelFTP(user, ftpService, initialFiles, ftpModel);
+		ftpService.setTableModel(ftpModel);
 
-		panelFtp.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-			public void windowClosing(java.awt.event.WindowEvent e) {
-				System.out.println("Cerrando recursos FTP...");
-				service.disconnectNotifications();
-				service.close();
-				panelFtp.dispose();
-			}
-		});
+		new FTPlist(ftpPanel.getSearchField(), ftpModel);
+		new FTPbtnUpFile(ftpPanel.getUploadButton(), ftpService, ftpModel, user);
+		new FTPbtnUp(ftpPanel.getUpButton(), ftpService, ftpModel);
+		new FTPdoubleClick(ftpPanel.getFileTable(), ftpService, ftpModel);
+		new FTPbtnReturn(ftpPanel, ftpPanel.getReturnButton(), user, this);
+		new FTPbtnNewFolder(ftpPanel.getFolderButton(), ftpService, ftpModel, user);
 
+		tabbedPane.setComponentAt(1, ftpPanel);
+	}
+
+	private void initializeSMTP() {
+		System.out.println("Inicializando panel SMTP...");
+		smtpPanel = new PanelSMTP(user);
+		smtpPanel.setOnReturnCallback(() -> switchToTab(0));
+		tabbedPane.setComponentAt(2, smtpPanel);
+	}
+
+	/**
+	 * Cleanup panel resources when switching away
+	 */
+	private void cleanupPanel(int tabIndex) {
+		switch (tabIndex) {
+			case 0: // CRUD
+				if (crudPanel != null) {
+					System.out.println("Limpiando recursos CRUD...");
+					tabbedPane.setComponentAt(0, null);
+					crudController = null;
+					crudPanel = null;
+				}
+				break;
+
+			case 1: // FTP
+				if (ftpService != null) {
+					System.out.println("Cerrando recursos FTP...");
+					ftpService.disconnectNotifications();
+					ftpService.close();
+					tabbedPane.setComponentAt(1, null);
+					ftpService = null;
+					ftpPanel = null;
+				}
+				break;
+
+			case 2: // SMTP
+				if (smtpPanel != null) {
+					System.out.println("Limpiando recursos SMTP...");
+					tabbedPane.setComponentAt(2, null);
+					smtpPanel = null;
+				}
+				break;
+		}
+	}
+
+	/**
+	 * Switch to a specific tab by index
+	 */
+	public void switchToTab(int tabIndex) {
+		if (tabIndex >= 0 && tabIndex < tabbedPane.getTabCount()) {
+			tabbedPane.setSelectedIndex(tabIndex);
+		}
 	}
 }

@@ -25,7 +25,7 @@ import metroMalaga.Controller.ftp.FTPButtonsRenderer;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 
-public class PanelFTP extends JFrame {
+public class PanelFTP extends JPanel {
 	private Usuario user;
 	private FTPTableModel ftpModel;
 	private JTable fileTable;
@@ -43,7 +43,6 @@ public class PanelFTP extends JFrame {
 		this.user = user;
 		initializeComponents();
 		applyStyle();
-		setupFrameConfiguration();
 		setupLayout();
 	}
 
@@ -62,7 +61,7 @@ public class PanelFTP extends JFrame {
 
 	private void applyStyle() {
 		Font modernFont = new Font("Dialog", Font.PLAIN, 14);
-		this.getContentPane().setBackground(BACKGROUND_LIGHT);
+		setBackground(BACKGROUND_LIGHT);
 		searchField.setFont(modernFont);
 		searchField.setBorder(new EmptyBorder(5, 10, 5, 10));
 
@@ -101,16 +100,9 @@ public class PanelFTP extends JFrame {
 		button.setBorder(new EmptyBorder(8, 15, 8, 15));
 	}
 
-	private void setupFrameConfiguration() {
-		this.setTitle("FTP Manager - " + user.getUsernameApp().toUpperCase());
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		this.setLayout(new BorderLayout());
-		this.setSize(800, 600);
-		this.setLocationRelativeTo(null);
-		this.setResizable(false);
-	}
-
 	private void setupLayout() {
+		setLayout(new BorderLayout());
+
 		JPanel actionPanel = new JPanel();
 		actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 		actionPanel.add(this.uploadButton);
@@ -119,7 +111,7 @@ public class PanelFTP extends JFrame {
 		actionPanel.setBackground(HEADER_GRAY);
 		actionPanel.add(this.uploadButton);
 		actionPanel.add(this.upButton);
-		actionPanel.add(this.folderButton); 
+		actionPanel.add(this.folderButton);
 		actionPanel.add(this.returnButton);
 
 		JPanel filterPanel = new JPanel();
@@ -134,13 +126,11 @@ public class PanelFTP extends JFrame {
 		topPanel.add(actionPanel, BorderLayout.WEST);
 		topPanel.add(filterPanel, BorderLayout.EAST);
 
-		this.add(topPanel, BorderLayout.SOUTH);
+		add(topPanel, BorderLayout.SOUTH);
 
 		JScrollPane scrollPane = new JScrollPane(fileTable);
 		scrollPane.setBorder(null);
-		this.add(scrollPane, BorderLayout.CENTER);
-
-		this.setVisible(true);
+		add(scrollPane, BorderLayout.CENTER);
 	}
 
 	public JButton getFolderButton() {
