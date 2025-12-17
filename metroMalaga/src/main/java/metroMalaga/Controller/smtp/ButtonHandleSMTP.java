@@ -13,21 +13,24 @@ import javax.swing.table.DefaultTableModel;
 
 import metroMalaga.Controller.smtp.tasks.*;
 import metroMalaga.Model.EmailModel;
+
 import metroMalaga.Model.Language;
 import metroMalaga.View.PanelMenu;
+
 import metroMalaga.View.PanelSMTP;
 
 public class ButtonHandleSMTP implements ActionListener {
 
 	private final PanelSMTP view;
 	private final HandleSMTP backend;
-	private final PanelMenu panelMenu;
+	private Runnable onReturnCallback;
 
 	private final JTextField txtTo;
 	private final JTextField txtSubject;
 	private final JTextArea txtBody;
 	private final JLabel lblAttachedFile;
 	private final JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnToggleRead, btnDownloadEmail, btnDelete, btnReturn, btnLanguage;
+
 	private final JTable emailTable;
 	private final DefaultTableModel tableModel;
 	private final JTextArea txtViewer;
@@ -35,9 +38,8 @@ public class ButtonHandleSMTP implements ActionListener {
 	private List<EmailModel> currentEmailList;
 	private List<File> attachmentsList;
 
-	public ButtonHandleSMTP(PanelSMTP view, HandleSMTP backend, PanelMenu panelMenu) {
+	public ButtonHandleSMTP(PanelSMTP view, HandleSMTP backend) {
 		this.view = view;
-		this.panelMenu = panelMenu;
 		this.backend = backend;
 
 		this.txtTo = view.getTxtTo();
@@ -76,14 +78,14 @@ public class ButtonHandleSMTP implements ActionListener {
 		btnLanguage.addActionListener(this);
 		if (btnReturn != null) btnReturn.addActionListener(this);
 		
+
 		MouseClickListener mouseListener = new MouseClickListener(
-				backend, 
-				this, 
-				emailTable, 
-				tableModel, 
-				txtViewer, 
-				btnDownloadEmail
-		);
+				backend,
+				this,
+				emailTable,
+				tableModel,
+				txtViewer,
+				btnDownloadEmail);
 		emailTable.addMouseListener(mouseListener);
 	}
 

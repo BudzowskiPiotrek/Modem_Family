@@ -14,10 +14,11 @@ import metroMalaga.Controller.smtp.FieldFocusHandle;
 import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.Language;
 
-public class PanelSMTP extends JFrame {
+public class PanelSMTP extends JPanel {
 
     private final HandleSMTP backend;
     private final Usuario loggedUser;
+
 
     private PanelMenu panelMenu;
     private JTextField txtTo, txtSubject;
@@ -29,6 +30,7 @@ public class PanelSMTP extends JFrame {
     private JLabel lblAttachedFile, lblTo, lblSubject;
     private JPanel pCompose, pInbox;
 
+
     private final Color BG_MAIN = new Color(245, 247, 250);
     private final Color BG_PANEL = Color.WHITE;
     private final Color TXT_DARK = new Color(50, 50, 50);
@@ -37,6 +39,7 @@ public class PanelSMTP extends JFrame {
     private final Color C_DANGER = new Color(220, 53, 69);
     private final Font F_HEADER = new Font("Segoe UI", Font.BOLD, 16);
     private final Font F_TEXT = new Font("Segoe UI", Font.PLAIN, 14);
+
 
     public PanelSMTP(Usuario usuario, PanelMenu panelMenu) {
         this.loggedUser = usuario;
@@ -60,6 +63,7 @@ public class PanelSMTP extends JFrame {
         content.setBorder(new EmptyBorder(15, 15, 15, 15));
         setContentPane(content);
     }
+
 
     private void createLanguageButton() {
         String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
@@ -217,6 +221,8 @@ public class PanelSMTP extends JFrame {
         pButtonsInbox.add(btnDownloadEmail);
         pButtonsInbox.add(btnDelete);
         pButtonsInbox.add(btnReturn);
+	private void registerListeners() {
+		buttonHandler = new ButtonHandleSMTP(this, backend);
 
         pInbox.add(split, BorderLayout.CENTER);
         pInbox.add(pButtonsInbox, BorderLayout.SOUTH);
@@ -405,4 +411,14 @@ public class PanelSMTP extends JFrame {
     public JButton getBtnLanguage() {
         return btnLanguage;
     }
+	public void setBtnReturn(JButton btnReturn) {
+		this.btnReturn = btnReturn;
+	}
+
+	public void setOnReturnCallback(Runnable callback) {
+		if (buttonHandler != null) {
+			buttonHandler.setOnReturnCallback(callback);
+		}
+	}
+
 }

@@ -31,14 +31,14 @@ import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
 
-public class PanelFTP extends JFrame {
-    private Usuario user;
-    private FTPTableModel ftpModel;
-    private JTable fileTable;
-    private JTextField searchField;
-    private JButton uploadButton, upButton, returnButton, folderButton, btnLanguage;
-    private JLabel lblFilter;
-    private ServiceFTP service;
+
+public class PanelFTP extends JPanel {
+	private Usuario user;
+	private FTPTableModel ftpModel;
+	private JTable fileTable;
+	private JTextField searchField;
+	private JButton uploadButton, upButton, returnButton, folderButton;
+	private ServiceFTP service;
 
     private static final Color ACCENT_RED = new Color(220, 53, 69);
     private static final Color ACCENT_BLUE = new Color(70, 130, 180);
@@ -114,33 +114,6 @@ public class PanelFTP extends JFrame {
         searchField.setFont(modernFont);
         searchField.setBorder(new EmptyBorder(5, 10, 5, 10));
 
-        fileTable.setBackground(BACKGROUND_LIGHT);
-        fileTable.setFont(modernFont);
-        fileTable.setGridColor(HEADER_GRAY);
-        fileTable.setSelectionBackground(new Color(230, 245, 255));
-
-        JTableHeader header = fileTable.getTableHeader();
-        header.setFont(modernFont.deriveFont(Font.BOLD, 14));
-        header.setBackground(HEADER_GRAY);
-        header.setForeground(Color.BLACK);
-        header.setBorder(null);
-
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < fileTable.getColumnCount() - 1; i++) {
-            fileTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
-
-        styleButton(uploadButton, ACCENT_RED, Color.WHITE);
-        styleButton(upButton, Color.GRAY, Color.WHITE);
-        styleButton(returnButton, ACCENT_RED, Color.WHITE);
-        styleButton(folderButton, new Color(40, 167, 69), Color.WHITE);
-
-        folderButton.setFont(modernFont);
-        uploadButton.setFont(modernFont);
-        upButton.setFont(modernFont);
-        returnButton.setFont(modernFont);
-    }
 
     private void styleButton(JButton button, Color background, Color foreground) {
         button.setBackground(background);
@@ -158,6 +131,7 @@ public class PanelFTP extends JFrame {
         this.setLocationRelativeTo(null);
         this.setResizable(false);
     }
+
 
     private void setupLayout() {
         JPanel actionPanel = new JPanel();

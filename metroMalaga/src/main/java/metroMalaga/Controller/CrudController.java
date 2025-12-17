@@ -1,8 +1,10 @@
 package metroMalaga.Controller;
 
 import metroMalaga.View.CrudFrontend;
+
 import metroMalaga.View.PanelMenu;
 import metroMalaga.Model.Language;
+
 
 import javax.swing.*;
 import java.sql.*;
@@ -17,13 +19,15 @@ public class CrudController {
 
     private CrudFrontend vista;
     private Connection conn;
+    private MenuSelect menuSelect;
 
     private String tablaActual;
     private List<String> nombresColumnas;
     private String idRegistroEdicion = null;
 
-    public CrudController(CrudFrontend vista) {
+    public CrudController(CrudFrontend vista, MenuSelect menuSelect) {
         this.vista = vista;
+        this.menuSelect = menuSelect;
         this.nombresColumnas = new ArrayList<>();
 
         conectarBD();
@@ -81,9 +85,12 @@ public class CrudController {
         });
 
         vista.getBtnVolver().addActionListener(e -> {
-            new PanelMenu(vista.getUser()).setVisible(true);
-            vista.dispose();
+            // Switch back to first tab (or could be a specific tab)
+            if (menuSelect != null) {
+                menuSelect.switchToTab(0);
+            }
         });
+    }
 
         vista.getBtnLanguage().addActionListener(e -> toggleLanguage());
     }
