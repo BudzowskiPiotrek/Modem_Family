@@ -18,11 +18,12 @@ public class PanelSMTP extends JFrame {
 	private final HandleSMTP backend;
 	private final Usuario loggedUser;
 
+	private PanelMenu panelMenu;
 	private JTextField txtTo, txtSubject;
 	private JTextArea txtBody, txtViewer;
 	private JTable emailTable;
 	private DefaultTableModel tableModel;
-	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail;
+	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail,btnReturn;
 	private JLabel lblAttachedFile;
 
 	private final Color BG_MAIN = new Color(245, 247, 250);
@@ -34,8 +35,9 @@ public class PanelSMTP extends JFrame {
 	private final Font F_HEADER = new Font("Segoe UI", Font.BOLD, 16);
 	private final Font F_TEXT = new Font("Segoe UI", Font.PLAIN, 14);
 
-	public PanelSMTP(Usuario usuario) {
+	public PanelSMTP(Usuario usuario,PanelMenu panelMenu) {
 		this.loggedUser = usuario;
+		this.panelMenu=panelMenu;
 		this.backend = new HandleSMTP();
 		backend.login(usuario.getEmailReal(), usuario.getPasswordApp());
 
@@ -79,6 +81,7 @@ public class PanelSMTP extends JFrame {
 		btnSend = createButton("Send Email", false);
 		btnSend.setBorder(new LineBorder(C_ACCENT, 1, true));
 		btnSend.setForeground(C_ACCENT);
+		
 
 		lblAttachedFile = new JLabel("No files attached");
 		lblAttachedFile.setForeground(Color.GRAY);
@@ -124,11 +127,13 @@ public class PanelSMTP extends JFrame {
 		btnDownloadEmail = createButton("Download .eml", false);
 		btnDownloadEmail.setEnabled(false);
 		btnDelete = createButton("Delete Email", true);
+		btnReturn =createButton("Return",true);
 
 		pButtonsInbox.add(btnRefresh);
 		pButtonsInbox.add(btnToggleRead);
 		pButtonsInbox.add(btnDownloadEmail);
 		pButtonsInbox.add(btnDelete);
+		pButtonsInbox.add(btnReturn);
 
 		pInbox.add(split, BorderLayout.CENTER);
 		pInbox.add(pButtonsInbox, BorderLayout.SOUTH);
@@ -143,7 +148,7 @@ public class PanelSMTP extends JFrame {
 	}
 
 	private void registerListeners() {
-		new ButtonHandleSMTP(this, backend);
+		new ButtonHandleSMTP(this, backend,panelMenu);
 
 		applyHover(btnAttach, BG_PANEL, TXT_DARK, false);
 		applyHover(btnRefresh, BG_PANEL, TXT_DARK, false);
@@ -152,6 +157,7 @@ public class PanelSMTP extends JFrame {
 		applyHover(btnSend, BG_PANEL, C_ACCENT, false);
 		applyHover(btnClearAttach, C_DANGER, Color.WHITE, true);
 		applyHover(btnDelete, C_DANGER, Color.WHITE, true);
+		applyHover(btnReturn, C_DANGER, Color.WHITE, true);
 	}
 
 	private void addGBC(JPanel p, Component c, int x, int y, double weight) {
@@ -303,4 +309,13 @@ public class PanelSMTP extends JFrame {
 	public JLabel getLblAttachedFile() {
 		return lblAttachedFile;
 	}
+
+	public JButton getBtnReturn() {
+		return btnReturn;
+	}
+
+	public void setBtnReturn(JButton btnReturn) {
+		this.btnReturn = btnReturn;
+	}
+	
 }

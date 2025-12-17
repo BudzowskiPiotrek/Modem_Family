@@ -3,8 +3,6 @@ package metroMalaga.Controller.smtp;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,18 +13,20 @@ import javax.swing.table.DefaultTableModel;
 
 import metroMalaga.Controller.smtp.tasks.*;
 import metroMalaga.Model.EmailModel;
+import metroMalaga.View.PanelMenu;
 import metroMalaga.View.PanelSMTP;
 
-public class ButtonHandleSMTP extends MouseAdapter implements ActionListener {
+public class ButtonHandleSMTP implements ActionListener {
 
 	private final PanelSMTP view;
 	private final HandleSMTP backend;
+	private final PanelMenu panelMenu;
 
 	private final JTextField txtTo;
 	private final JTextField txtSubject;
 	private final JTextArea txtBody;
 	private final JLabel lblAttachedFile;
-	private final JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnToggleRead, btnDownloadEmail, btnDelete;
+	private final JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnToggleRead, btnDownloadEmail, btnDelete, btnReturn;
 	private final JTable emailTable;
 	private final DefaultTableModel tableModel;
 	private final JTextArea txtViewer;
@@ -34,8 +34,9 @@ public class ButtonHandleSMTP extends MouseAdapter implements ActionListener {
 	private List<EmailModel> currentEmailList;
 	private List<File> attachmentsList;
 
-	public ButtonHandleSMTP(PanelSMTP view, HandleSMTP backend) {
+	public ButtonHandleSMTP(PanelSMTP view, HandleSMTP backend,PanelMenu panelMenu) {
 		this.view = view;
+		this.panelMenu=panelMenu;
 		this.backend = backend;
 
 		this.txtTo = view.getTxtTo();
@@ -49,6 +50,7 @@ public class ButtonHandleSMTP extends MouseAdapter implements ActionListener {
 		this.btnToggleRead = view.getBtnToggleRead();
 		this.btnDownloadEmail = view.getBtnDownloadEmail();
 		this.btnDelete = view.getBtnDelete();
+		this.btnReturn = view.getBtnReturn();
 		this.emailTable = view.getEmailTable();
 		this.tableModel = view.getTableModel();
 		this.txtViewer = view.getTxtViewer();
@@ -69,8 +71,17 @@ public class ButtonHandleSMTP extends MouseAdapter implements ActionListener {
 		btnToggleRead.addActionListener(this);
 		btnDownloadEmail.addActionListener(this);
 		btnDelete.addActionListener(this);
+		if (btnReturn != null) btnReturn.addActionListener(this);
 		
-		emailTable.addMouseListener(this);
+		MouseClickListener mouseListener = new MouseClickListener(
+				backend, 
+				this, 
+				emailTable, 
+				tableModel, 
+				txtViewer, 
+				btnDownloadEmail
+		);
+		emailTable.addMouseListener(mouseListener);
 	}
 
 	@Override
@@ -91,25 +102,9 @@ public class ButtonHandleSMTP extends MouseAdapter implements ActionListener {
 			downloadFullEmail();
 		} else if (source == btnDelete) {
 			deleteEmail();
-		}
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if (e.getSource() == emailTable) {
-			int row = emailTable.getSelectedRow();
-			if (row >= 0 && row < currentEmailList.size()) {
-				EmailModel mail = currentEmailList.get(row);
-
-				if ("[Click to load content...]".equals(mail.getContent())) {
-					txtViewer.setText("Downloading message content...\nPlease wait.");
-					LoadContentTask task = new LoadContentTask(backend, mail, txtViewer, btnDownloadEmail, tableModel,
-							row);
-					new Thread(task).start();
-				} else {
-					displayContent(mail);
-				}
-			}
+		} else if (source == btnReturn) {
+			view.setVisible(false);
+			panelMenu.setVisible(true);
 		}
 	}
 
