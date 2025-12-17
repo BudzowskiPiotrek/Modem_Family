@@ -23,12 +23,21 @@ public class ServiceFTP {
 	private FTPClient ftpClient;
 	private ConnecionFTP conFTP;
 	private String user;
-	
+
 	// ????
 	private NotificationController notificationController;
 	private boolean notificationsInitialized = false;
 	private String ftpServerHost;
 	private static final String NOTIFICATION_SERVER_HOST = "127.0.0.1";
+
+	public boolean makeDirectory(String path) {
+		try {
+			return ftpClient.makeDirectory(path);
+		} catch (IOException e) {
+			showError("Error creating directory: " + path, e);
+			return false;
+		}
+	}
 
 	public ServiceFTP(String user) {
 		this.user = user;
@@ -42,9 +51,11 @@ public class ServiceFTP {
 		}
 		try {
 			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+			this.ftpServerHost = conFTP.getServerHost();
 		} catch (IOException e) {
 			showError("Error configuring FTP connection", e);
 		}
+		initializeNotificationSystem();
 	}
 
 	public FTPFile[] listAllFiles() {

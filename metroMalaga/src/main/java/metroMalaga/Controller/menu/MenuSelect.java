@@ -13,6 +13,12 @@ import org.apache.commons.net.ftp.FTPFile;
 import metroMalaga.Controller.CrudController;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Controller.ftp.FTPRefreshThread;
+import metroMalaga.Controller.ftp.FTPbtnNewFolder;
+import metroMalaga.Controller.ftp.FTPbtnReturn;
+import metroMalaga.Controller.ftp.FTPbtnUp;
+import metroMalaga.Controller.ftp.FTPbtnUpFile;
+import metroMalaga.Controller.ftp.FTPdoubleClick;
+import metroMalaga.Controller.ftp.FTPlist;
 import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
@@ -53,12 +59,7 @@ public class MenuSelect implements ActionListener {
 			break;
 
 		case "FTP":
-			ServiceFTP service = new ServiceFTP(user.getRol().getPermiso());
-			FTPFile[] fileArray = service.listAllFiles();
-			List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
-
-			FTPTableModel ftpModel = new FTPTableModel(initialFiles, service);
-			PanelFTP panelFtp = new PanelFTP(user, service, initialFiles, ftpModel);
+			startFTP();
 			/*
 			 * FTPRefreshThread refreshThread = new FTPRefreshThread(service, ftpModel);
 			 * refreshThread.start();
@@ -71,7 +72,7 @@ public class MenuSelect implements ActionListener {
 			 * if (refreshThread != null) { refreshThread.stopRunning(); }
 			 * panelFtp.dispose(); } });
 			 */
-			panelFtp.setVisible(true);
+			
 			break;
 
 		case "SMTP":
@@ -84,5 +85,24 @@ public class MenuSelect implements ActionListener {
 			break;
 		}
 		panelMenu.disposeWindow();
+	}
+
+	private void startFTP() {
+		
+		ServiceFTP service = new ServiceFTP(user.getRol().getPermiso());
+		FTPFile[] fileArray = service.listAllFiles();
+		List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
+		FTPTableModel ftpModel = new FTPTableModel(initialFiles, service);
+		
+		PanelFTP panelFtp = new PanelFTP(user, service, initialFiles, ftpModel);
+		
+		
+		FTPlist listener = new FTPlist(panelFtp.getSearchField(), ftpModel);
+		FTPbtnUpFile listenerFile = new FTPbtnUpFile(panelFtp.getUploadButton(), service, ftpModel, user);
+		FTPbtnUp listenerUp = new FTPbtnUp(panelFtp.getUpButton(), service, ftpModel);
+		FTPdoubleClick listenerClick = new FTPdoubleClick(panelFtp.getFileTable(), service, ftpModel);
+		FTPbtnReturn listenerReturMenu = new FTPbtnReturn(panelFtp, panelFtp.getReturnButton(), user);
+		FTPbtnNewFolder a = new FTPbtnNewFolder(panelFtp.getFolderButton(), service, ftpModel, user);
+		panelFtp.setVisible(true);
 	}
 }
