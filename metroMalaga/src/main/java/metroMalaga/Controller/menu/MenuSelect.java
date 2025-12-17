@@ -62,8 +62,7 @@ public class MenuSelect implements ActionListener {
 			break;
 
 		case "SMTP":
-			HandleSMTP handleSmtp = new HandleSMTP();
-			PanelSMTP panelSmtp = new PanelSMTP(user, handleSmtp);
+			PanelSMTP panelSmtp = new PanelSMTP(user,panelMenu);
 			panelSmtp.setVisible(true);
 			break;
 
