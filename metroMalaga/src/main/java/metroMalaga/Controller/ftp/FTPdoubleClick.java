@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.ftp;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
 
 public class FTPdoubleClick extends MouseAdapter {

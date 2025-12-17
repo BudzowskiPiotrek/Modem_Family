@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.ftp;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -15,7 +15,10 @@ import javax.swing.table.TableCellEditor;
 
 import org.apache.commons.net.ftp.FTPFile;
 
+import metroMalaga.Controller.Common;
+import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
+import metroMalaga.Model.Usuario;
 
 public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
 
@@ -23,8 +26,12 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 	private FTPFile currentFile;
 	private final ServiceFTP service;
 	private final FTPTableModel model;
+	private Common cn;
+	private Usuario user;
 
-	public FTPButtonsEditor(ServiceFTP service, FTPTableModel model) {
+	public FTPButtonsEditor(ServiceFTP service, FTPTableModel model, Usuario user) {
+		this.cn = new Common();
+		this.user = user;
 		this.service = service;
 		this.model = model;
 		this.panel = new FTPButtonsPanel();
@@ -95,6 +102,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 
 				if (success) {
 					JOptionPane.showMessageDialog(null, "File successfully downloaded to:\n" + localFilePath);
+					cn.registerLog(user.getUsernameApp(), "File downloaded:" + localFilePath);
 				} else {
 					JOptionPane.showMessageDialog(null, "Error: The folder cannot be downloaded", "DownloadError",
 							JOptionPane.ERROR_MESSAGE);
@@ -118,6 +126,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				if (success) {
 					JOptionPane.showMessageDialog(null, "File successfully deleted.");
 					updateTable();
+					cn.registerLog(user.getUsernameApp(), "File delete:" + file.getName());
 				} else {
 					JOptionPane.showMessageDialog(null, "You can't delete the folder", "Error de Borrado",
 							JOptionPane.ERROR_MESSAGE);
@@ -138,6 +147,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				if (success) {
 					JOptionPane.showMessageDialog(null, "File renamed successfully.");
 					updateTable();
+					cn.registerLog(user.getUsernameApp(),"File renamed :" + file.getName() + " for: " + newName.trim());
 				} else {
 					JOptionPane.showMessageDialog(null, "Fallo al renombrar el archivo.", "Error de Renombrado",
 							JOptionPane.ERROR_MESSAGE);

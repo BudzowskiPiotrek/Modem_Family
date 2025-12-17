@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 
-import metroMalaga.Controller.MenuMouseListener;
-import metroMalaga.Controller.MenuSelect;
+import metroMalaga.Controller.menu.MenuMouseListener;
+import metroMalaga.Controller.menu.MenuSelect;
 import metroMalaga.Model.Usuario;
 
 // Importamos la clase Usuario ya que el Login nos la pasa

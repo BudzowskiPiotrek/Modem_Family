@@ -1,4 +1,4 @@
-package metroMalaga.Controller;
+package metroMalaga.Controller.ftp;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
