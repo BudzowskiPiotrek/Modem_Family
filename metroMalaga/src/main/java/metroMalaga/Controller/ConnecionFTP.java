@@ -21,10 +21,25 @@ public class ConnecionFTP {
 	public FTPClient getConnection() {
 		FTPClient ftpClient = new FTPClient();
 		try {
+			// Configure timeouts before connecting (these methods only accept int
+			// milliseconds)
+			ftpClient.setDefaultTimeout(60000); // 60 seconds for connection timeout
+			ftpClient.setConnectTimeout(60000); // 60 seconds for socket connection
+
+			// Set keep-alive to prevent connection from closing during idle time
+			ftpClient.setControlKeepAliveTimeout(java.time.Duration.ofMinutes(5)); // Send NOOP every 5 minutes
+
 			ftpClient.connect(SERVER, PORT);
 			boolean login = ftpClient.login(user, PASS);
 			if (login) {
 				ftpClient.enterLocalPassiveMode();
+
+				// Set data timeout and keep-alive reply timeout after connection is established
+				ftpClient.setDataTimeout(java.time.Duration.ofSeconds(60)); // 60 seconds for data transfer
+				ftpClient.setControlKeepAliveReplyTimeout(java.time.Duration.ofSeconds(60)); // 60 seconds timeout for
+																								// keep-alive responses
+
+				System.out.println("FTP connection established with keep-alive enabled (NOOP every 5 minutes)");
 				return ftpClient;
 			} else {
 				closeConnection(ftpClient);
