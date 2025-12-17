@@ -11,17 +11,11 @@ public class ConnecionFTP {
 	private static final String PASS = "proyecto";
 
 	public ConnecionFTP(String tipo) {
-		if (tipo.equalsIgnoreCase("readwrite")) {
+		if (tipo.equalsIgnoreCase("ESCRITURA")) {
 			this.user = "proyecto";
-		} else if (tipo.equalsIgnoreCase("write")) {
-			this.user = "write";
-		} else if (tipo.equalsIgnoreCase("read")) {
+		} else if (tipo.equalsIgnoreCase("LECTURA")) {
 			this.user = "read";
 		}
-	}
-
-	public String getServerHost() {
-		return SERVER;
 	}
 
 	public FTPClient getConnection() {
@@ -37,8 +31,7 @@ public class ConnecionFTP {
 				JOptionPane.showMessageDialog(null,
 						"Login Failed for user: " + user
 								+ ". Check password in ConnecionFTP.java and user privileges on FileZilla Server.",
-						"Authentication Error",
-						JOptionPane.ERROR_MESSAGE);
+						"Authentication Error", JOptionPane.ERROR_MESSAGE);
 
 			}
 		} catch (IOException e) {
@@ -59,5 +52,9 @@ public class ConnecionFTP {
 				JOptionPane.showMessageDialog(null, errorMessage, "Error FTP", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+	}
+
+	public String getServerHost() {
+		return SERVER;
 	}
 }
