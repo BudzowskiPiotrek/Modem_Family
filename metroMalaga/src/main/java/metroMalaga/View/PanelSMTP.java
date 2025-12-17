@@ -36,6 +36,8 @@ public class PanelSMTP extends JFrame {
 	private final Font F_HEADER = new Font("Segoe UI", Font.BOLD, 16);
 	private final Font F_TEXT = new Font("Segoe UI", Font.PLAIN, 14);
 
+	
+
 	public PanelSMTP(Usuario usuario, HandleSMTP handleSmtp) {
 		this.loggedUser = usuario;
 		this.backend = handleSmtp;
@@ -145,18 +147,24 @@ public class PanelSMTP extends JFrame {
 	}
 
 	private void registerListeners() {
-	    new ButtonHandleSMTP(this, backend, txtTo, txtSubject, txtBody, 
-	                        lblAttachedFile, emailTable, tableModel, txtViewer);
+		ButtonHandleSMTP logic = new ButtonHandleSMTP(this, backend, txtTo, txtSubject, txtBody, lblAttachedFile,
+				btnSend, btnAttach, btnClearAttach, btnRefresh, btnToggleRead, btnDownloadEmail, btnDelete, emailTable,
+				tableModel, txtViewer);
 
-	    applyHover(btnAttach, BG_PANEL, TXT_DARK, false);
-	    applyHover(btnRefresh, BG_PANEL, TXT_DARK, false);
-	    applyHover(btnToggleRead, BG_PANEL, TXT_DARK, false);
-	    applyHover(btnDownloadEmail, BG_PANEL, TXT_DARK, false);
-	    applyHover(btnSend, BG_PANEL, C_ACCENT, false);
-	    applyHover(btnClearAttach, C_DANGER, Color.WHITE, true);
-	    applyHover(btnDelete, C_DANGER, Color.WHITE, true);
+		for (JButton btn : Arrays.asList(btnAttach, btnClearAttach, btnSend, btnRefresh, btnToggleRead,
+				btnDownloadEmail, btnDelete)) {
+			btn.addActionListener(logic);
+		}
+		emailTable.addMouseListener(logic);
+
+		applyHover(btnAttach, BG_PANEL, TXT_DARK, false);
+		applyHover(btnRefresh, BG_PANEL, TXT_DARK, false);
+		applyHover(btnToggleRead, BG_PANEL, TXT_DARK, false);
+		applyHover(btnDownloadEmail, BG_PANEL, TXT_DARK, false);
+		applyHover(btnSend, BG_PANEL, C_ACCENT, false);
+		applyHover(btnClearAttach, C_DANGER, Color.WHITE, true);
+		applyHover(btnDelete, C_DANGER, Color.WHITE, true);
 	}
-
 
 
 	private void addGBC(JPanel p, Component c, int x, int y, double weight) {
@@ -255,38 +263,4 @@ public class PanelSMTP extends JFrame {
 		btn.setBorder(new CompoundBorder(b, new EmptyBorder(5, 10, 5, 10)));
 		btn.addMouseListener(new ButtonHoverHandle(btn, bg, fg, hoverBg, fg, b, b));
 	}
-	
-	// Getters para los botones
-	public JButton getBtnAttach() {
-	    return btnAttach;
-	}
-
-	public JButton getBtnClearAttach() {
-	    return btnClearAttach;
-	}
-
-	public JButton getBtnSend() {
-	    return btnSend;
-	}
-
-	public JButton getBtnRefresh() {
-	    return btnRefresh;
-	}
-
-	public JButton getBtnToggleRead() {
-	    return btnToggleRead;
-	}
-
-	public JButton getBtnDownloadEmail() {
-	    return btnDownloadEmail;
-	}
-
-	public JButton getBtnDelete() {
-	    return btnDelete;
-	}
-
-	public JTable getEmailTable() {
-	    return emailTable;
-	}
-
 }

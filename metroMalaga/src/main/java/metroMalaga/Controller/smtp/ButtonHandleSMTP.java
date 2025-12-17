@@ -1,8 +1,11 @@
 package metroMalaga.Controller.smtp;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,17 +16,24 @@ import javax.swing.table.DefaultTableModel;
 
 import metroMalaga.Controller.smtp.tasks.*;
 import metroMalaga.Model.EmailModel;
-import metroMalaga.View.PanelSMTP;
 
-public class ButtonHandleSMTP implements ActionListener {
+public class ButtonHandleSMTP extends MouseAdapter implements ActionListener {
 
-	private final PanelSMTP parentView;
+	private final Component parentView;
 	private final HandleSMTP backend;
 
 	private final JTextField txtTo;
 	private final JTextField txtSubject;
 	private final JTextArea txtBody;
 	private final JLabel lblAttachedFile;
+
+	private final JButton btnSend;
+	private final JButton btnAttach;
+	private final JButton btnClearAttach;
+	private final JButton btnRefresh;
+	private final JButton btnToggleRead;
+	private final JButton btnDownloadEmail;
+	private final JButton btnDelete;
 
 	private final JTable emailTable;
 	private final DefaultTableModel tableModel;
@@ -32,55 +42,70 @@ public class ButtonHandleSMTP implements ActionListener {
 	private List<EmailModel> currentEmailList;
 	private List<File> attachmentsList;
 
-	public ButtonHandleSMTP(PanelSMTP parentView, HandleSMTP backend, JTextField txtTo, JTextField txtSubject,
-			JTextArea txtBody, JLabel lblAttachedFile, JTable emailTable, DefaultTableModel tableModel,
-			JTextArea txtViewer) {
+	public ButtonHandleSMTP(Component parentView, HandleSMTP backend, JTextField txtTo, JTextField txtSubject,
+			JTextArea txtBody, JLabel lblAttachedFile, JButton btnSend, JButton btnAttach, JButton btnClearAttach,
+			JButton btnRefresh, JButton btnToggleRead, JButton btnDownloadEmail, JButton btnDelete, JTable emailTable,
+			DefaultTableModel tableModel, JTextArea txtViewer) {
 		this.parentView = parentView;
 		this.backend = backend;
 		this.txtTo = txtTo;
 		this.txtSubject = txtSubject;
 		this.txtBody = txtBody;
 		this.lblAttachedFile = lblAttachedFile;
+		this.btnSend = btnSend;
+		this.btnAttach = btnAttach;
+		this.btnClearAttach = btnClearAttach;
+		this.btnRefresh = btnRefresh;
+		this.btnToggleRead = btnToggleRead;
+		this.btnDownloadEmail = btnDownloadEmail;
+		this.btnDelete = btnDelete;
 		this.emailTable = emailTable;
 		this.tableModel = tableModel;
 		this.txtViewer = txtViewer;
 
 		this.currentEmailList = new ArrayList<>();
 		this.attachmentsList = new ArrayList<>();
-
-		registerListeners();
-	}
-
-	private void registerListeners() {
-		for (JButton btn : Arrays.asList(parentView.getBtnAttach(), parentView.getBtnClearAttach(),
-				parentView.getBtnSend(), parentView.getBtnRefresh(), parentView.getBtnToggleRead(),
-				parentView.getBtnDownloadEmail(), parentView.getBtnDelete())) {
-			btn.addActionListener(this);
-		}
-
-		MouseClickEmail mouseListener = new MouseClickEmail(parentView.getEmailTable(), txtViewer,
-				parentView.getBtnDownloadEmail(), currentEmailList);
-		parentView.getEmailTable().addMouseListener(mouseListener);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 
-		if (source == parentView.getBtnAttach()) {
+		if (source == btnAttach) {
 			attachFiles();
-		} else if (source == parentView.getBtnClearAttach()) {
+		} else if (source == btnClearAttach) {
 			clearAttachments();
-		} else if (source == parentView.getBtnSend()) {
+		} else if (source == btnSend) {
 			sendEmail();
-		} else if (source == parentView.getBtnRefresh()) {
+		} else if (source == btnRefresh) {
 			refreshInbox();
-		} else if (source == parentView.getBtnToggleRead()) {
+		} else if (source == btnToggleRead) {
 			toggleReadStatus();
-		} else if (source == parentView.getBtnDownloadEmail()) {
+		} else if (source == btnDownloadEmail) {
 			downloadFullEmail();
-		} else if (source == parentView.getBtnDelete()) {
+		} else if (source == btnDelete) {
 			deleteEmail();
+		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if (e.getSource() == emailTable) {
+			int row = emailTable.getSelectedRow();
+			if (row >= 0 && row < currentEmailList.size()) {
+				EmailModel mail = currentEmailList.get(row);
+
+				String attachmentsInfo = "";
+				if (mail.hasAttachments()) {
+					attachmentsInfo = "\n\n=== ATTACHED OBJECTS ===\n";
+					for (String n : mail.getAttachmentNames())
+						attachmentsInfo += "> " + n + "\n";
+				}
+
+				btnDownloadEmail.setEnabled(true);
+				txtViewer.setText("SOURCE: " + mail.getSender() + "\nTOPIC: " + mail.getSubject()
+						+ "\n--------------------------------\n" + mail.getContent() + attachmentsInfo);
+			}
 		}
 	}
 
@@ -128,13 +153,12 @@ public class ButtonHandleSMTP implements ActionListener {
 		}
 
 		EmailSenderTask task = new EmailSenderTask(backend, recipient, subject, body, attachmentsList, parentView,
-				parentView.getBtnSend(), txtTo, txtSubject, txtBody, lblAttachedFile, attachmentsList);
+				btnSend, txtTo, txtSubject, txtBody, lblAttachedFile, attachmentsList);
 		new Thread(task).start();
 	}
 
 	private void refreshInbox() {
-		RefreshInboxTask task = new RefreshInboxTask(backend, parentView.getBtnRefresh(), tableModel, txtViewer,
-				currentEmailList);
+		RefreshInboxTask task = new RefreshInboxTask(backend, btnRefresh, tableModel, txtViewer, currentEmailList);
 		new Thread(task).start();
 	}
 
@@ -189,4 +213,5 @@ public class ButtonHandleSMTP implements ActionListener {
 				tableModel, txtViewer);
 		new Thread(task).start();
 	}
+
 }
