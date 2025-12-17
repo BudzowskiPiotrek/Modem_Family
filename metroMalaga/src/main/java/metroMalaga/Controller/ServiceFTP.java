@@ -200,14 +200,9 @@ public class ServiceFTP {
 	 *                   received
 	 */
 	public void setTableModel(FTPTableModel tableModel) {
-		if (!notificationsInitialized && tableModel != null) {
+		if (tableModel != null) {
 			// Only create notification controller (client) if we're NOT running as server
-			if (!NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
-				// Create notification controller with the server host
-				this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
-			} else {
-				System.out.println("Running as server - no client connection needed");
-			}
+			this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
 			notificationsInitialized = true;
 		}
 	}

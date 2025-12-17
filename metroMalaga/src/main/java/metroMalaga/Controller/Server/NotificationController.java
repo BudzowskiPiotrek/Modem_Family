@@ -1,6 +1,12 @@
 package metroMalaga.Controller.Server;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.swing.SwingUtilities;
+
+import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
@@ -51,10 +57,17 @@ public class NotificationController implements NotificationClient.MessageListene
     public void notifyChange(String action, String filePath) {
         String message = action + ":" + filePath;
 
-        // Send notification to server to broadcast to all clients
-        NotificationServer.getInstance().broadcast(message);
-
-        System.out.println("Notified change: " + message);
+        // Send notification to server through socket (works for distributed
+        // architecture)
+        if (client != null && client.isConnected()) {
+            if (client.sendMessage(message)) {
+                System.out.println("Notified server about change: " + message);
+            } else {
+                System.err.println("Failed to notify server about change: " + message);
+            }
+        } else {
+            System.err.println("Cannot notify change - client not connected to server");
+        }
     }
 
     /**
@@ -62,13 +75,9 @@ public class NotificationController implements NotificationClient.MessageListene
      */
     private void refreshTable() {
         try {
-            // Reload file list from FTP server
-            java.util.List<org.apache.commons.net.ftp.FTPFile> files = java.util.Arrays.asList(service.listAllFiles());
-
-            // Update table model
-            tableModel.setData(files);
-
-            System.out.println("Table refreshed with " + files.size() + " files");
+            FTPFile[] updatedFilesArray = service.listAllFiles();
+            List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
+            tableModel.setData(updatedFilesList);
         } catch (Exception e) {
             System.err.println("Error refreshing table: " + e.getMessage());
         }

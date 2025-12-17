@@ -46,42 +46,44 @@ public class MenuSelect implements ActionListener {
 		String nameButton = button.getText();
 
 		switch (nameButton) {
-		case "CRUD":
-			CrudFrontend crudView = new CrudFrontend(user);
-			CrudController crudControl = new CrudController(crudView);
-			crudView.setVisible(true);
-			break;
+			case "CRUD":
+				CrudFrontend crudView = new CrudFrontend(user);
+				CrudController crudControl = new CrudController(crudView);
+				crudView.setVisible(true);
+				break;
 
-		case "FTP":
-			ServiceFTP service = new ServiceFTP(user.getRol().getPermiso());
-			FTPFile[] fileArray = service.listAllFiles();
-			List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
+			case "FTP":
+				ServiceFTP service = new ServiceFTP(user.getRol().getPermiso());
+				FTPFile[] fileArray = service.listAllFiles();
+				List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
 
-			FTPTableModel ftpModel = new FTPTableModel(initialFiles, service);
-			PanelFTP panelFtp = new PanelFTP(user, service, initialFiles, ftpModel);
-			/*
-			 * FTPRefreshThread refreshThread = new FTPRefreshThread(service, ftpModel);
-			 * refreshThread.start();
-			 * 
-			 * panelFtp.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-			 * 
-			 * panelFtp.addWindowListener(new java.awt.event.WindowAdapter() {
-			 * 
-			 * @Override public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-			 * if (refreshThread != null) { refreshThread.stopRunning(); }
-			 * panelFtp.dispose(); } });
-			 */
-			panelFtp.setVisible(true);
-			break;
+				FTPTableModel ftpModel = new FTPTableModel(initialFiles, service);
+				// Initialize notification system with the table model
+				service.setTableModel(ftpModel);
+				PanelFTP panelFtp = new PanelFTP(user, service, initialFiles, ftpModel);
+				/*
+				 * FTPRefreshThread refreshThread = new FTPRefreshThread(service, ftpModel);
+				 * refreshThread.start();
+				 * 
+				 * panelFtp.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				 * 
+				 * panelFtp.addWindowListener(new java.awt.event.WindowAdapter() {
+				 * 
+				 * @Override public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+				 * if (refreshThread != null) { refreshThread.stopRunning(); }
+				 * panelFtp.dispose(); } });
+				 */
+				panelFtp.setVisible(true);
+				break;
 
-		case "SMTP":
-			HandleSMTP handleSmtp = new HandleSMTP();
-			PanelSMTP panelSmtp = new PanelSMTP(user, handleSmtp);
-			panelSmtp.setVisible(true);
-			break;
+			case "SMTP":
+				HandleSMTP handleSmtp = new HandleSMTP();
+				PanelSMTP panelSmtp = new PanelSMTP(user, handleSmtp);
+				panelSmtp.setVisible(true);
+				break;
 
-		case "Salir":
-			break;
+			case "Salir":
+				break;
 		}
 		panelMenu.disposeWindow();
 	}
