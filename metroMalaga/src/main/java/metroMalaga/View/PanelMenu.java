@@ -1,49 +1,31 @@
 package metroMalaga.View;
 
 import java.awt.*;
-import java.util.ArrayList;
-
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 
-import metroMalaga.Controller.menu.MenuMouseListener;
 import metroMalaga.Controller.menu.MenuSelect;
 import metroMalaga.Model.Usuario;
 
-// Importamos la clase Usuario ya que el Login nos la pasa
-
 public class PanelMenu extends JFrame {
 
-	// Mantenemos tus listas
-	public ArrayList<JButton> buttons;
-	public ArrayList<String> buttonsName;
 	private Usuario user;
+	private JTabbedPane tabbedPane;
+	private MenuSelect menuController;
 
-	// --- ESTÉTICA PERSONA 5 (Copiada del Login) ---
+	// --- ESTÉTICA PERSONA 5 ---
 	private final Color P5_RED = new Color(220, 20, 60);
 	private final Color P5_BRIGHT_RED = new Color(255, 0, 0);
 	private final Color P5_BLACK = new Color(20, 20, 20);
 	private final Color P5_WHITE = new Color(240, 240, 240);
 
-	// Usamos la fuente de botones definida en el Login
-	private final Font P5_BUTTON_FONT = new Font("Dialog", Font.BOLD | Font.ITALIC, 24);
-
 	public PanelMenu(Usuario user) {
 		this.user = user;
-		this.buttonsName = new ArrayList<>();
-		this.buttons = new ArrayList<>();
 
-		// Mantenemos tu orden de llamadas original
-
-		createButtonsName();
-		createButtons();
-		addListenerButtons();
-		// Configuramos la ventana ANTES de añadir botones para tener el Layout listo
 		propertiesWindow();
-		addButtons();
+		createTabbedPane();
 		setTitle();
 
-		MenuSelect handler = new MenuSelect(this, buttons, user);
 		this.setVisible(true);
 	}
 
@@ -52,66 +34,126 @@ public class PanelMenu extends JFrame {
 		this.dispose();
 	}
 
-	private void addListenerButtons() {
-		for (JButton bns : buttons) {
-			bns.addMouseListener(new MenuMouseListener(bns));
-		}
-	}
-
 	private void propertiesWindow() {
-		// Usamos GridBagLayout para centrar los elementos como en el Login
-		this.setLayout(new GridBagLayout());
-		this.getContentPane().setBackground(P5_RED); // Fondo Rojo P5
+		this.setLayout(new BorderLayout());
+		this.getContentPane().setBackground(P5_RED);
 
-		this.setSize(700, 700);
+		this.setSize(1100, 750);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 	}
 
 	private void setTitle() {
-		// Título de la ventana
-		this.setTitle("Menú Principal - centimetro Málaga");
+		this.setTitle("Menú Principal - Metro Málaga");
 	}
 
-	private void createButtonsName() {
-		buttonsName.add("CRUD");
-		buttonsName.add("FTP");
-		buttonsName.add("SMTP");
-		buttonsName.add("Salir");
+	private void createTabbedPane() {
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+
+		// Aplicar estilo Persona 5 al JTabbedPane
+		tabbedPane.setBackground(P5_BLACK);
+		tabbedPane.setForeground(P5_WHITE);
+		tabbedPane.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 16));
+
+		// Crear el controlador que manejará las pestañas
+		menuController = new MenuSelect(this, tabbedPane, user);
+
+		// Añadir las pestañas (inicialmente vacías, se cargarán bajo demanda)
+		tabbedPane.addTab("CRUD", null);
+		tabbedPane.addTab("FTP", null);
+		tabbedPane.addTab("SMTP", null);
+		tabbedPane.addTab("Salir", createExitPanel());
+
+		// Aplicar estilo personalizado a las pestañas
+		styleTabPane();
+
+		this.add(tabbedPane, BorderLayout.CENTER);
 	}
 
-	private void createButtons() {
-		for (String bn : buttonsName) {
-			JButton button = new JButton(bn);
+	private void styleTabPane() {
+		// Personalizar el UI del JTabbedPane
+		UIManager.put("TabbedPane.selected", P5_BRIGHT_RED);
+		UIManager.put("TabbedPane.background", P5_BLACK);
+		UIManager.put("TabbedPane.foreground", P5_WHITE);
+		UIManager.put("TabbedPane.focus", P5_BRIGHT_RED);
+		UIManager.put("TabbedPane.contentAreaColor", P5_RED);
+		UIManager.put("TabbedPane.borderHightlightColor", P5_BRIGHT_RED);
 
-			// --- APLICANDO ESTÉTICA AL BOTÓN ---
-			button.setPreferredSize(new Dimension(250, 60)); // Un poco más anchos
-			button.setBackground(P5_BLACK); // Fondo negro por defecto (para contrastar con el fondo rojo de la ventana)
-			button.setForeground(P5_WHITE); // Texto blanco
-			button.setFont(P5_BUTTON_FONT);
-			button.setFocusPainted(false);
-			button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-			// Borde estilo cómic/Persona 5
-			MatteBorder defaultBorder = new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED);
-			button.setBorder(defaultBorder);
-
-			// Efecto Hover (Ratón encima) - Invertimos colores
-			buttons.add(button);
-		}
+		SwingUtilities.updateComponentTreeUI(tabbedPane);
 	}
 
-	private void addButtons() {
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		// Margen entre botones (Arriba, Izquierda, Abajo, Derecha)
-		gbc.insets = new Insets(15, 0, 15, 0);
-		gbc.fill = GridBagConstraints.HORIZONTAL;
+	private JPanel createExitPanel() {
+		JPanel exitPanel = new JPanel(new GridBagLayout());
+		exitPanel.setBackground(P5_RED);
 
-		for (JButton button : buttons) {
-			this.add(button, gbc);
-			gbc.gridy++; // Siguiente botón en la siguiente fila
-		}
+		JPanel contentPanel = new JPanel();
+		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+		contentPanel.setBackground(P5_BLACK);
+		contentPanel.setBorder(new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED));
+
+		JLabel lblMessage = new JLabel("¿Desea salir de la aplicación?");
+		lblMessage.setFont(new Font("Dialog", Font.BOLD, 24));
+		lblMessage.setForeground(P5_WHITE);
+		lblMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+		lblMessage.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+		buttonPanel.setBackground(P5_BLACK);
+
+		JButton btnConfirm = new JButton("Sí, Salir");
+		styleExitButton(btnConfirm, P5_BRIGHT_RED, P5_WHITE);
+		btnConfirm.addActionListener(e -> System.exit(0));
+
+		JButton btnCancel = new JButton("No, Volver");
+		styleExitButton(btnCancel, P5_WHITE, P5_BLACK);
+		btnCancel.addActionListener(e -> tabbedPane.setSelectedIndex(0));
+
+		buttonPanel.add(btnCancel);
+		buttonPanel.add(btnConfirm);
+
+		contentPanel.add(lblMessage);
+		contentPanel.add(buttonPanel);
+
+		exitPanel.add(contentPanel);
+
+		return exitPanel;
+	}
+
+	private void styleExitButton(JButton btn, Color bg, Color fg) {
+		btn.setPreferredSize(new Dimension(180, 50));
+		btn.setBackground(bg);
+		btn.setForeground(fg);
+		btn.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 18));
+		btn.setFocusPainted(false);
+		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		btn.setBorder(new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED));
+
+		// Hover effect
+		btn.addMouseListener(new java.awt.event.MouseAdapter() {
+			Color originalBg = btn.getBackground();
+			Color originalFg = btn.getForeground();
+
+			@Override
+			public void mouseEntered(java.awt.event.MouseEvent e) {
+				btn.setBackground(originalFg);
+				btn.setForeground(originalBg);
+				btn.setBorder(new MatteBorder(4, 4, 8, 6, P5_BLACK));
+			}
+
+			@Override
+			public void mouseExited(java.awt.event.MouseEvent e) {
+				btn.setBackground(originalBg);
+				btn.setForeground(originalFg);
+				btn.setBorder(new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED));
+			}
+		});
+	}
+
+	public JTabbedPane getTabbedPane() {
+		return tabbedPane;
+	}
+
+	public Usuario getUser() {
+		return user;
 	}
 }
