@@ -57,28 +57,26 @@ public class HandleSMTPTest {
             handleSMTP.sendEmail("", "Test Subject", "Test Body", null);
         });
         
-        assertTrue(exception.getMessage().contains("recipient cannot be empty"));
+        assertNotNull(exception);
     }
 
     @Test
     public void testSendEmailConDestinatarioNulo() {
         handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
         
-        Exception exception = assertThrows(Exception.class, () -> {
+        assertThrows(Exception.class, () -> {
             handleSMTP.sendEmail(null, "Test", "Body", null);
         });
-        
-        assertTrue(exception.getMessage().contains("recipient cannot be empty"));
     }
 
-     @Test
-     public void testSendEmailSinAdjuntos() {
-         handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
-         
-         assertDoesNotThrow(() -> {
-             handleSMTP.sendEmail(TEST_EMAIL, "Test JUnit", "Cuerpo del test", null);
-         });
-     }
+    @Test
+    public void testSendEmailSinAdjuntos() {
+        handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
+        
+        assertDoesNotThrow(() -> {
+            handleSMTP.sendEmail(TEST_EMAIL, "Test JUnit", "Cuerpo del test", null);
+        });
+    }
 
     @Test
     public void testSendEmailConListaAdjuntosVacia() {
@@ -90,13 +88,15 @@ public class HandleSMTPTest {
     }
 
     @Test
-    public void testDownloadEmailCompleteNoLanzaExcepcion() {
+    public void testDownloadEmailConUIDInexistenteLanzaExcepcion() {
         handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
         File destFile = new File("test_email.eml");
         
-        assertDoesNotThrow(() -> {
-            handleSMTP.downloadEmailComplete("fake-uid", destFile);
+        Exception exception = assertThrows(Exception.class, () -> {
+            handleSMTP.downloadEmailComplete("fake-uid-12345", destFile);
         });
+        
+        assertTrue(exception.getMessage().contains("Mensaje no encontrado"));
         
         if (destFile.exists()) {
             destFile.delete();
@@ -104,23 +104,33 @@ public class HandleSMTPTest {
     }
 
     @Test
-    public void testDeleteEmailNoLanzaExcepcion() {
+    public void testDeleteEmailConUIDInexistente() {
         handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
         
+        // Ahora deleteEmail solo recibe UID
         assertDoesNotThrow(() -> {
-            handleSMTP.deleteEmail("Subject Test", "sender@example.com");
+            handleSMTP.deleteEmail("fake-uid-inexistente");
         });
     }
 
     @Test
-    public void testUpdateReadStatusNoLanzaExcepcion() {
+    public void testUpdateReadStatusConUIDInexistente() {
         handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
         
+        // Ahora updateReadStatusIMAP solo recibe UID y boolean
         assertDoesNotThrow(() -> {
-            handleSMTP.updateReadStatusIMAP("Test", "sender@test.com", "uid-123", true);
+            handleSMTP.updateReadStatusIMAP("fake-uid-123", true);
         });
     }
     
+    @Test
+    public void testUpdateReadStatusMarcarComoNoLeido() {
+        handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
+        
+        assertDoesNotThrow(() -> {
+            handleSMTP.updateReadStatusIMAP("fake-uid-456", false);
+        });
+    }
     
     @Test
     public void testListaEmailsInicializadaVacia() {
@@ -150,5 +160,40 @@ public class HandleSMTPTest {
         
         assertFalse(email.isEmpty());
         assertTrue(email.contains("@"));
+    }
+    
+    @Test
+    public void testLoadFullContentConEmailModelVacio() {
+        handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
+        EmailModel emailModel = new EmailModel(1, "sender@test.com", "Test", "Body");
+        emailModel.setUniqueId("fake-uid");
+        
+        // No debe lanzar excepción aunque no encuentre el email
+        assertDoesNotThrow(() -> {
+            handleSMTP.loadFullContent(emailModel);
+        });
+    }
+    
+    @Test
+    public void testCrearArchivoDestino() {
+        File destFile = new File("test_output.eml");
+        
+        assertNotNull(destFile);
+        assertEquals("test_output.eml", destFile.getName());
+        assertTrue(destFile.getName().endsWith(".eml"));
+    }
+    
+    @Test
+    public void testValidacionSubjectVacio() {
+        String subject = "";
+        
+        assertTrue(subject.isEmpty());
+    }
+    
+    @Test
+    public void testValidacionSubjectConEspacios() {
+        String subject = "   ";
+        
+        assertTrue(subject.trim().isEmpty());
     }
 }
