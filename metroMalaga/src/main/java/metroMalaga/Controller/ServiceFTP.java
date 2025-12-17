@@ -23,8 +23,6 @@ public class ServiceFTP {
 	private FTPClient ftpClient;
 	private ConnecionFTP conFTP;
 	private String user;
-	
-	// ????
 	private NotificationController notificationController;
 	private boolean notificationsInitialized = false;
 	private String ftpServerHost;
@@ -42,21 +40,84 @@ public class ServiceFTP {
 		}
 		try {
 			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+			this.ftpServerHost = conFTP.getServerHost();
 		} catch (IOException e) {
 			showError("Error configuring FTP connection", e);
 		}
+		initializeNotificationSystem();
+	}
+	
+	public boolean makeDirectory(String path) {
+	    try {
+	        return ftpClient.makeDirectory(path);
+	    } catch (IOException e) {
+	        showError("Error al crear el directorio: " + path, e);
+	        return false;
+	    }
 	}
 
-	public FTPFile[] listAllFiles() {
+	public synchronized FTPFile[] listAllFiles() {
 		try {
+			// Check if connection is still alive, reconnect if needed
+			if (!isConnected()) {
+				System.out.println("FTP connection lost, attempting to reconnect...");
+				reconnect();
+			}
+
 			return ftpClient.listFiles();
 		} catch (IOException e) {
-			showError("Could not retrieve file list from server", e);
-			return new FTPFile[0];
+			// If we get an error, try to reconnect and retry once
+			System.err.println("Error listing files, attempting reconnect: " + e.getMessage());
+			try {
+				reconnect();
+				return ftpClient.listFiles();
+			} catch (IOException retryEx) {
+				showError("Could not retrieve file list from server", retryEx);
+				return new FTPFile[0];
+			}
 		}
 	}
 
-	public boolean changeDirectory(String directoryName) {
+	/**
+	 * Check if FTP connection is still alive
+	 */
+	private boolean isConnected() {
+		try {
+			return ftpClient != null && ftpClient.isConnected() && ftpClient.sendNoOp();
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Reconnect to FTP server
+	 */
+	private void reconnect() throws IOException {
+		System.out.println("Reconnecting to FTP server...");
+		// Close old connection if exists
+		if (ftpClient != null && ftpClient.isConnected()) {
+			try {
+				ftpClient.disconnect();
+			} catch (IOException e) {
+				// Ignore errors when disconnecting
+			}
+		}
+
+		// Create new connection
+		this.ftpClient = conFTP.getConnection();
+		if (ftpClient == null) {
+			throw new IOException("Could not reconnect to FTP server");
+		}
+
+		try {
+			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+			System.out.println("Successfully reconnected to FTP server");
+		} catch (IOException e) {
+			throw new IOException("Error configuring reconnected FTP connection: " + e.getMessage());
+		}
+	}
+
+	public synchronized boolean changeDirectory(String directoryName) {
 		try {
 			return ftpClient.changeWorkingDirectory(directoryName);
 		} catch (IOException e) {
@@ -83,7 +144,7 @@ public class ServiceFTP {
 		}
 	}
 
-	public boolean uploadFile(String localFilePath, String remoteFilePath) {
+	public synchronized boolean uploadFile(String localFilePath, String remoteFilePath) {
 		File localFile = new File(localFilePath);
 
 		if (!localFile.exists()) {
@@ -100,7 +161,7 @@ public class ServiceFTP {
 		}
 	}
 
-	public boolean downloadFile(String remoteFilePath, String localFilePath) {
+	public synchronized boolean downloadFile(String remoteFilePath, String localFilePath) {
 		try (OutputStream outputStream = new FileOutputStream(localFilePath)) {
 			return ftpClient.retrieveFile(remoteFilePath, outputStream);
 		} catch (IOException e) {
@@ -109,7 +170,7 @@ public class ServiceFTP {
 		}
 	}
 
-	public boolean deleteFile(String remoteFilePath) {
+	public synchronized boolean deleteFile(String remoteFilePath) {
 		try {
 			return ftpClient.deleteFile(remoteFilePath);
 		} catch (IOException e) {
@@ -118,7 +179,7 @@ public class ServiceFTP {
 		}
 	}
 
-	public boolean renameFile(String remoteFrom, String remoteTo) {
+	public synchronized boolean renameFile(String remoteFrom, String remoteTo) {
 		try {
 			return ftpClient.rename(remoteFrom, remoteTo);
 		} catch (IOException e) {
@@ -198,14 +259,9 @@ public class ServiceFTP {
 	 *                   received
 	 */
 	public void setTableModel(FTPTableModel tableModel) {
-		if (!notificationsInitialized && tableModel != null) {
+		if (tableModel != null) {
 			// Only create notification controller (client) if we're NOT running as server
-			if (!NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
-				// Create notification controller with the server host
-				this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
-			} else {
-				System.out.println("Running as server - no client connection needed");
-			}
+			this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
 			notificationsInitialized = true;
 		}
 	}
@@ -216,6 +272,29 @@ public class ServiceFTP {
 	public void disconnectNotifications() {
 		if (notificationController != null) {
 			notificationController.disconnect();
+		}
+	}
+
+	/**
+	 * Notify all clients about an FTP change
+	 * This method should be called after successful FTP operations (upload, delete,
+	 * rename, etc.)
+	 * 
+	 * @param action   The type of action (UPLOAD, DELETE, RENAME, etc.)
+	 * @param filePath The affected file path
+	 */
+	public void notifyFTPChange(String action, String filePath) {
+		try {
+			if (notificationController != null) {
+				notificationController.notifyChange(action, filePath);
+			} else {
+				System.out.println("Notification controller not initialized - notification not sent for: " + action
+						+ " " + filePath);
+			}
+		} catch (Exception e) {
+			// Don't let notification errors break the FTP operation
+			System.err.println("Error sending notification: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

@@ -51,8 +51,12 @@ public class FTPbtnUpFile implements ActionListener {
 				if (success) {
 
 					JOptionPane.showMessageDialog(null, "File uploaded successfully:" + remoteFileName);
-					
+
 					cn.registerLog(user.getUsernameApp(), "File uploaded:" + remoteFileName);
+
+					// Notify other clients about the upload
+					service.notifyFTPChange("UPLOAD", remoteFileName);
+
 					FTPFile[] updatedFilesArray = service.listAllFiles();
 					List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
 					model.setData(updatedFilesList);
