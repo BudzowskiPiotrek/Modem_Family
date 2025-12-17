@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="p5_red_bg">#DC143C</color>
+    <color name="p5_bright_red">#FF0000</color>
+    <color name="p5_black">#141414</color>
+    <color name="p5_white">#F0F0F0</color>
+    <color name="p5_gray">#969696</color>
+</resources>
