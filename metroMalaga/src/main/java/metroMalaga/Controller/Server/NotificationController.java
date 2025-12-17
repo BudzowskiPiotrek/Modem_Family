@@ -75,11 +75,20 @@ public class NotificationController implements NotificationClient.MessageListene
      */
     private void refreshTable() {
         try {
+            System.out.println("Refreshing FTP table...");
             FTPFile[] updatedFilesArray = service.listAllFiles();
-            List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
-            tableModel.setData(updatedFilesList);
+
+            if (updatedFilesArray != null && updatedFilesArray.length >= 0) {
+                List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
+                tableModel.setData(updatedFilesList);
+                System.out.println("Table refreshed successfully with " + updatedFilesArray.length + " files");
+            } else {
+                System.err.println("Failed to retrieve file list - received null or empty array");
+            }
         } catch (Exception e) {
             System.err.println("Error refreshing table: " + e.getMessage());
+            e.printStackTrace();
+            // Don't crash the application, just log the error
         }
     }
 

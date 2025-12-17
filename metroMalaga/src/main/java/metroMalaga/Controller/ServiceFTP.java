@@ -225,8 +225,17 @@ public class ServiceFTP {
 	 * @param filePath The affected file path
 	 */
 	public void notifyFTPChange(String action, String filePath) {
-		if (notificationController != null) {
-			notificationController.notifyChange(action, filePath);
+		try {
+			if (notificationController != null) {
+				notificationController.notifyChange(action, filePath);
+			} else {
+				System.out.println("Notification controller not initialized - notification not sent for: " + action
+						+ " " + filePath);
+			}
+		} catch (Exception e) {
+			// Don't let notification errors break the FTP operation
+			System.err.println("Error sending notification: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
