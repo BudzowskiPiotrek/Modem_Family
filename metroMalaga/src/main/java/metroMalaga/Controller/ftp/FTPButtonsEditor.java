@@ -74,15 +74,15 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 
 		if (currentFile != null) {
 			switch (command) {
-			case "DOWNLOAD":
-				handleDownload(currentFile);
-				break;
-			case "DELETE":
-				handleDelete(currentFile);
-				break;
-			case "RENAME":
-				handleRename(currentFile);
-				break;
+				case "DOWNLOAD":
+					handleDownload(currentFile);
+					break;
+				case "DELETE":
+					handleDelete(currentFile);
+					break;
+				case "RENAME":
+					handleRename(currentFile);
+					break;
 			}
 		}
 	}
@@ -125,6 +125,10 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 
 				if (success) {
 					JOptionPane.showMessageDialog(null, "File successfully deleted.");
+
+					// Notify other clients about the deletion
+					service.notifyFTPChange("DELETE", file.getName());
+
 					updateTable();
 					cn.registerLog(user.getUsernameApp(), "File delete:" + file.getName());
 				} else {
@@ -146,8 +150,13 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 
 				if (success) {
 					JOptionPane.showMessageDialog(null, "File renamed successfully.");
+
+					// Notify other clients about the rename
+					service.notifyFTPChange("RENAME", file.getName() + " -> " + newName.trim());
+
 					updateTable();
-					cn.registerLog(user.getUsernameApp(),"File renamed :" + file.getName() + " for: " + newName.trim());
+					cn.registerLog(user.getUsernameApp(),
+							"File renamed :" + file.getName() + " for: " + newName.trim());
 				} else {
 					JOptionPane.showMessageDialog(null, "Fallo al renombrar el archivo.", "Error de Renombrado",
 							JOptionPane.ERROR_MESSAGE);

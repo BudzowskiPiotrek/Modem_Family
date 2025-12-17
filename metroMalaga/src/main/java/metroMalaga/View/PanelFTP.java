@@ -119,7 +119,7 @@ public class PanelFTP extends JFrame {
 		actionPanel.setBackground(HEADER_GRAY);
 		actionPanel.add(this.uploadButton);
 		actionPanel.add(this.upButton);
-		actionPanel.add(this.folderButton);
+		actionPanel.add(this.folderButton); 
 		actionPanel.add(this.returnButton);
 
 		JPanel filterPanel = new JPanel();
@@ -143,6 +143,10 @@ public class PanelFTP extends JFrame {
 		this.setVisible(true);
 	}
 
+	public JButton getFolderButton() {
+		return folderButton;
+	}
+
 	public JTable getFileTable() {
 		return fileTable;
 	}
@@ -163,7 +167,4 @@ public class PanelFTP extends JFrame {
 		return returnButton;
 	}
 
-	public JButton getFolderButton() {
-		return folderButton;
-	}
 }
