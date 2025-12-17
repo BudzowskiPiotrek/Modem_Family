@@ -37,6 +37,7 @@ public class FTPbtnNewFolder implements ActionListener {
 			if (exito) {
 				model.setData(Arrays.asList(service.listAllFiles()));
 				cn.registerLog(user.getUsernameApp(), "New Folder: " + folderName.trim());
+				service.notifyFTPChange("Create folder", folderName);
 			} else {
 				JOptionPane.showMessageDialog(null, "The folder could not be created.", "Error",
 						JOptionPane.ERROR_MESSAGE);
