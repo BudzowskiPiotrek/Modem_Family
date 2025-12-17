@@ -10,9 +10,9 @@ import java.util.List;
 public class CrudController {
 
     // --- CONFIGURACIÓN BD ---
-    private static final String URL = "jdbc:mysql://localhost/centimetromalaga";
-    private static final String USER = "root";
-    private static final String PASS = "";
+    private static final String URL = "jdbc:mysql://192.168.1.32:3306/centimetromalaga";
+    private static final String USER = "remoto";
+    private static final String PASS = "proyecto";
 
     private CrudFrontend vista;
     private Connection conn;
