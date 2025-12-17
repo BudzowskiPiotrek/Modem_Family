@@ -152,7 +152,7 @@ public class PanelLogin extends JFrame {
 	}
 
 	private void settingsFrame() {
-		setTitle("Login - Metro Malaga");
+		setTitle("Login - Metro M�laga");
 		setSize(700, 700);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);

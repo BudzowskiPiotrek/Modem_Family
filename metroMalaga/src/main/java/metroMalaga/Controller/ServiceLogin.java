@@ -34,10 +34,8 @@ public class ServiceLogin {
 	public Usuario getUserData(String usuario) {
 		Usuario user = null;
 
-
 		final String SQL = "SELECT u.username, u.password, u.correo_electronico, u.fk_id_rol, r.nombre AS rol_nombre, r.permiso "
 				+ "FROM usuarios u JOIN roles r ON u.fk_id_rol = r.id_roles WHERE u.username = ?";
-
 
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);

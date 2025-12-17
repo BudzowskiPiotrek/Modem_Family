@@ -22,11 +22,6 @@ import org.apache.commons.net.ftp.FTPFile;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Controller.ftp.FTPButtonsEditor;
 import metroMalaga.Controller.ftp.FTPButtonsRenderer;
-import metroMalaga.Controller.ftp.FTPbtnReturn;
-import metroMalaga.Controller.ftp.FTPbtnUp;
-import metroMalaga.Controller.ftp.FTPbtnUpFile;
-import metroMalaga.Controller.ftp.FTPdoubleClick;
-import metroMalaga.Controller.ftp.FTPlist;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 
@@ -35,7 +30,7 @@ public class PanelFTP extends JFrame {
 	private FTPTableModel ftpModel;
 	private JTable fileTable;
 	private JTextField searchField;
-	private JButton uploadButton, upButton, returnButton;
+	private JButton uploadButton, upButton, returnButton, folderButton;
 	private ServiceFTP service;
 
 	private static final Color ACCENT_RED = new Color(220, 53, 69);
@@ -48,7 +43,6 @@ public class PanelFTP extends JFrame {
 		this.user = user;
 		initializeComponents();
 		applyStyle();
-		attachListeners();
 		setupFrameConfiguration();
 		setupLayout();
 	}
@@ -59,6 +53,7 @@ public class PanelFTP extends JFrame {
 		this.uploadButton = new JButton("⤒");
 		this.upButton = new JButton("🔙");
 		this.returnButton = new JButton("Return");
+		this.folderButton = new JButton("📁 New Folder");
 		FTPButtonsEditor buttonsEditor = new FTPButtonsEditor(this.service, this.ftpModel, user);
 		fileTable.getColumnModel().getColumn(3).setCellRenderer(new FTPButtonsRenderer());
 		fileTable.getColumnModel().getColumn(3).setCellEditor(buttonsEditor);
@@ -91,7 +86,9 @@ public class PanelFTP extends JFrame {
 		styleButton(uploadButton, ACCENT_RED, Color.WHITE);
 		styleButton(upButton, Color.GRAY, Color.WHITE);
 		styleButton(returnButton, ACCENT_RED, Color.WHITE);
+		styleButton(folderButton, new Color(40, 167, 69), Color.WHITE);
 
+		folderButton.setFont(modernFont);
 		uploadButton.setFont(modernFont);
 		upButton.setFont(modernFont);
 		returnButton.setFont(modernFont);
@@ -104,14 +101,6 @@ public class PanelFTP extends JFrame {
 		button.setBorder(new EmptyBorder(8, 15, 8, 15));
 	}
 
-	private void attachListeners() {
-		FTPlist listener = new FTPlist(searchField, ftpModel);
-		FTPbtnUpFile listenerFile = new FTPbtnUpFile(uploadButton, service, ftpModel, user);
-		FTPbtnUp listenerUp = new FTPbtnUp(upButton, service, ftpModel);
-		FTPdoubleClick listenerClick = new FTPdoubleClick(fileTable, service, ftpModel);
-		FTPbtnReturn listenerReturMenu = new FTPbtnReturn(this, returnButton, user);
-	}
-
 	private void setupFrameConfiguration() {
 		this.setTitle("FTP Manager - " + user.getUsernameApp().toUpperCase());
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -119,15 +108,6 @@ public class PanelFTP extends JFrame {
 		this.setSize(800, 600);
 		this.setLocationRelativeTo(null);
 		this.setResizable(false);
-
-		// este lisening aqui no deberia estar
-		// Add window listener to disconnect notification system on close
-		this.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-			public void windowClosing(java.awt.event.WindowEvent e) {
-				service.disconnectNotifications();
-			}
-		});
 	}
 
 	private void setupLayout() {
@@ -137,6 +117,10 @@ public class PanelFTP extends JFrame {
 		actionPanel.add(this.upButton);
 		actionPanel.add(this.returnButton);
 		actionPanel.setBackground(HEADER_GRAY);
+		actionPanel.add(this.uploadButton);
+		actionPanel.add(this.upButton);
+		actionPanel.add(this.folderButton); 
+		actionPanel.add(this.returnButton);
 
 		JPanel filterPanel = new JPanel();
 		filterPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 10));
@@ -158,4 +142,29 @@ public class PanelFTP extends JFrame {
 
 		this.setVisible(true);
 	}
+
+	public JButton getFolderButton() {
+		return folderButton;
+	}
+
+	public JTable getFileTable() {
+		return fileTable;
+	}
+
+	public JTextField getSearchField() {
+		return searchField;
+	}
+
+	public JButton getUploadButton() {
+		return uploadButton;
+	}
+
+	public JButton getUpButton() {
+		return upButton;
+	}
+
+	public JButton getReturnButton() {
+		return returnButton;
+	}
+
 }
