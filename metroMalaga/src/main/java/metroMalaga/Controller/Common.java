@@ -32,7 +32,7 @@ public class Common {
 	}
 
 	public void registerLog(String user, String description) {
-		final String SQL = "INSERT INTO logs (usuario, operaciones) VALUES (?, ?)";
+		final String SQL = "INSERT INTO logs (username, accion) VALUES (?, ?)";
 
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, user);
