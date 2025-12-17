@@ -73,32 +73,33 @@ public class MenuSelect implements ActionListener {
 	}
 
 	private void startFTP() {
-		ServiceFTP service = new ServiceFTP(user.getRol().getPermiso());
-		FTPFile[] fileArray = service.listAllFiles();
-		List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
+	    ServiceFTP service = new ServiceFTP(user.getRol().getPermiso());
+	    FTPFile[] fileArray = service.listAllFiles();
+	    List<FTPFile> initialFiles = new ArrayList<>(Arrays.asList(fileArray));
 
-		FTPTableModel ftpModel = new FTPTableModel(initialFiles, service);
+	    // CAMBIAR ESTA LÍNEA - Solo pasar la lista de archivos
+	    FTPTableModel ftpModel = new FTPTableModel(initialFiles);
 
-		PanelFTP panelFtp = new PanelFTP(user, service, initialFiles, ftpModel);
-		service.setTableModel(ftpModel);
+	    PanelFTP panelFtp = new PanelFTP(user, service, initialFiles, ftpModel);
+	    service.setTableModel(ftpModel);
 
-		new FTPlist(panelFtp.getSearchField(), ftpModel);
-		new FTPbtnUpFile(panelFtp.getUploadButton(), service, ftpModel, user);
-		new FTPbtnUp(panelFtp.getUpButton(), service, ftpModel);
-		new FTPdoubleClick(panelFtp.getFileTable(), service, ftpModel);
-		new FTPbtnReturn(panelFtp, panelFtp.getReturnButton(), user);
-		new FTPbtnNewFolder(panelFtp.getFolderButton(), service, ftpModel, user);
-		panelFtp.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+	    new FTPlist(panelFtp.getSearchField(), ftpModel);
+	    new FTPbtnUpFile(panelFtp.getUploadButton(), service, ftpModel, user);
+	    new FTPbtnUp(panelFtp.getUpButton(), service, ftpModel);
+	    new FTPdoubleClick(panelFtp.getFileTable(), service, ftpModel);
+	    new FTPbtnReturn(panelFtp, panelFtp.getReturnButton(), user);
+	    new FTPbtnNewFolder(panelFtp.getFolderButton(), service, ftpModel, user);
+	    panelFtp.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-		panelFtp.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-			public void windowClosing(java.awt.event.WindowEvent e) {
-				System.out.println("Cerrando recursos FTP...");
-				service.disconnectNotifications();
-				service.close();
-				panelFtp.dispose();
-			}
-		});
-
+	    panelFtp.addWindowListener(new java.awt.event.WindowAdapter() {
+	        @Override
+	        public void windowClosing(java.awt.event.WindowEvent e) {
+	            System.out.println("Cerrando recursos FTP...");
+	            service.disconnectNotifications();
+	            service.close();
+	            panelFtp.dispose();
+	        }
+	    });
 	}
+
 }

@@ -33,7 +33,7 @@ public class FTPdoubleClick extends MouseAdapter {
             if (row != -1) {
                 int modelRow = ftpTable.convertRowIndexToModel(row);
                 
-                FTPFile selectedFile = (FTPFile) model.getValueAt(modelRow, 3); 
+                FTPFile selectedFile = model.getFileAt(row); 
                 
                 handleNavigation(selectedFile);
             }
