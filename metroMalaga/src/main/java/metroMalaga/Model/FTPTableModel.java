@@ -56,10 +56,10 @@ public class FTPTableModel extends AbstractTableModel {
 		case 1:
 			long size;
 			if (file.isDirectory()) {
-	            size = service.calculateDirectorySize(file.getName()); 
-	        } else {
-	            size = file.getSize();
-	        }
+				size = service.calculateDirectorySize(file.getName());
+			} else {
+				size = file.getSize();
+			}
 			return Common.formatSize(size);
 		case 2:
 			Date date = file.getTimestamp().getTime();
@@ -84,5 +84,4 @@ public class FTPTableModel extends AbstractTableModel {
 		return columnIndex == 3;
 	}
 
-	
 }
