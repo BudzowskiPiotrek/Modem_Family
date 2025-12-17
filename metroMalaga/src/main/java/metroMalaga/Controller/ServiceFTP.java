@@ -23,7 +23,7 @@ public class ServiceFTP {
 	private FTPClient ftpClient;
 	private ConnecionFTP conFTP;
 	private String user;
-	
+
 	// ????
 	private NotificationController notificationController;
 	private boolean notificationsInitialized = false;
@@ -42,9 +42,11 @@ public class ServiceFTP {
 		}
 		try {
 			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+			this.ftpServerHost = conFTP.getServerHost();
 		} catch (IOException e) {
 			showError("Error configuring FTP connection", e);
 		}
+		initializeNotificationSystem();
 	}
 
 	public FTPFile[] listAllFiles() {
