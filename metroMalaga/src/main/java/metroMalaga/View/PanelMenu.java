@@ -63,7 +63,7 @@ public class PanelMenu extends JFrame {
 		styleTopButton(btnLanguage);
 		btnLanguage.addActionListener(e -> toggleLanguage());
 
-		btnDarkMode = new JButton(Common.isDarkMode ? "☀️" : "🌑");
+		btnDarkMode = new JButton(Common.isDarkMode ? "☀️" : "🌙");
 		styleTopButton(btnDarkMode);
 		btnDarkMode.addActionListener(e -> toggleTheme());
 
@@ -83,7 +83,7 @@ public class PanelMenu extends JFrame {
 	private void toggleTheme() {
 		Common.isDarkMode = !Common.isDarkMode;
 		
-		btnDarkMode.setText(Common.isDarkMode ? "☀️" : "🌑");
+		btnDarkMode.setText(Common.isDarkMode ? "☀️" : "🌙");
 		
 		applyTheme();
 		
@@ -95,14 +95,12 @@ public class PanelMenu extends JFrame {
 	public void applyTheme() {
 		boolean p5Mode = Common.isDarkMode;
 
-		// 👇 COLORES CORREGIDOS
-		Color bgColor = p5Mode ? P5_BLACK : new Color(230, 230, 230); // Fondo general
-		Color headerBg = p5Mode ? P5_BLACK : new Color(230, 230, 230); // Barra superior
+		Color bgColor = p5Mode ? P5_BLACK : new Color(230, 230, 230);
+		Color headerBg = p5Mode ? P5_BLACK : new Color(230, 230, 230); 
 		Color btnBg = p5Mode ? P5_RED : Common.getPanelBackground();
 		Color btnFg = p5Mode ? P5_WHITE : Common.getText();
 		Color btnBorder = p5Mode ? P5_BLACK : Common.getBorder();
 
-		// Aplicar fondo principal
 		this.getContentPane().setBackground(bgColor);
 		if (topPanel != null) topPanel.setBackground(headerBg);
 
@@ -114,20 +112,17 @@ public class PanelMenu extends JFrame {
 			Color tabFg = p5Mode ? P5_WHITE : Color.BLACK;
 			Color tabSel = p5Mode ? P5_RED : Common.getAccent();
 			
-			// 👇 APLICAR COLORES AL TABBEDPANE
 			tabbedPane.setBackground(tabBg);
 			tabbedPane.setForeground(tabFg);
 			
-			// 👇 CAMBIAR EL FONDO DEL ÁREA DE CONTENIDO
 			UIManager.put("TabbedPane.selected", tabSel);
-			UIManager.put("TabbedPane.contentAreaColor", bgColor); // Fondo de pestañas
-			UIManager.put("TabbedPane.background", tabBg); // Fondo de cabeceras
+			UIManager.put("TabbedPane.contentAreaColor", bgColor); 
+			UIManager.put("TabbedPane.background", tabBg);
 			UIManager.put("TabbedPane.darkShadow", tabBg);
 			UIManager.put("TabbedPane.light", tabBg);
 			UIManager.put("TabbedPane.highlight", tabBg);
 			UIManager.put("TabbedPane.shadow", tabBg);
 			
-			// 👇 ACTUALIZAR TODOS LOS PANELES INTERNOS
 			for (int i = 0; i < tabbedPane.getTabCount(); i++) {
 				Component comp = tabbedPane.getComponentAt(i);
 				if (comp != null && comp instanceof JPanel) {
