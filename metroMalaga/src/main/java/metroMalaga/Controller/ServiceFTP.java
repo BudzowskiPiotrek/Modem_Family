@@ -23,14 +23,23 @@ public class ServiceFTP {
 	private FTPClient ftpClient;
 	private ConnecionFTP conFTP;
 	private String user;
+	private String currentUsername; // Username of the logged-in user
+	private metroMalaga.Model.Rol userRole; // Role object of the logged-in user
 	private NotificationController notificationController;
 	private boolean notificationsInitialized = false;
 	private String ftpServerHost;
 	private static final String NOTIFICATION_SERVER_HOST = "127.0.0.1";
 
-	public ServiceFTP(String user) {
-		this.user = user;
-		this.conFTP = new ConnecionFTP(user);
+	/**
+	 * Constructor for ServiceFTP
+	 * 
+	 * @param username Username of the logged-in user
+	 * @param rol      Role object of the user
+	 */
+	public ServiceFTP(String username, metroMalaga.Model.Rol rol) {
+		this.currentUsername = username;
+		this.userRole = rol;
+		this.conFTP = new ConnecionFTP();
 		this.ftpClient = conFTP.getConnection();
 
 		if (ftpClient == null) {
@@ -54,6 +63,11 @@ public class ServiceFTP {
 		}
 
 		boolean created = ftpClient.makeDirectory(path);
+
+		// Register folder ownership if creation was successful
+		if (created && currentUsername != null) {
+			metroMalaga.Model.FTPFileOwnershipDAO.registerFile(path, currentUsername, true);
+		}
 
 		if (!created) {
 			int replyCode = ftpClient.getReplyCode();
@@ -164,7 +178,23 @@ public class ServiceFTP {
 		}
 
 		try (InputStream inputStream = new FileInputStream(localFile)) {
-			return ftpClient.storeFile(remoteFilePath, inputStream);
+			boolean success = ftpClient.storeFile(remoteFilePath, inputStream);
+
+			System.out.println("DEBUG uploadFile - Upload success: " + success);
+			System.out.println("DEBUG uploadFile - currentUsername: " + currentUsername);
+			System.out.println("DEBUG uploadFile - remoteFilePath: " + remoteFilePath);
+
+			// Register file ownership if upload was successful
+			if (success && currentUsername != null) {
+				System.out.println("DEBUG uploadFile - Registering ownership...");
+				metroMalaga.Model.FTPFileOwnershipDAO.registerFile(remoteFilePath, currentUsername, false);
+				System.out.println("DEBUG uploadFile - Ownership registered!");
+			} else {
+				System.out.println("DEBUG uploadFile - NOT registering ownership. success=" + success + ", username="
+						+ currentUsername);
+			}
+
+			return success;
 		} catch (IOException e) {
 			showError("Error uploading file: " + remoteFilePath, e);
 			return false;
@@ -181,6 +211,16 @@ public class ServiceFTP {
 	}
 
 	public synchronized boolean deleteFile(String path) {
+		// Check if user has permission to delete this file
+		if (currentUsername != null && userRole != null) {
+			if (!metroMalaga.Model.FTPFileOwnershipDAO.canModifyFile(path, currentUsername, userRole, true)) {
+				JOptionPane.showMessageDialog(null,
+						"No tienes permisos para borrar este archivo.\nSolo puedes borrar tus propios archivos.",
+						"Permiso Denegado", JOptionPane.WARNING_MESSAGE);
+				return false;
+			}
+		}
+
 		try {
 			FTPFile file = ftpClient.mlistFile(path);
 
@@ -193,6 +233,10 @@ public class ServiceFTP {
 			} else {
 				ftpClient.deleteFile(path);
 			}
+
+			// Remove from ownership database after successful deletion
+			metroMalaga.Model.FTPFileOwnershipDAO.deleteFile(path);
+
 			return true;
 		} catch (IOException e) {
 			showError("Could not delete: " + path, e);
@@ -208,14 +252,35 @@ public class ServiceFTP {
 				deleteDirectoryRecursive(fullPath);
 			} else {
 				ftpClient.deleteFile(fullPath);
+				// Delete ownership record for each file
+				metroMalaga.Model.FTPFileOwnershipDAO.deleteFile(fullPath);
 			}
 		}
 		ftpClient.removeDirectory(dirPath);
+		// Delete ownership record for the directory itself
+		metroMalaga.Model.FTPFileOwnershipDAO.deleteFile(dirPath);
 	}
 
 	public synchronized boolean renameFile(String remoteFrom, String remoteTo) {
+		// Check if user has permission to rename this file
+		if (currentUsername != null && userRole != null) {
+			if (!metroMalaga.Model.FTPFileOwnershipDAO.canModifyFile(remoteFrom, currentUsername, userRole, false)) {
+				JOptionPane.showMessageDialog(null,
+						"No tienes permisos para renombrar este archivo.\nSolo puedes renombrar tus propios archivos.",
+						"Permiso Denegado", JOptionPane.WARNING_MESSAGE);
+				return false;
+			}
+		}
+
 		try {
-			return ftpClient.rename(remoteFrom, remoteTo);
+			boolean success = ftpClient.rename(remoteFrom, remoteTo);
+
+			// Update ownership database if rename was successful
+			if (success) {
+				metroMalaga.Model.FTPFileOwnershipDAO.renameFile(remoteFrom, remoteTo);
+			}
+
+			return success;
 		} catch (IOException e) {
 			showError("Could not rename file", e);
 			return false;
