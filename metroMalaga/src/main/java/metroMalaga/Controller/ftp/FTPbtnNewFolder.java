@@ -12,6 +12,7 @@ import metroMalaga.Controller.Common;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
+import metroMalaga.Model.Language;
 
 public class FTPbtnNewFolder implements ActionListener {
 
@@ -32,7 +33,7 @@ public class FTPbtnNewFolder implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		String folderName = JOptionPane.showInputDialog(null, "Name of the new folder:", "Create Folder",
+		String folderName = JOptionPane.showInputDialog(null, Language.get(132), Language.get(133),
 				JOptionPane.QUESTION_MESSAGE);
 
 		if (folderName == null || folderName.trim().isEmpty()) {
@@ -53,13 +54,10 @@ public class FTPbtnNewFolder implements ActionListener {
 		} catch (IOException ex) {
 
 			if ("DIRECTORY_EXISTS".equals(ex.getMessage())) {
-				JOptionPane.showMessageDialog(null, "The folder already exists.", "Warning",
-						JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null, Language.get(134), Language.get(102), JOptionPane.WARNING_MESSAGE);
 			} else {
-				JOptionPane.showMessageDialog(null, "The folder could not be created.", "Error",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, Language.get(135), Language.get(101), JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 }
-
