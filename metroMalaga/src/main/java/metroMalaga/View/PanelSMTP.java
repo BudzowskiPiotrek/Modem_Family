@@ -24,7 +24,6 @@ public class PanelSMTP extends JPanel {
 	private JTable emailTable;
 	private DefaultTableModel tableModel;
 	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail, btnReturn;
-	private JButton btnLanguage;
 	private JLabel lblAttachedFile, lblTo, lblSubject;
 	private JPanel pCompose, pInbox;
 	private ButtonHandleSMTP buttonHandler;
@@ -45,7 +44,6 @@ public class PanelSMTP extends JPanel {
 
 		setupPanel();
 		initUI();
-		createLanguageButton();
 		registerListeners();
 	}
 
@@ -55,70 +53,39 @@ public class PanelSMTP extends JPanel {
 		setBorder(new EmptyBorder(15, 15, 15, 15));
 	}
 
-	private void createLanguageButton() {
-		String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
-		btnLanguage = new JButton(langText);
-		btnLanguage.setFont(new Font("Segoe UI", Font.BOLD, 13));
-		btnLanguage.setBackground(C_ACCENT);
-		btnLanguage.setForeground(Color.WHITE);
-		btnLanguage.setBorder(new CompoundBorder(
-			new LineBorder(C_ACCENT, 1, true),
-			new EmptyBorder(5, 10, 5, 10)
-		));
-		btnLanguage.setFocusPainted(false);
-		btnLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		btnLanguage.addActionListener(e -> toggleLanguage());
-		
-		JPanel languagePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		languagePanel.setBackground(BG_MAIN);
-		languagePanel.add(btnLanguage);
-		add(languagePanel, BorderLayout.NORTH);
-	}
-
-	private void toggleLanguage() {
-		if (Language.getCurrentLanguage().equals("espanol")) {
-			Language.setEnglish();
-			btnLanguage.setText("EN");
-		} else {
-			Language.setSpanish();
-			btnLanguage.setText("ES");
-		}
-		updateAllTexts();
-	}
-
 	public void updateAllTexts() {
 		updatePanelTitle(pCompose, Language.get(53));
 		updatePanelTitle(pInbox, Language.get(54));
-		
+
 		lblTo.setText(Language.get(55));
 		lblSubject.setText(Language.get(56));
-		
+
 		String currentLabel = lblAttachedFile.getText();
 		if (currentLabel.contains("No ") || currentLabel.contains("files")) {
 			lblAttachedFile.setText(Language.get(60));
 		}
-		
+
 		btnAttach.setText(Language.get(57));
 		btnClearAttach.setText(Language.get(58));
 		btnSend.setText(Language.get(59));
-		
+
 		tableModel.setColumnIdentifiers(new String[]{
 			Language.get(61),
 			Language.get(62),
 			Language.get(63)
 		});
-		
+
 		btnRefresh.setText(Language.get(64));
 		btnToggleRead.setText(Language.get(65));
 		btnDownloadEmail.setText(Language.get(66));
 		btnDelete.setText(Language.get(67));
 		btnReturn.setText(Language.get(69));
-		
+
 		String viewerText = txtViewer.getText();
 		if (viewerText.contains("Select") || viewerText.contains("Selecciona")) {
 			txtViewer.setText(Language.get(68));
 		}
-		
+
 		revalidate();
 		repaint();
 	}
@@ -247,7 +214,6 @@ public class PanelSMTP extends JPanel {
 		applyHover(btnClearAttach, C_DANGER, Color.WHITE, true);
 		applyHover(btnDelete, C_DANGER, Color.WHITE, true);
 		applyHover(btnReturn, C_DANGER, Color.WHITE, true);
-		applyHover(btnLanguage, C_ACCENT, Color.WHITE, false);
 	}
 
 	private void addGBC(JPanel p, Component c, int x, int y, double weight) {
