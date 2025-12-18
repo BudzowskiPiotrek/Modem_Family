@@ -40,7 +40,7 @@ public class MenuSelect implements ChangeListener {
 	public void updateActivePanelTheme() {
 		
 		if (crudPanel != null && tabbedPane.getSelectedComponent() == crudPanel) {
-			// crudPanel.applyTheme();
+			crudPanel.applyTheme();
 		} 
 		else if (ftpPanel != null && tabbedPane.getSelectedComponent() == ftpPanel) {
 			// ftpPanel.applyTheme(); 
@@ -96,7 +96,7 @@ public class MenuSelect implements ChangeListener {
 			@Override
 			protected Void doInBackground() throws Exception {
 				publish("Conectando al servidor FTP...");
-				service = new ServiceFTP(user.getRol().getPermiso());
+				service = new ServiceFTP();
 
 				publish("Listando archivos...");
 				FTPFile[] fileArray = service.listAllFiles();
