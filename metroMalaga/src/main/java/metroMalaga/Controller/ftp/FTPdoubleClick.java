@@ -12,6 +12,7 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
+import metroMalaga.Model.Language;
 
 public class FTPdoubleClick extends MouseAdapter {
 
@@ -51,7 +52,7 @@ public class FTPdoubleClick extends MouseAdapter {
             } 
             
         } else {
-            JOptionPane.showMessageDialog(null, "Esto es un archivo, no una carpeta. Usa 'Descargar' para obtenerlo.");
+            JOptionPane.showMessageDialog(null, Language.get(99));
         }
     }
 }

@@ -17,6 +17,7 @@ import metroMalaga.Controller.Common;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
+import metroMalaga.Model.Language;
 
 public class FTPbtnUpFile implements ActionListener {
 
@@ -36,7 +37,7 @@ public class FTPbtnUpFile implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setDialogTitle("Select file to upload");
+		fileChooser.setDialogTitle(Language.get(124));
 
 		int result = fileChooser.showOpenDialog(null);
 
@@ -50,11 +51,11 @@ public class FTPbtnUpFile implements ActionListener {
 
 				if (success) {
 
-					JOptionPane.showMessageDialog(null, "File uploaded successfully:" + remoteFileName);
+					JOptionPane.showMessageDialog(null, 
+						Language.get(125) + remoteFileName);
 
 					cn.registerLog(user.getUsernameApp(), "File uploaded:" + remoteFileName);
 
-					// Notify other clients about the upload
 					service.notifyFTPChange("UPLOAD", remoteFileName);
 
 					FTPFile[] updatedFilesArray = service.listAllFiles();
@@ -62,12 +63,16 @@ public class FTPbtnUpFile implements ActionListener {
 					model.setData(updatedFilesList);
 
 				} else {
-					JOptionPane.showMessageDialog(null, "File upload failed.", "Upload Error",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, 
+						Language.get(126), 
+						Language.get(127),
+						JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, "I/O error during upload: " + ex.getMessage(), "Error de Subida",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, 
+					Language.get(128) + ex.getMessage(), 
+					Language.get(127),
+					JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
