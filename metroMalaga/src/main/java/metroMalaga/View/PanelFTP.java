@@ -54,11 +54,11 @@ public class PanelFTP extends JPanel {
 		returnButton.setText(Language.get(84));
 		folderButton.setText("📁 " + Language.get(85));
 		lblFilter.setText(Language.get(86));
-		
+
 		ftpModel.updateColumnNames();
-		
+
 		restoreButtonColumn();
-		
+
 		revalidate();
 		repaint();
 	}
@@ -77,10 +77,10 @@ public class PanelFTP extends JPanel {
 		this.returnButton = new JButton(Language.get(84));
 		this.folderButton = new JButton("📁 " + Language.get(85));
 		this.lblFilter = new JLabel(Language.get(86));
-		
+
 		buttonsEditor = new FTPButtonsEditor(this.service, this.ftpModel, user);
-		buttonsRenderer = new FTPButtonsRenderer();
-		
+		buttonsRenderer = new FTPButtonsRenderer(user);
+
 		fileTable.getColumnModel().getColumn(3).setCellRenderer(buttonsRenderer);
 		fileTable.getColumnModel().getColumn(3).setCellEditor(buttonsEditor);
 		fileTable.setRowHeight(30);
