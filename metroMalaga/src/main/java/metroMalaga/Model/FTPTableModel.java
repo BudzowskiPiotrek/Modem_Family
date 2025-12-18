@@ -14,12 +14,31 @@ public class FTPTableModel extends AbstractTableModel {
 	private final ServiceFTP service;
 	private List<FTPFile> masterList;
 	private List<FTPFile> currentFileList;
-	private final String[] columnNames = { "NAME", "SIZE", "DATE", "BUTTONS" };
+	private String[] columnNames;
 
 	public FTPTableModel(List<FTPFile> initialList, ServiceFTP service) {
 		this.masterList = initialList;
 		this.currentFileList = initialList;
 		this.service = service;
+		updateColumnNames();
+	}
+
+	public void updateColumnNames() {
+		this.columnNames = new String[] {
+			Language.get(87),
+			Language.get(88),
+			Language.get(89),
+			Language.get(90)
+		};
+		fireTableStructureChanged();
+	}
+
+	public void setColumnIdentifiers(Object[] newIdentifiers) {
+		columnNames = new String[newIdentifiers.length];
+		for (int i = 0; i < newIdentifiers.length; i++) {
+			columnNames[i] = newIdentifiers[i].toString();
+		}
+		fireTableStructureChanged();
 	}
 
 	public List<FTPFile> getMasterList() {
@@ -83,5 +102,4 @@ public class FTPTableModel extends AbstractTableModel {
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return columnIndex == 3;
 	}
-
 }
