@@ -1,5 +1,6 @@
 package metroMalaga.Controller;
 
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -43,4 +44,42 @@ public class Common {
 			JOptionPane.showMessageDialog(null, errorMessage, "Critical Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
+	
+	public static boolean isDarkMode = false;
+
+    // Colores Claros
+    private static final Color L_BG_MAIN = new Color(245, 247, 250);
+    private static final Color L_BG_PANEL = Color.WHITE;
+    private static final Color L_TXT = new Color(50, 50, 50);
+    private static final Color L_BORDER = new Color(220, 220, 220);
+    
+    // Colores Oscuros
+    private static final Color D_BG_MAIN = new Color(30, 30, 30);
+    private static final Color D_BG_PANEL = new Color(45, 45, 48);
+    private static final Color D_TXT = new Color(230, 230, 230);
+    private static final Color D_BORDER = new Color(80, 80, 80);
+
+    // Getters dinámicos
+    public static Color getBackground() { return isDarkMode ? D_BG_MAIN : L_BG_MAIN; }
+    public static Color getPanelBackground() { return isDarkMode ? D_BG_PANEL : L_BG_PANEL; }
+    public static Color getText() { return isDarkMode ? D_TXT : L_TXT; }
+    public static Color getBorder() { return isDarkMode ? D_BORDER : L_BORDER; }
+    public static Color getAccent() { return new Color(70, 130, 180); } 
+    public static Color getDanger() { return new Color(220, 53, 69); } 
+    
+    // Método helper para campos de texto
+    public static Color getFieldBackground() { return isDarkMode ? new Color(60, 60, 60) : Color.WHITE; }
+
+    // --- ESTE ES EL MÉTODO QUE TE FALTABA ---
+    public static Color getHoverColor(boolean isDanger, boolean isAccent) {
+        if (isDanger) {
+            return new Color(200, 40, 50); // Rojo un poco más oscuro
+        }
+        if (isAccent) {
+            // Azul diferente según el modo para que se vea bien
+            return isDarkMode ? new Color(60, 100, 140) : new Color(235, 245, 255);
+        }
+        // Botón normal: Gris claro u oscuro según el tema
+        return isDarkMode ? new Color(70, 70, 70) : new Color(240, 240, 240);
+    }
 }
