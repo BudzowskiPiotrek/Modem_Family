@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.io.File;
 import javax.swing.JOptionPane;
 import metroMalaga.Controller.smtp.HandleSMTP;
+import metroMalaga.Model.Language;
 
 public class DownloadEmailTask implements Runnable {
 
@@ -23,9 +24,9 @@ public class DownloadEmailTask implements Runnable {
 	public void run() {
 		try {
 			backend.downloadEmailComplete(uid, dest);
-			JOptionPane.showMessageDialog(parentView, "Saved: " + dest.getAbsolutePath());
+			JOptionPane.showMessageDialog(parentView, Language.get(163) + dest.getAbsolutePath());
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(parentView, "Error: " + e.getMessage());
+			JOptionPane.showMessageDialog(parentView, Language.get(164) + e.getMessage());
 		}
 	}
 }

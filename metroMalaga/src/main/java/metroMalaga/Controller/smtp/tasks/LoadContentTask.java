@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.EmailModel;
+import metroMalaga.Model.Language;
 
 public class LoadContentTask implements Runnable {
 
@@ -29,12 +30,12 @@ public class LoadContentTask implements Runnable {
 		backend.loadFullContent(mail);
 		String att = "";
 		if (mail.hasAttachments()) {
-			att = "\n\n=== ATTACHMENTS ===\n";
+			att = Language.get(159);
 			for (String n : mail.getAttachmentNames())
 				att += "> " + n + "\n";
 		}
 		btnDownloadEmail.setEnabled(true);
-		txtViewer.setText("FROM: " + mail.getSender() + "\nSUBJECT: " + mail.getSubject()
+		txtViewer.setText(Language.get(157) + mail.getSender() + "\n" + Language.get(158) + mail.getSubject()
 				+ "\n--------------------------------\n" + mail.getContent() + att);
 		tableModel.fireTableRowsUpdated(row, row);
 	}
