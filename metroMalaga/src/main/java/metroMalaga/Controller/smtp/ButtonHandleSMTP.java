@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+import metroMalaga.Controller.ServiceSMTP;
 import metroMalaga.Controller.smtp.tasks.*;
 import metroMalaga.Model.EmailModel;
 import metroMalaga.View.PanelSMTP;
@@ -19,6 +20,7 @@ public class ButtonHandleSMTP implements ActionListener {
 
 	private final PanelSMTP view;
 	private final HandleSMTP backend;
+	private ServiceSMTP serviceSMTP;
 	private Runnable onReturnCallback;
 
 	private final JTextField txtTo;
@@ -37,6 +39,7 @@ public class ButtonHandleSMTP implements ActionListener {
 	public ButtonHandleSMTP(PanelSMTP view, HandleSMTP backend) {
 		this.view = view;
 		this.backend = backend;
+		this.serviceSMTP = new ServiceSMTP();
 
 		this.txtTo = view.getTxtTo();
 		this.txtSubject = view.getTxtSubject();
@@ -155,18 +158,25 @@ public class ButtonHandleSMTP implements ActionListener {
 	}
 
 	private void sendEmail() {
-		String recipient = txtTo.getText().trim();
-		String subject = txtSubject.getText().trim();
-		String body = txtBody.getText().trim();
+	    String recipient = txtTo.getText().trim();
+	    String subject = txtSubject.getText().trim();
+	    String body = txtBody.getText().trim();
 
-		if (recipient.isEmpty()) {
-			JOptionPane.showMessageDialog(view, "Recipient needed.");
-			return;
-		}
+	    if (recipient.isEmpty()) {
+	        JOptionPane.showMessageDialog(view, "Recipient needed.");
+	        return;
+	    }
 
-		EmailSenderTask task = new EmailSenderTask(backend, view, recipient, subject, body, attachmentsList,
-				btnSend, txtTo, txtSubject, txtBody, lblAttachedFile);
-		new Thread(task).start();
+	    if (!serviceSMTP.isEmailInWhitelist(recipient)) {
+	        JOptionPane.showMessageDialog(view, 
+	            "Error: The email " + recipient + " is not in the whitelist.", 
+	            "Email blocked", 
+	            JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
+	    EmailSenderTask task = new EmailSenderTask(backend, view, recipient, subject, body, attachmentsList,
+	            btnSend, txtTo, txtSubject, txtBody, lblAttachedFile);
+	    new Thread(task).start();
 	}
 
 	public void refreshInbox(boolean isAuto) {
