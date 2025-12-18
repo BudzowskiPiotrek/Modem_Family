@@ -95,12 +95,14 @@ public class PanelMenu extends JFrame {
 	public void applyTheme() {
 		boolean p5Mode = Common.isDarkMode;
 
-		Color bgColor = p5Mode ? P5_WHITE : Common.getBackground();
-		Color headerBg = p5Mode ? P5_WHITE : Common.getBackground();
+		// 👇 COLORES CORREGIDOS
+		Color bgColor = p5Mode ? P5_BLACK : new Color(230, 230, 230); // Fondo general
+		Color headerBg = p5Mode ? P5_BLACK : new Color(230, 230, 230); // Barra superior
 		Color btnBg = p5Mode ? P5_RED : Common.getPanelBackground();
 		Color btnFg = p5Mode ? P5_WHITE : Common.getText();
 		Color btnBorder = p5Mode ? P5_BLACK : Common.getBorder();
 
+		// Aplicar fondo principal
 		this.getContentPane().setBackground(bgColor);
 		if (topPanel != null) topPanel.setBackground(headerBg);
 
@@ -112,11 +114,27 @@ public class PanelMenu extends JFrame {
 			Color tabFg = p5Mode ? P5_WHITE : Color.BLACK;
 			Color tabSel = p5Mode ? P5_RED : Common.getAccent();
 			
+			// 👇 APLICAR COLORES AL TABBEDPANE
 			tabbedPane.setBackground(tabBg);
 			tabbedPane.setForeground(tabFg);
 			
+			// 👇 CAMBIAR EL FONDO DEL ÁREA DE CONTENIDO
 			UIManager.put("TabbedPane.selected", tabSel);
-			UIManager.put("TabbedPane.contentAreaColor", bgColor);
+			UIManager.put("TabbedPane.contentAreaColor", bgColor); // Fondo de pestañas
+			UIManager.put("TabbedPane.background", tabBg); // Fondo de cabeceras
+			UIManager.put("TabbedPane.darkShadow", tabBg);
+			UIManager.put("TabbedPane.light", tabBg);
+			UIManager.put("TabbedPane.highlight", tabBg);
+			UIManager.put("TabbedPane.shadow", tabBg);
+			
+			// 👇 ACTUALIZAR TODOS LOS PANELES INTERNOS
+			for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+				Component comp = tabbedPane.getComponentAt(i);
+				if (comp != null && comp instanceof JPanel) {
+					comp.setBackground(bgColor);
+				}
+			}
+			
 			SwingUtilities.updateComponentTreeUI(tabbedPane);
 		}
 		
