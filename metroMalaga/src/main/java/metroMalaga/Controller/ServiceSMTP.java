@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
+import metroMalaga.Model.Language;
 
 public class ServiceSMTP {
 
@@ -23,11 +24,12 @@ public class ServiceSMTP {
 				}
 			}
 		} catch (SQLException e) {
-			String errorMessage = "Error verifying whitelist: " + e.getMessage();
-			JOptionPane.showMessageDialog(null, errorMessage, "Error SQL", JOptionPane.ERROR_MESSAGE);
+			String errorMessage = Language.get(188) + e.getMessage();
+			JOptionPane.showMessageDialog(null, errorMessage, Language.get(187), JOptionPane.ERROR_MESSAGE);
 		}
 		return exists;
 	}
+	
 	public boolean isEmailInUsers(String email) {
 		boolean exists = false;
 		final String SQL = "SELECT COUNT(*) FROM usuarios WHERE correo_electronico = ?";
@@ -41,8 +43,8 @@ public class ServiceSMTP {
 				}
 			}
 		} catch (SQLException e) {
-			String errorMessage = "Error verifying whitelist: " + e.getMessage();
-			JOptionPane.showMessageDialog(null, errorMessage, "Error SQL", JOptionPane.ERROR_MESSAGE);
+			String errorMessage = Language.get(188) + e.getMessage();
+			JOptionPane.showMessageDialog(null, errorMessage, Language.get(187), JOptionPane.ERROR_MESSAGE);
 		}
 		return exists;
 	}

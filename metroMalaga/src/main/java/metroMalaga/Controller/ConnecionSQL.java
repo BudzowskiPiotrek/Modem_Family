@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
+import metroMalaga.Model.Language;
 
 public class ConnecionSQL {
 
@@ -17,8 +18,8 @@ public class ConnecionSQL {
 		try {
 			con = DriverManager.getConnection(RUTA, USUARIO, PASS);
 		} catch (SQLException e) {
-			String errorMessage = "CRITICAL DATABASE ERROR: Could not establish connection. Detail: " + e.getMessage();
-			JOptionPane.showMessageDialog(null, errorMessage, "SQL Connection Error", JOptionPane.ERROR_MESSAGE);
+			String errorMessage = Language.get(195) + e.getMessage();
+			JOptionPane.showMessageDialog(null, errorMessage, Language.get(196), JOptionPane.ERROR_MESSAGE);
 		}
 		return con;
 	}
