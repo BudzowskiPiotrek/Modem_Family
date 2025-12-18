@@ -28,9 +28,9 @@ public class ServiceFTP {
 	private String ftpServerHost;
 	private static final String NOTIFICATION_SERVER_HOST = "127.0.0.1";
 
-	public ServiceFTP(String user) {
+	public ServiceFTP() {
 		this.user = user;
-		this.conFTP = new ConnecionFTP(user);
+		this.conFTP = new ConnecionFTP();
 		this.ftpClient = conFTP.getConnection();
 
 		if (ftpClient == null) {
