@@ -16,6 +16,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- Language selector button -->
+    <TextView
+        android:id="@+id/btnLanguage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🌐"
+        android:textSize="32sp"
+        android:textColor="@color/p5_red"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="8dp"
+        android:elevation="8dp"
+        android:background="@color/p5_bg_primary"
+        app:layout_constraintTop_toBottomOf="@id/topBanner"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"/>
+
     <TextView
         android:id="@+id/tvTitle"
         style="@style/PersonaTitle"
@@ -25,6 +43,7 @@
         android:gravity="center"
         android:paddingTop="24dp"
         android:paddingBottom="8dp"
+        android:paddingEnd="56dp"
         android:textAllCaps="true"
         app:layout_constraintTop_toBottomOf="@id/topBanner"
         app:layout_constraintStart_toStartOf="parent"

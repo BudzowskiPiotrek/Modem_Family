@@ -12,8 +12,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UIStringsHelper {
 
-    private static final String COLLECTION = "ui_strings";
-
     public interface StringsLoadedListener {
         void onStringsLoaded();
 
@@ -21,8 +19,10 @@ public class UIStringsHelper {
     }
 
     public static void loadCommonStrings(FirebaseFirestore db, final TextView tvTitle, final Button btnBack,
-            final StringsLoadedListener listener) {
-        db.collection(COLLECTION).document("common")
+            final StringsLoadedListener listener, LanguageManager languageManager) {
+        String collection = languageManager.getUIStringsCollection();
+
+        db.collection(collection).document("common")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -32,7 +32,6 @@ public class UIStringsHelper {
 
                             if (document.exists()) {
                                 String btnBackText = document.getString("btn_back");
-                                String loading = document.getString("loading");
 
                                 if (btnBack != null && btnBackText != null) {
                                     btnBack.setText(btnBackText);

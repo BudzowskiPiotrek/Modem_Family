@@ -12,17 +12,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-public class LoginManualActivity extends AppCompatActivity {
+public class LoginManualActivity extends BaseManualActivity {
 
     private static final String TAG = "LoginManualActivity";
-    private FirebaseFirestore db;
 
     private TextView tvTitle;
     private ProgressBar progressBar;
@@ -39,13 +36,14 @@ public class LoginManualActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
-        db = FirebaseFirestore.getInstance();
-
         tvTitle = findViewById(R.id.tvSectionTitle);
         progressBar = findViewById(R.id.progressBar);
         scrollView = findViewById(R.id.scrollView);
         btnBack = findViewById(R.id.btnBack);
+        btnLanguage = findViewById(R.id.btnLanguage);
         contentLayout = findViewById(R.id.contentLayout);
+
+        setupLanguageButton(btnLanguage);
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,9 +52,6 @@ public class LoginManualActivity extends AppCompatActivity {
             }
         });
 
-        // Load UI strings
-        UIStringsHelper.loadCommonStrings(db, tvTitle, btnBack, null);
-
         loadData();
     }
 
@@ -64,7 +59,10 @@ public class LoginManualActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         scrollView.setVisibility(View.GONE);
 
-        db.collection("manual").document("login")
+        // Load UI strings
+        UIStringsHelper.loadCommonStrings(db, tvTitle, btnBack, null, languageManager);
+
+        db.collection(languageManager.getManualCollection()).document("login")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -150,5 +148,11 @@ public class LoginManualActivity extends AppCompatActivity {
         textView.setTextSize(14);
         textView.setTextColor(getResources().getColor(android.R.color.white));
         contentLayout.addView(textView);
+    }
+
+    @Override
+    protected void onLanguageChanged() {
+        // Reload content when language changes
+        loadData();
     }
 }

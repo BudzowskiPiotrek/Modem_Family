@@ -12,19 +12,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
-public class FtpActivity extends AppCompatActivity {
+public class FtpActivity extends BaseManualActivity {
 
     private static final String TAG = "FtpActivity";
-    private FirebaseFirestore db;
 
     private TextView tvTitle;
     private ProgressBar progressBar;
@@ -41,13 +38,14 @@ public class FtpActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
-        db = FirebaseFirestore.getInstance();
-
         tvTitle = findViewById(R.id.tvSectionTitle);
         progressBar = findViewById(R.id.progressBar);
         scrollView = findViewById(R.id.scrollView);
         btnBack = findViewById(R.id.btnBack);
+        btnLanguage = findViewById(R.id.btnLanguage);
         contentLayout = findViewById(R.id.contentLayout);
+
+        setupLanguageButton(btnLanguage);
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,9 +54,6 @@ public class FtpActivity extends AppCompatActivity {
             }
         });
 
-        // Load UI strings
-        UIStringsHelper.loadCommonStrings(db, tvTitle, btnBack, null);
-
         loadData();
     }
 
@@ -66,7 +61,10 @@ public class FtpActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         scrollView.setVisibility(View.GONE);
 
-        db.collection("manual").document("ftp")
+        // Load UI strings
+        UIStringsHelper.loadCommonStrings(db, tvTitle, btnBack, null, languageManager);
+
+        db.collection(languageManager.getManualCollection()).document("ftp")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -247,5 +245,10 @@ public class FtpActivity extends AppCompatActivity {
             textView.setTextColor(getResources().getColor(android.R.color.white));
             contentLayout.addView(textView);
         }
+    }
+
+    @Override
+    protected void onLanguageChanged() {
+        loadData();
     }
 }

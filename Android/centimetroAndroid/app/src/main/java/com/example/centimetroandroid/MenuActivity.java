@@ -7,20 +7,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-public class MenuActivity extends AppCompatActivity {
+public class MenuActivity extends BaseManualActivity {
 
     private static final String TAG = "MenuActivity";
-    private FirebaseFirestore db;
 
     private TextView tvTitle;
     private TextView tvSubtitle;
@@ -30,7 +26,6 @@ public class MenuActivity extends AppCompatActivity {
     private Button btnCorreos;
     private Button btnCrud;
     private Button btnFtp;
-    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +36,6 @@ public class MenuActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
-        db = FirebaseFirestore.getInstance();
-
         // Referencias a los elementos UI
         tvTitle = findViewById(R.id.tvTitle);
         tvSubtitle = findViewById(R.id.tvSubtitle);
@@ -52,6 +45,9 @@ public class MenuActivity extends AppCompatActivity {
         btnCorreos = findViewById(R.id.btnCorreos);
         btnCrud = findViewById(R.id.btnCrud);
         btnFtp = findViewById(R.id.btnFtp);
+        btnLanguage = findViewById(R.id.btnLanguage);
+
+        setupLanguageButton(btnLanguage);
 
         // Cargar strings desde Firebase
         loadUIStrings();
@@ -106,8 +102,16 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload strings when returning from other activities (in case language
+        // changed)
+        loadUIStrings();
+    }
+
     private void loadUIStrings() {
-        db.collection("ui_strings").document("menu")
+        db.collection(languageManager.getUIStringsCollection()).document("menu")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -149,5 +153,10 @@ public class MenuActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    protected void onLanguageChanged() {
+        loadUIStrings();
     }
 }

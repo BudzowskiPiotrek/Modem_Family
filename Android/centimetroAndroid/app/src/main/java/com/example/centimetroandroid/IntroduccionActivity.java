@@ -4,31 +4,30 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
-public class IntroduccionActivity extends AppCompatActivity {
+public class IntroduccionActivity extends BaseManualActivity {
 
     private static final String TAG = "IntroduccionActivity";
-    private FirebaseFirestore db;
 
     private TextView tvTitle;
-    private TextView tvContent;
     private ProgressBar progressBar;
     private ScrollView scrollView;
     private Button btnBack;
+    private LinearLayout contentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,17 +38,15 @@ public class IntroduccionActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
 
-        // Inicializar Firebase
-        db = FirebaseFirestore.getInstance();
-
-        // Inicializar vistas
         tvTitle = findViewById(R.id.tvSectionTitle);
-        tvContent = findViewById(R.id.tvSectionContent);
         progressBar = findViewById(R.id.progressBar);
         scrollView = findViewById(R.id.scrollView);
         btnBack = findViewById(R.id.btnBack);
+        btnLanguage = findViewById(R.id.btnLanguage);
+        contentLayout = findViewById(R.id.contentLayout);
 
-        // Configurar botón volver
+        setupLanguageButton(btnLanguage);
+
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,10 +54,6 @@ public class IntroduccionActivity extends AppCompatActivity {
             }
         });
 
-        // Cargar strings de UI
-        UIStringsHelper.loadCommonStrings(db, tvTitle, btnBack, null);
-
-        // Cargar datos de Firebase
         loadData();
     }
 
@@ -68,7 +61,10 @@ public class IntroduccionActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         scrollView.setVisibility(View.GONE);
 
-        db.collection("manual").document("introduccion")
+        // Load UI strings
+        UIStringsHelper.loadCommonStrings(db, tvTitle, btnBack, null, languageManager);
+
+        db.collection(languageManager.getManualCollection()).document("introduccion")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -81,15 +77,16 @@ public class IntroduccionActivity extends AppCompatActivity {
                             if (document.exists()) {
                                 scrollView.setVisibility(View.VISIBLE);
 
-                                // Obtener datos
                                 String title = document.getString("title");
                                 String paragraph1 = document.getString("paragraph1");
                                 String paragraph2 = document.getString("paragraph2");
                                 List<String> features = (List<String>) document.get("features");
                                 String paragraph3 = document.getString("paragraph3");
 
-                                // Mostrar título
                                 tvTitle.setText(title != null ? title : "Introduction");
+
+                                // Limpiar contenido previo
+                                contentLayout.removeAllViews();
 
                                 // Construir contenido
                                 StringBuilder content = new StringBuilder();
@@ -112,7 +109,7 @@ public class IntroduccionActivity extends AppCompatActivity {
                                     content.append(paragraph3);
                                 }
 
-                                tvContent.setText(content.toString());
+                                addTextToLayout(content.toString());
 
                             } else {
                                 Toast.makeText(IntroduccionActivity.this,
@@ -126,5 +123,23 @@ public class IntroduccionActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void addTextToLayout(String text) {
+        TextView textView = new TextView(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 8, 0, 8);
+        textView.setLayoutParams(params);
+        textView.setText(text);
+        textView.setTextSize(14);
+        textView.setTextColor(getResources().getColor(android.R.color.white));
+        contentLayout.addView(textView);
+    }
+
+    @Override
+    protected void onLanguageChanged() {
+        loadData();
     }
 }
