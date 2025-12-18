@@ -88,11 +88,10 @@ public class MenuManualActivity extends BaseManualActivity {
                                     addTextToLayout(description);
                                 }
 
-                                // Add menu images
-                                addImageToLayout(R.drawable.image14); // Navigation tabs
-                                addImageToLayout(R.drawable.image11); // Full menu view
+                                // Add menu images - only tabs bars and buttons
+                                addImageToLayout(R.drawable.image14); // Navigation tabs (light mode)
                                 addImageToLayout(R.drawable.image2); // Theme/language buttons
-                                addImageToLayout(R.drawable.image6); // Tabs close-up
+                                addImageToLayout(R.drawable.image6); // Navigation tabs (dark mode)
 
                                 if (features != null) {
                                     addTextToLayout(""); // Add some spacing
