@@ -89,6 +89,8 @@ public class PanelMenu extends JFrame {
 				((PanelSMTP) comp).updateAllTexts();
 			} else if (comp instanceof CrudFrontend) {
 				((CrudFrontend) comp).updateAllTexts();
+			} else if (comp instanceof PanelFTP) {
+				((PanelFTP) comp).updateAllTexts(); 
 			}
 		}
 	}
