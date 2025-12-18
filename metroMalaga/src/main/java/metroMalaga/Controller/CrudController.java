@@ -212,19 +212,36 @@ public class CrudController {
             } else {
                 String nombreColID = nombresColumnas.get(0);
 
+                // Build UPDATE statement, excluding password if it's the placeholder
                 StringBuilder sql = new StringBuilder("UPDATE " + tablaActual + " SET ");
+                List<String> valoresParaUpdate = new ArrayList<>();
+
+                boolean first = true;
                 for (int i = 1; i < nombresColumnas.size(); i++) {
-                    sql.append(nombresColumnas.get(i)).append("=?");
-                    if (i < nombresColumnas.size() - 1)
-                        sql.append(", ");
+                    String nombreCol = nombresColumnas.get(i);
+                    String valor = valores.get(i);
+
+                    // Skip password field if it's the placeholder (not changed)
+                    boolean isPasswordPlaceholder = tablaActual.equalsIgnoreCase("usuarios") &&
+                            nombreCol.equalsIgnoreCase("password") &&
+                            valor.equals("********");
+
+                    if (!isPasswordPlaceholder) {
+                        if (!first) {
+                            sql.append(", ");
+                        }
+                        sql.append(nombreCol).append("=?");
+                        valoresParaUpdate.add(valor);
+                        first = false;
+                    }
                 }
                 sql.append(" WHERE ").append(nombreColID).append("=?");
 
                 pst = conn.prepareStatement(sql.toString());
 
                 int paramIndex = 1;
-                for (int i = 1; i < valores.size(); i++) {
-                    pst.setString(paramIndex++, valores.get(i));
+                for (String valor : valoresParaUpdate) {
+                    pst.setString(paramIndex++, valor);
                 }
                 pst.setString(paramIndex, idRegistroEdicion);
             }
