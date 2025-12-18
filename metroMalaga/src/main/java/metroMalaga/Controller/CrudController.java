@@ -2,6 +2,7 @@ package metroMalaga.Controller;
 
 import metroMalaga.View.CrudFrontend;
 import metroMalaga.Controller.menu.MenuSelect;
+import metroMalaga.Model.Language;
 
 import javax.swing.*;
 import java.sql.*;
@@ -10,7 +11,6 @@ import java.util.List;
 
 public class CrudController {
 
-    // --- CONFIGURACIÓN BD ---
     private static final String URL = "jdbc:mysql://192.168.1.35/centimetromalaga";
     private static final String USER = "remoto";
     private static final String PASS = "proyecto";
@@ -19,10 +19,9 @@ public class CrudController {
     private Connection conn;
     private MenuSelect menuSelect;
 
-    // Estado actual
     private String tablaActual;
     private List<String> nombresColumnas; 
-    private String idRegistroEdicion = null; // Si es null, es INSERT. Si tiene valor, es UPDATE.
+    private String idRegistroEdicion = null;
 
     public CrudController(CrudFrontend vista, MenuSelect menuSelect) {
         this.vista = vista;
@@ -38,13 +37,12 @@ public class CrudController {
         try {
             conn = DriverManager.getConnection(URL, USER, PASS);
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(vista, "Error conectando a BD: " + e.getMessage());
+            JOptionPane.showMessageDialog(vista, Language.get(171) + e.getMessage());
             System.exit(1);
         }
     }
 
     private void inicializarEventos() {
-        // 1. Selección de Tabla en el menú lateral
         vista.getListaTablas().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 String seleccion = vista.getTablaSeleccionada();
@@ -57,25 +55,19 @@ public class CrudController {
             }
         });
 
-        // 2. Botón Guardar (Sirve para INSERT y UPDATE)
         vista.getBtnGuardar().addActionListener(e -> accionGuardar());
 
-        // 3. Botón Cancelar Edición
         vista.getBtnCancelarEdicion().addActionListener(e -> {
             idRegistroEdicion = null;
             vista.limpiarCamposFormulario();
         });
 
-        // 4. Acciones dentro de la tabla (Editar / Eliminar)
         vista.setAccionFilaListener(new CrudFrontend.AccionFilaListener() {
             @Override
             public void onEditar(int fila) {
-                // Recuperar datos visuales de la tabla
-                // Asumimos que la columna 0 es el ID
                 Object id = vista.getTableValueAt(fila, 0);
                 idRegistroEdicion = id.toString();
 
-                // Obtener toda la fila para rellenar el formulario
                 int numColumnas = nombresColumnas.size();
                 Object[] datosFila = new Object[numColumnas];
                 for (int i = 0; i < numColumnas; i++) {
@@ -97,41 +89,37 @@ public class CrudController {
         });
     }
 
-    // --- LÓGICA DE NEGOCIO ---
-
     private void cargarListaTablas() {
         try {
-            // 1. Obtener el nombre de la base de datos (Catálogo) de la conexión
             String catalogo = conn.getCatalog();
 
             if (catalogo == null) {
-                // Si getCatalog() devuelve null
                 JOptionPane.showMessageDialog(vista,
-                        "Error: No se pudo obtener el nombre del catálogo (Base de Datos).", "Error de Configuración",
+                        Language.get(172), 
+                        Language.get(173),
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // 2. Usar el Catálogo en getTables para filtrar por la BD específica
             DatabaseMetaData meta = conn.getMetaData();
             ResultSet rs = meta.getTables(catalogo, null, "%", new String[] { "TABLE" });
 
             List<String> tablas = new ArrayList<>();
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
-                // Filtrar tablas según permisos del usuario
                 if (canViewTable(tableName)) {
                     tablas.add(tableName);
                 }
             }
 
-            // La vista solo se encarga de mostrar
             vista.setListaTablas(tablas);
 
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(vista, "Error al cargar la lista de tablas: " + e.getMessage(),
-                    "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(vista, 
+                    Language.get(174) + e.getMessage(),
+                    Language.get(175), 
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -140,7 +128,6 @@ public class CrudController {
             return;
         nombresColumnas.clear();
 
-        // Sincronizar tabla actual con la vista para verificación de permisos
         vista.setTablaActual(tablaActual);
 
         try {
@@ -149,7 +136,6 @@ public class CrudController {
             ResultSetMetaData meta = rs.getMetaData();
             int colCount = meta.getColumnCount();
 
-            // Guardar nombres de columnas
             String[] arrayColumnas = new String[colCount];
             for (int i = 1; i <= colCount; i++) {
                 String nombreCol = meta.getColumnName(i);
@@ -157,7 +143,6 @@ public class CrudController {
                 arrayColumnas[i - 1] = nombreCol;
             }
 
-            // Guardar datos
             List<Object[]> datos = new ArrayList<>();
             while (rs.next()) {
                 Object[] fila = new Object[colCount];
@@ -167,13 +152,12 @@ public class CrudController {
                 datos.add(fila);
             }
 
-            // Actualizar Vista
             Object[][] matrizDatos = datos.toArray(new Object[0][]);
             vista.actualizarTablaDatos(arrayColumnas, matrizDatos);
             vista.generarFormulario(arrayColumnas);
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(vista, "Error cargando tabla: " + e.getMessage());
+            JOptionPane.showMessageDialog(vista, Language.get(176) + e.getMessage());
         }
     }
 
@@ -181,9 +165,10 @@ public class CrudController {
         if (tablaActual == null)
             return;
 
-        // Verificar permisos antes de insertar/actualizar
         if (!canModifyTable(tablaActual)) {
-            JOptionPane.showMessageDialog(vista, "No tienes permisos para modificar esta tabla.", "Acceso Denegado",
+            JOptionPane.showMessageDialog(vista, 
+                    Language.get(177), 
+                    Language.get(178),
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -193,7 +178,6 @@ public class CrudController {
         try {
             PreparedStatement pst;
             if (idRegistroEdicion == null) {
-                // --- MODO INSERTAR ---
                 StringBuilder sql = new StringBuilder("INSERT INTO " + tablaActual + " VALUES (");
                 for (int i = 0; i < valores.size(); i++) {
                     sql.append("?");
@@ -207,11 +191,9 @@ public class CrudController {
                     pst.setString(i + 1, valores.get(i));
                 }
             } else {
-                // --- MODO ACTUALIZAR ---
                 String nombreColID = nombresColumnas.get(0);
 
                 StringBuilder sql = new StringBuilder("UPDATE " + tablaActual + " SET ");
-                // Empezamos desde 1 para no actualizar el ID 
                 for (int i = 1; i < nombresColumnas.size(); i++) {
                     sql.append(nombresColumnas.get(i)).append("=?");
                     if (i < nombresColumnas.size() - 1)
@@ -221,55 +203,52 @@ public class CrudController {
 
                 pst = conn.prepareStatement(sql.toString());
 
-                // Llenar parámetros SET
                 int paramIndex = 1;
                 for (int i = 1; i < valores.size(); i++) {
                     pst.setString(paramIndex++, valores.get(i));
                 }
-                // Llenar parámetro WHERE
                 pst.setString(paramIndex, idRegistroEdicion);
             }
 
             pst.executeUpdate();
 
-            // Refrescar interfaz
             idRegistroEdicion = null;
             vista.limpiarCamposFormulario();
             cargarDatosTabla();
-            JOptionPane.showMessageDialog(vista, "Operación realizada con éxito");
+            JOptionPane.showMessageDialog(vista, Language.get(179));
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(vista, "Error SQL: " + e.getMessage());
+            JOptionPane.showMessageDialog(vista, Language.get(180) + e.getMessage());
         }
     }
 
     private void accionEliminar(int fila) {
-        // Verificar permisos antes de eliminar
         if (!canModifyTable(tablaActual)) {
-            JOptionPane.showMessageDialog(vista, "No tienes permisos para eliminar de esta tabla.", "Acceso Denegado",
+            JOptionPane.showMessageDialog(vista, 
+                    Language.get(181), 
+                    Language.get(178),
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Asumimos que la Columna 0 es la Primary Key
         Object id = vista.getTableValueAt(fila, 0);
         String nombreColID = nombresColumnas.get(0);
 
-        int confirm = JOptionPane.showConfirmDialog(vista, "¿Eliminar registro con ID " + id + "?");
+        int confirm = JOptionPane.showConfirmDialog(vista, 
+                Language.get(182) + id + Language.get(183));
+        
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 String sql = "DELETE FROM " + tablaActual + " WHERE " + nombreColID + " = ?";
                 PreparedStatement pst = conn.prepareStatement(sql);
                 pst.setString(1, id.toString());
                 pst.executeUpdate();
-                cargarDatosTabla(); // Recargar
+                cargarDatosTabla();
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(vista, "Error eliminando: " + e.getMessage());
+                JOptionPane.showMessageDialog(vista, Language.get(176) + e.getMessage());
             }
         }
     }
-
-    // --- MÉTODOS DE PERMISOS ---
 
     private boolean canViewTable(String tableName) {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
@@ -279,10 +258,8 @@ public class CrudController {
         String permiso = vista.getUser().getRol().getPermiso();
 
         if ("admin".equalsIgnoreCase(permiso)) {
-            // Admin puede ver todas las tablas
             return true;
         } else if ("usuario".equalsIgnoreCase(permiso)) {
-            // Usuario solo puede ver ciertas tablas
             return tableName.equalsIgnoreCase("cocheras") ||
                     tableName.equalsIgnoreCase("estaciones") ||
                     tableName.equalsIgnoreCase("lineas") ||
@@ -293,10 +270,6 @@ public class CrudController {
         return false;
     }
 
-    /**
-     * Verifica si el usuario puede modificar (insertar, actualizar, eliminar) una
-     * tabla
-     */
     private boolean canModifyTable(String tableName) {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
             return false;
@@ -305,19 +278,14 @@ public class CrudController {
         String permiso = vista.getUser().getRol().getPermiso();
 
         if ("usuario".equalsIgnoreCase(permiso)) {
-            // Usuario no puede modificar ninguna tabla
             return false;
         } else if ("admin".equalsIgnoreCase(permiso)) {
-            // Admin puede modificar todas las tablas excepto log
             return !tableName.equalsIgnoreCase("logs");
         }
 
         return false;
     }
 
-    /**
-     * Obtiene el permiso del usuario actual
-     */
     public String getUserPermission() {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
             return "";
