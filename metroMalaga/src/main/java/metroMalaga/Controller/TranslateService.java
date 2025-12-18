@@ -31,8 +31,6 @@ public class TranslateService {
                 translations.put(rs.getInt("id"), rs.getString("texto"));
             }
 
-            System.out.println("✓ Cargadas " + translations.size() + " traducciones en " + languageColumn);
-
         } catch (SQLException e) {
             System.err.println("Error cargando traducciones: " + e.getMessage());
             e.printStackTrace();

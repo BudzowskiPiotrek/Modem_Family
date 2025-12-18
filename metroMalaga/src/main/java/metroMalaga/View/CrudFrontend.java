@@ -35,7 +35,6 @@ public class CrudFrontend extends JPanel {
     private JButton btnGuardar;
     private JButton btnVolver;
     private JButton btnCancelarEdicion;
-    private JButton btnLanguage;
     private JLabel lblEstadoFormulario;
 
     private JScrollPane scrollTablasPanel;
@@ -55,38 +54,6 @@ public class CrudFrontend extends JPanel {
         crearMenuLateral();
         crearPanelCentral();
         crearPanelInferior();
-        createLanguageButton();
-    }
-
-    private void createLanguageButton() {
-        String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
-        btnLanguage = new JButton(langText);
-        btnLanguage.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnLanguage.setBackground(COLOR_PRIMARIO);
-        btnLanguage.setForeground(Color.WHITE);
-        btnLanguage.setBorder(new CompoundBorder(
-            new LineBorder(COLOR_PRIMARIO, 1, true),
-            new EmptyBorder(5, 10, 5, 10)
-        ));
-        btnLanguage.setFocusPainted(false);
-        btnLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnLanguage.addActionListener(e -> toggleLanguage());
-        
-        JPanel languagePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        languagePanel.setBackground(COLOR_FONDO);
-        languagePanel.add(btnLanguage);
-        add(languagePanel, BorderLayout.NORTH);
-    }
-
-    private void toggleLanguage() {
-        if (Language.getCurrentLanguage().equals("espanol")) {
-            Language.setEnglish();
-            btnLanguage.setText("EN");
-        } else {
-            Language.setSpanish();
-            btnLanguage.setText("ES");
-        }
-        updateAllTexts();
     }
 
     public void updateAllTexts() {
@@ -294,10 +261,6 @@ public class CrudFrontend extends JPanel {
 
     public JButton getBtnVolver() {
         return btnVolver;
-    }
-
-    public JButton getBtnLanguage() {
-        return btnLanguage;
     }
 
     public String getTablaSeleccionada() {
