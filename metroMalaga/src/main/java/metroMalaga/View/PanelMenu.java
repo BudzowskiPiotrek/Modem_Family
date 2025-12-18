@@ -17,8 +17,7 @@ public class PanelMenu extends JFrame {
 	private JLabel lblMessage;
 	private JButton btnConfirm, btnCancel;
 
-	private final Color P5_RED = new Color(220, 20, 60);
-	private final Color P5_BRIGHT_RED = new Color(255, 0, 0);
+	private final Color P5_RED = new Color(255, 0, 0);
 	private final Color P5_BLACK = new Color(20, 20, 20);
 	private final Color P5_WHITE = new Color(240, 240, 240);
 
@@ -40,7 +39,7 @@ public class PanelMenu extends JFrame {
 
 	private void propertiesWindow() {
 		this.setLayout(new BorderLayout());
-		this.getContentPane().setBackground(P5_RED);
+		this.getContentPane().setBackground(P5_WHITE);
 
 		this.setSize(1100, 750);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -55,7 +54,7 @@ public class PanelMenu extends JFrame {
 		String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
 		btnLanguage = new JButton(langText);
 		btnLanguage.setFont(new Font("Dialog", Font.BOLD, 14));
-		btnLanguage.setBackground(P5_BRIGHT_RED);
+		btnLanguage.setBackground(P5_RED);
 		btnLanguage.setForeground(P5_WHITE);
 		btnLanguage.setBorder(new MatteBorder(2, 2, 4, 4, P5_BLACK));
 		btnLanguage.setFocusPainted(false);
@@ -64,7 +63,7 @@ public class PanelMenu extends JFrame {
 		btnLanguage.addActionListener(e -> toggleLanguage());
 
 		JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-		topPanel.setBackground(P5_RED);
+		topPanel.setBackground(P5_WHITE);
 		topPanel.add(btnLanguage);
 
 		this.add(topPanel, BorderLayout.NORTH);
@@ -131,24 +130,24 @@ public class PanelMenu extends JFrame {
 	}
 
 	private void styleTabPane() {
-		UIManager.put("TabbedPane.selected", P5_BRIGHT_RED);
+		UIManager.put("TabbedPane.selected", P5_RED);
 		UIManager.put("TabbedPane.background", P5_BLACK);
 		UIManager.put("TabbedPane.foreground", P5_WHITE);
-		UIManager.put("TabbedPane.focus", P5_BRIGHT_RED);
-		UIManager.put("TabbedPane.contentAreaColor", P5_RED);
-		UIManager.put("TabbedPane.borderHightlightColor", P5_BRIGHT_RED);
+		UIManager.put("TabbedPane.focus", P5_RED);
+		UIManager.put("TabbedPane.contentAreaColor", P5_WHITE);
+		UIManager.put("TabbedPane.borderHightlightColor", P5_WHITE);
 
 		SwingUtilities.updateComponentTreeUI(tabbedPane);
 	}
 
 	private JPanel createExitPanel() {
 		JPanel exitPanel = new JPanel(new GridBagLayout());
-		exitPanel.setBackground(P5_RED);
+		exitPanel.setBackground(P5_WHITE);
 
 		JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		contentPanel.setBackground(P5_BLACK);
-		contentPanel.setBorder(new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED));
+		contentPanel.setBorder(new MatteBorder(4, 4, 8, 6, P5_RED));
 
 		lblMessage = new JLabel(Language.get(96));
 		lblMessage.setFont(new Font("Dialog", Font.BOLD, 24));
@@ -160,7 +159,7 @@ public class PanelMenu extends JFrame {
 		buttonPanel.setBackground(P5_BLACK);
 
 		btnConfirm = new JButton(Language.get(97));
-		styleExitButton(btnConfirm, P5_BRIGHT_RED, P5_WHITE);
+		styleExitButton(btnConfirm, P5_RED, P5_WHITE);
 		btnConfirm.addActionListener(e -> System.exit(0));
 
 		btnCancel = new JButton(Language.get(98));
@@ -185,7 +184,7 @@ public class PanelMenu extends JFrame {
 		btn.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 18));
 		btn.setFocusPainted(false);
 		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		btn.setBorder(new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED));
+		btn.setBorder(new MatteBorder(4, 4, 8, 6, P5_RED));
 
 		btn.addMouseListener(new java.awt.event.MouseAdapter() {
 			Color originalBg = btn.getBackground();
@@ -202,7 +201,7 @@ public class PanelMenu extends JFrame {
 			public void mouseExited(java.awt.event.MouseEvent e) {
 				btn.setBackground(originalBg);
 				btn.setForeground(originalFg);
-				btn.setBorder(new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED));
+				btn.setBorder(new MatteBorder(4, 4, 8, 6, P5_RED));
 			}
 		});
 	}
