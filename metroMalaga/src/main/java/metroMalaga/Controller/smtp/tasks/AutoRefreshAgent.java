@@ -14,7 +14,7 @@ public class AutoRefreshAgent implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(1000);
 				controller.refreshInbox(true);
 			} catch (InterruptedException e) {
 				break;

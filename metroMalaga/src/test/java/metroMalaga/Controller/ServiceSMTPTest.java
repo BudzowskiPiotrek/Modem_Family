@@ -10,7 +10,7 @@ import java.util.List;
 import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.EmailModel;
 
-public class HandleSMTPTest {
+public class ServiceSMTPTest {
 
     private HandleSMTP handleSMTP;
     

@@ -11,7 +11,7 @@ import java.util.List;
 public class CrudController {
 
     // --- CONFIGURACIÓN BD ---
-    private static final String URL = "jdbc:mysql://192.168.1.32:3306/centimetromalaga";
+    private static final String URL = "jdbc:mysql://192.168.1.35:3306/centimetromalaga";
     private static final String USER = "remoto";
     private static final String PASS = "proyecto";
 
