@@ -9,6 +9,7 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import metroMalaga.Controller.CrudController;
 import metroMalaga.Controller.ServiceFTP;
+import metroMalaga.Controller.ServiceLogin;
 import metroMalaga.Controller.ftp.*;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
@@ -17,14 +18,14 @@ import metroMalaga.View.*;
 public class MenuSelect implements ChangeListener {
 	private final PanelMenu panelMenu;
 	private final JTabbedPane tabbedPane;
-	private final Usuario user;
+	private Usuario user; // Not final - can be refreshed from database
 
 	private int previousTabIndex = -1;
 
 	private CrudFrontend crudPanel;
 	private PanelFTP ftpPanel;
 	private PanelSMTP smtpPanel;
-	
+
 	private ServiceFTP ftpService;
 	private CrudController crudController;
 
@@ -35,25 +36,28 @@ public class MenuSelect implements ChangeListener {
 		tabbedPane.addChangeListener(this);
 	}
 
-	public Usuario getUser() { return user; }
+	public Usuario getUser() {
+		return user;
+	}
 
 	public void updateActivePanelTheme() {
-		
+
 		if (crudPanel != null && tabbedPane.getSelectedComponent() == crudPanel) {
 			crudPanel.applyTheme();
-		} 
-		else if (ftpPanel != null && tabbedPane.getSelectedComponent() == ftpPanel) {
-			ftpPanel.applyTheme(); 
-		} 
-		else if (smtpPanel != null && tabbedPane.getSelectedComponent() == smtpPanel) {
-			smtpPanel.applyTheme(); 
+		} else if (ftpPanel != null && tabbedPane.getSelectedComponent() == ftpPanel) {
+			ftpPanel.applyTheme();
+		} else if (smtpPanel != null && tabbedPane.getSelectedComponent() == smtpPanel) {
+			smtpPanel.applyTheme();
 		}
 	}
-	
+
 	public void updateActivePanelText() {
-		if (crudPanel != null) crudPanel.updateAllTexts();
-		if (ftpPanel != null) ftpPanel.updateAllTexts();
-		if (smtpPanel != null) smtpPanel.updateAllTexts();
+		if (crudPanel != null)
+			crudPanel.updateAllTexts();
+		if (ftpPanel != null)
+			ftpPanel.updateAllTexts();
+		if (smtpPanel != null)
+			smtpPanel.updateAllTexts();
 	}
 
 	@Override
@@ -65,10 +69,17 @@ public class MenuSelect implements ChangeListener {
 		}
 
 		switch (selectedIndex) {
-			case 0: initializeCRUD(); break;
-			case 1: initializeFTP(); break;
-			case 2: initializeSMTP(); break;
-			case 3: break;
+			case 0:
+				initializeCRUD();
+				break;
+			case 1:
+				initializeFTP();
+				break;
+			case 2:
+				initializeSMTP();
+				break;
+			case 3:
+				break;
 		}
 		previousTabIndex = selectedIndex;
 	}
@@ -95,8 +106,16 @@ public class MenuSelect implements ChangeListener {
 
 			@Override
 			protected Void doInBackground() throws Exception {
+				// IMPORTANT: Refresh user data from database to get current role permissions
+				publish("Actualizando permisos...");
+				ServiceLogin loginService = new ServiceLogin();
+				Usuario refreshedUser = loginService.refreshUserData(user);
+				if (refreshedUser != null) {
+					user = refreshedUser;
+				}
+
 				publish("Conectando al servidor FTP...");
-				service = new ServiceFTP();
+				service = new ServiceFTP(user.getUsernameApp(), user.getRol());
 
 				publish("Listando archivos...");
 				FTPFile[] fileArray = service.listAllFiles();
@@ -160,9 +179,9 @@ public class MenuSelect implements ChangeListener {
 	private void initializeSMTP() {
 		System.out.println("Init SMTP...");
 		smtpPanel = new PanelSMTP(user);
-		
+
 		smtpPanel.setOnReturnCallback(() -> switchToTab(0));
-		
+
 		tabbedPane.setComponentAt(2, smtpPanel);
 	}
 
@@ -189,7 +208,7 @@ public class MenuSelect implements ChangeListener {
 			case 2:
 				if (smtpPanel != null) {
 					System.out.println("Cleaning SMTP...");
-					tabbedPane.setComponentAt(2, null); 
+					tabbedPane.setComponentAt(2, null);
 					smtpPanel = null;
 				}
 				break;
