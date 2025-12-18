@@ -14,7 +14,9 @@ public class ConnecionFTP {
 	public ConnecionFTP(String tipo) {
 		if (tipo.equalsIgnoreCase("admin")) {
 			this.user = "proyecto";
-		} else if (tipo.equalsIgnoreCase("LECTURA")) {
+		} else if (tipo.equalsIgnoreCase("usuario")) {
+			this.user = "write";
+		} else if (tipo.equalsIgnoreCase("super")) {
 			this.user = "read";
 		}
 	}
