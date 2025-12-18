@@ -5,7 +5,7 @@ import javax.swing.JOptionPane;
 import org.apache.commons.net.ftp.FTPClient;
 
 public class ConnecionFTP {
-	private static final String SERVER = "192.168.1.32";
+	private static final String SERVER = "192.168.1.35";
 	private static final int PORT = 21;
 	private String user;
 	private static final String PASS = "proyecto";
