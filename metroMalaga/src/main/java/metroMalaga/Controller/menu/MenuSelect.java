@@ -24,7 +24,7 @@ public class MenuSelect implements ChangeListener {
 	private CrudFrontend crudPanel;
 	private PanelFTP ftpPanel;
 	private PanelSMTP smtpPanel;
-	
+
 	private ServiceFTP ftpService;
 	private CrudController crudController;
 
@@ -35,25 +35,28 @@ public class MenuSelect implements ChangeListener {
 		tabbedPane.addChangeListener(this);
 	}
 
-	public Usuario getUser() { return user; }
+	public Usuario getUser() {
+		return user;
+	}
 
 	public void updateActivePanelTheme() {
-		
+
 		if (crudPanel != null && tabbedPane.getSelectedComponent() == crudPanel) {
 			// crudPanel.applyTheme();
-		} 
-		else if (ftpPanel != null && tabbedPane.getSelectedComponent() == ftpPanel) {
-			// ftpPanel.applyTheme(); 
-		} 
-		else if (smtpPanel != null && tabbedPane.getSelectedComponent() == smtpPanel) {
-			smtpPanel.applyTheme(); 
+		} else if (ftpPanel != null && tabbedPane.getSelectedComponent() == ftpPanel) {
+			// ftpPanel.applyTheme();
+		} else if (smtpPanel != null && tabbedPane.getSelectedComponent() == smtpPanel) {
+			smtpPanel.applyTheme();
 		}
 	}
-	
+
 	public void updateActivePanelText() {
-		if (crudPanel != null) crudPanel.updateAllTexts();
-		if (ftpPanel != null) ftpPanel.updateAllTexts();
-		if (smtpPanel != null) smtpPanel.updateAllTexts();
+		if (crudPanel != null)
+			crudPanel.updateAllTexts();
+		if (ftpPanel != null)
+			ftpPanel.updateAllTexts();
+		if (smtpPanel != null)
+			smtpPanel.updateAllTexts();
 	}
 
 	@Override
@@ -65,10 +68,17 @@ public class MenuSelect implements ChangeListener {
 		}
 
 		switch (selectedIndex) {
-			case 0: initializeCRUD(); break;
-			case 1: initializeFTP(); break;
-			case 2: initializeSMTP(); break;
-			case 3: break;
+			case 0:
+				initializeCRUD();
+				break;
+			case 1:
+				initializeFTP();
+				break;
+			case 2:
+				initializeSMTP();
+				break;
+			case 3:
+				break;
 		}
 		previousTabIndex = selectedIndex;
 	}
@@ -160,9 +170,9 @@ public class MenuSelect implements ChangeListener {
 	private void initializeSMTP() {
 		System.out.println("Init SMTP...");
 		smtpPanel = new PanelSMTP(user);
-		
+
 		smtpPanel.setOnReturnCallback(() -> switchToTab(0));
-		
+
 		tabbedPane.setComponentAt(2, smtpPanel);
 	}
 
@@ -189,7 +199,7 @@ public class MenuSelect implements ChangeListener {
 			case 2:
 				if (smtpPanel != null) {
 					System.out.println("Cleaning SMTP...");
-					tabbedPane.setComponentAt(2, null); 
+					tabbedPane.setComponentAt(2, null);
 					smtpPanel = null;
 				}
 				break;
