@@ -48,7 +48,7 @@ public class ServiceLoginTest {
 
 	@Test
 	public void testObtenerDatosUsuario() {
-		Usuario usuario = service.getUserData("admin");
+		Usuario usuario = service.getUserData("admin","");
 
 		assertNotNull(usuario);
 		assertEquals("admin", usuario.getUsernameApp());
@@ -58,7 +58,7 @@ public class ServiceLoginTest {
 
 	@Test
 	public void testObtenerUsuarioNoExiste() {
-		Usuario usuario = service.getUserData("usuarioInexistente999");
+		Usuario usuario = service.getUserData("usuarioInexistente999","");
 		assertNull(usuario);
 	}
 
@@ -78,7 +78,7 @@ public class ServiceLoginTest {
 
 	@Test
 	public void testUsuarioTieneRolValido() {
-		Usuario usuario = service.getUserData("admin");
+		Usuario usuario = service.getUserData("admin","");
 
 		assertNotNull(usuario);
 		assertNotNull(usuario.getRol());
