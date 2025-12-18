@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 
+import metroMalaga.Controller.Common;
 import metroMalaga.Controller.menu.MenuSelect;
 import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
@@ -13,7 +14,11 @@ public class PanelMenu extends JFrame {
 	private Usuario user;
 	private JTabbedPane tabbedPane;
 	private MenuSelect menuController;
+	
 	private JButton btnLanguage;
+	private JButton btnDarkMode; 
+	private JPanel topPanel; 
+
 	private JLabel lblMessage;
 	private JButton btnConfirm, btnCancel;
 
@@ -26,8 +31,10 @@ public class PanelMenu extends JFrame {
 
 		propertiesWindow();
 		createTabbedPane();
-		createLanguageButton();
+		createTopBar();
 		setTitle();
+		
+		applyTheme();
 
 		this.setVisible(true);
 	}
@@ -39,8 +46,6 @@ public class PanelMenu extends JFrame {
 
 	private void propertiesWindow() {
 		this.setLayout(new BorderLayout());
-		this.getContentPane().setBackground(P5_WHITE);
-
 		this.setSize(1100, 750);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
@@ -50,23 +55,97 @@ public class PanelMenu extends JFrame {
 		this.setTitle(Language.get(91));
 	}
 
-	private void createLanguageButton() {
+	private void createTopBar() {
+		topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+		
 		String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
 		btnLanguage = new JButton(langText);
-		btnLanguage.setFont(new Font("Dialog", Font.BOLD, 14));
-		btnLanguage.setBackground(P5_RED);
-		btnLanguage.setForeground(P5_WHITE);
-		btnLanguage.setBorder(new MatteBorder(2, 2, 4, 4, P5_BLACK));
-		btnLanguage.setFocusPainted(false);
-		btnLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		btnLanguage.setPreferredSize(new Dimension(80, 35));
+		styleTopButton(btnLanguage);
 		btnLanguage.addActionListener(e -> toggleLanguage());
 
-		JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-		topPanel.setBackground(P5_WHITE);
+		btnDarkMode = new JButton(Common.isDarkMode ? "☀️" : "🌑");
+		styleTopButton(btnDarkMode);
+		btnDarkMode.addActionListener(e -> toggleTheme());
+
 		topPanel.add(btnLanguage);
+		topPanel.add(btnDarkMode);
 
 		this.add(topPanel, BorderLayout.NORTH);
+	}
+	
+	private void styleTopButton(JButton btn) {
+		btn.setFont(new Font("Dialog", Font.BOLD, 14));
+		btn.setFocusPainted(false);
+		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		btn.setPreferredSize(new Dimension(80, 35));
+	}
+
+	private void toggleTheme() {
+		Common.isDarkMode = !Common.isDarkMode;
+		
+		btnDarkMode.setText(Common.isDarkMode ? "☀️" : "🌑");
+		
+		applyTheme();
+		
+		if (menuController != null) {
+			menuController.updateActivePanelTheme();
+		}
+	}
+
+	public void applyTheme() {
+		boolean p5Mode = Common.isDarkMode;
+
+		// 👇 COLORES CORREGIDOS
+		Color bgColor = p5Mode ? P5_BLACK : new Color(230, 230, 230); // Fondo general
+		Color headerBg = p5Mode ? P5_BLACK : new Color(230, 230, 230); // Barra superior
+		Color btnBg = p5Mode ? P5_RED : Common.getPanelBackground();
+		Color btnFg = p5Mode ? P5_WHITE : Common.getText();
+		Color btnBorder = p5Mode ? P5_BLACK : Common.getBorder();
+
+		// Aplicar fondo principal
+		this.getContentPane().setBackground(bgColor);
+		if (topPanel != null) topPanel.setBackground(headerBg);
+
+		updateButtonStyle(btnLanguage, btnBg, btnFg, btnBorder);
+		updateButtonStyle(btnDarkMode, btnBg, btnFg, btnBorder);
+
+		if (tabbedPane != null) {
+			Color tabBg = p5Mode ? P5_BLACK : new Color(230, 230, 230);
+			Color tabFg = p5Mode ? P5_WHITE : Color.BLACK;
+			Color tabSel = p5Mode ? P5_RED : Common.getAccent();
+			
+			// 👇 APLICAR COLORES AL TABBEDPANE
+			tabbedPane.setBackground(tabBg);
+			tabbedPane.setForeground(tabFg);
+			
+			// 👇 CAMBIAR EL FONDO DEL ÁREA DE CONTENIDO
+			UIManager.put("TabbedPane.selected", tabSel);
+			UIManager.put("TabbedPane.contentAreaColor", bgColor); // Fondo de pestañas
+			UIManager.put("TabbedPane.background", tabBg); // Fondo de cabeceras
+			UIManager.put("TabbedPane.darkShadow", tabBg);
+			UIManager.put("TabbedPane.light", tabBg);
+			UIManager.put("TabbedPane.highlight", tabBg);
+			UIManager.put("TabbedPane.shadow", tabBg);
+			
+			// 👇 ACTUALIZAR TODOS LOS PANELES INTERNOS
+			for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+				Component comp = tabbedPane.getComponentAt(i);
+				if (comp != null && comp instanceof JPanel) {
+					comp.setBackground(bgColor);
+				}
+			}
+			
+			SwingUtilities.updateComponentTreeUI(tabbedPane);
+		}
+		
+		this.repaint();
+	}
+
+	private void updateButtonStyle(JButton btn, Color bg, Color fg, Color border) {
+		if (btn == null) return;
+		btn.setBackground(bg);
+		btn.setForeground(fg);
+		btn.setBorder(new MatteBorder(2, 2, 4, 4, border));
 	}
 
 	private void toggleLanguage() {
@@ -102,9 +181,9 @@ public class PanelMenu extends JFrame {
 		tabbedPane.setTitleAt(2, Language.get(94));
 		tabbedPane.setTitleAt(3, Language.get(95));
 		
-		lblMessage.setText(Language.get(96));
-		btnConfirm.setText(Language.get(97));
-		btnCancel.setText(Language.get(98));
+		if (lblMessage != null) lblMessage.setText(Language.get(96));
+		if (btnConfirm != null) btnConfirm.setText(Language.get(97));
+		if (btnCancel != null) btnCancel.setText(Language.get(98));
 		
 		revalidate();
 		repaint();
@@ -112,9 +191,6 @@ public class PanelMenu extends JFrame {
 
 	private void createTabbedPane() {
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-
-		tabbedPane.setBackground(P5_BLACK);
-		tabbedPane.setForeground(P5_WHITE);
 		tabbedPane.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 16));
 
 		menuController = new MenuSelect(this, tabbedPane, user);
@@ -124,25 +200,12 @@ public class PanelMenu extends JFrame {
 		tabbedPane.addTab(Language.get(94), null);
 		tabbedPane.addTab(Language.get(95), createExitPanel());
 
-		styleTabPane();
-
 		this.add(tabbedPane, BorderLayout.CENTER);
-	}
-
-	private void styleTabPane() {
-		UIManager.put("TabbedPane.selected", P5_RED);
-		UIManager.put("TabbedPane.background", P5_BLACK);
-		UIManager.put("TabbedPane.foreground", P5_WHITE);
-		UIManager.put("TabbedPane.focus", P5_RED);
-		UIManager.put("TabbedPane.contentAreaColor", P5_WHITE);
-		UIManager.put("TabbedPane.borderHightlightColor", P5_WHITE);
-
-		SwingUtilities.updateComponentTreeUI(tabbedPane);
 	}
 
 	private JPanel createExitPanel() {
 		JPanel exitPanel = new JPanel(new GridBagLayout());
-		exitPanel.setBackground(P5_WHITE);
+		exitPanel.setOpaque(false);
 
 		JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
