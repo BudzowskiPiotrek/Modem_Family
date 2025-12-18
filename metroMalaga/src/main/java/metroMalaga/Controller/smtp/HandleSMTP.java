@@ -3,7 +3,7 @@ package metroMalaga.Controller.smtp;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import metroMalaga.Model.EmailModel;
-
+import metroMalaga.Model.Language;
 import java.io.*;
 import java.util.*;
 
@@ -11,21 +11,32 @@ public class HandleSMTP {
 
     private String userEmail;
     private String appPassword;
+    private boolean credentialsValid = true;
 
     public boolean login(String email, String password) {
         this.userEmail = email;
         this.appPassword = password;
+        this.credentialsValid = true;
         return true;
+    }
+    
+    public boolean isCredentialsValid() {
+        return credentialsValid;
     }
 
     public List<EmailModel> fetchEmails() {
+        if (!credentialsValid) return new ArrayList<>();
+
         List<EmailModel> emailList = new ArrayList<>();
+        Store store = null;
+        Folder emailFolder = null;
+
         try {
             Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
-            Store store = session.getStore("imaps");
+            store = session.getStore("imaps");
             store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
 
-            Folder emailFolder = store.getFolder("INBOX");
+            emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);
 
             int totalMessages = emailFolder.getMessageCount();
@@ -49,7 +60,8 @@ public class HandleSMTP {
                     String uid = "";
                     if (msg instanceof MimeMessage) uid = ((MimeMessage) msg).getMessageID();
 
-                    String bodyText = "[Click to load content...]";
+                    String bodyText = Language.get(160);
+
                     EmailModel email = new EmailModel(msg.getMessageNumber(), sender, msg.getSubject(), bodyText);
                     email.setUniqueId(uid);
                     email.setRead(msg.isSet(Flags.Flag.SEEN));
@@ -57,22 +69,36 @@ public class HandleSMTP {
                     emailList.add(email);
                 }
             }
-            emailFolder.close(false);
-            store.close();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (AuthenticationFailedException e) {
+            System.err.println("Auth Failed.");
+            this.credentialsValid = false;
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        } finally {
+            try {
+                if (emailFolder != null && emailFolder.isOpen()) emailFolder.close(false);
+                if (store != null && store.isConnected()) store.close();
+            } catch (Exception ex) {}
+        }
         return emailList;
     }
 
     public void loadFullContent(EmailModel emailModel) {
+        if (!credentialsValid) return;
+        Store store = null;
+        Folder emailFolder = null;
         try {
             Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
-            Store store = session.getStore("imaps");
+            store = session.getStore("imaps");
             store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
 
-            Folder emailFolder = store.getFolder("INBOX");
+            emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);
 
-            Message[] messages = emailFolder.getMessages();
+            int totalMessages = emailFolder.getMessageCount();
+            int start = Math.max(1, totalMessages - 50);
+            Message[] messages = emailFolder.getMessages(start, totalMessages);
+            
             FetchProfile fp = new FetchProfile();
             fp.add(FetchProfile.Item.ENVELOPE);
             emailFolder.fetch(messages, fp);
@@ -80,7 +106,7 @@ public class HandleSMTP {
             for (int i = messages.length - 1; i >= 0; i--) {
                 if (messages[i] instanceof MimeMessage) {
                     String serverUid = ((MimeMessage) messages[i]).getMessageID();
-                    if (serverUid.equals(emailModel.getUniqueId())) {
+                    if (serverUid != null && serverUid.equals(emailModel.getUniqueId())) {
                         Message msg = messages[i];
                         
                         String bodyText = "";
@@ -101,21 +127,29 @@ public class HandleSMTP {
                     }
                 }
             }
-            emailFolder.close(false);
-            store.close();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { e.printStackTrace(); } 
+        finally {
+            try {
+                if (emailFolder != null && emailFolder.isOpen()) emailFolder.close(false);
+                if (store != null && store.isConnected()) store.close();
+            } catch (Exception ex) {}
+        }
     }
 
+    
     public void updateReadStatusIMAP(String uid, boolean markAsRead) {
+        if (!credentialsValid) return;
         try {
             Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
             Store store = session.getStore("imaps");
             store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
-            
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_WRITE);
-
-            Message[] messages = emailFolder.getMessages();
+            
+            int totalMessages = emailFolder.getMessageCount();
+            int start = Math.max(1, totalMessages - 50);
+            Message[] messages = emailFolder.getMessages(start, totalMessages);
+            
             FetchProfile fp = new FetchProfile();
             fp.add(FetchProfile.Item.ENVELOPE);
             emailFolder.fetch(messages, fp);
@@ -128,19 +162,22 @@ public class HandleSMTP {
             }
             emailFolder.close(true);
             store.close();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {}
     }
 
     public void deleteEmail(String uid) {
+        if (!credentialsValid) return;
         try {
             Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
             Store store = session.getStore("imaps");
             store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
-            
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_WRITE);
-
-            Message[] messages = emailFolder.getMessages();
+            
+            int totalMessages = emailFolder.getMessageCount();
+            int start = Math.max(1, totalMessages - 50);
+            Message[] messages = emailFolder.getMessages(start, totalMessages);
+            
             FetchProfile fp = new FetchProfile();
             fp.add(FetchProfile.Item.ENVELOPE);
             emailFolder.fetch(messages, fp);
@@ -153,23 +190,21 @@ public class HandleSMTP {
             }
             emailFolder.close(true);
             store.close();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {}
     }
 
     public void downloadEmailComplete(String uid, File destinationFile) throws Exception {
+        if (!credentialsValid) throw new Exception("Error login");
         Session session = Session.getInstance(EmailConfig.getPop3Properties());
         Store store = session.getStore("pop3");
         store.connect(EmailConfig.POP3_HOST, "recent:" + userEmail, appPassword);
-
         Folder emailFolder = store.getFolder("INBOX");
         emailFolder.open(Folder.READ_ONLY);
-
         Message[] messages = emailFolder.getMessages();
         FetchProfile fp = new FetchProfile();
         fp.add(FetchProfile.Item.ENVELOPE);
         fp.add(UIDFolder.FetchProfileItem.UID);
         emailFolder.fetch(messages, fp);
-
         Message targetMsg = null;
         for (int i = messages.length - 1; i >= 0; i--) {
             if (messages[i] instanceof MimeMessage) {
@@ -180,36 +215,29 @@ public class HandleSMTP {
                 }
             }
         }
-        
         if (targetMsg == null) {
-            emailFolder.close(false);
-            store.close();
-            throw new Exception("Mensaje no encontrado en POP3.");
+            emailFolder.close(false); store.close();
+            throw new Exception("Not found");
         }
-
         try (FileOutputStream fos = new FileOutputStream(destinationFile)) {
             targetMsg.writeTo(fos);
         }
-
-        emailFolder.close(false);
-        store.close();
+        emailFolder.close(false); store.close();
     }
 
     public void sendEmail(String recipient, String subject, String body, List<File> attachments) throws Exception {
+        if (!credentialsValid) throw new Exception("Error login");
         Session session = Session.getInstance(EmailConfig.getSmtpProperties(), new Authenticator() {
             @Override protected PasswordAuthentication getPasswordAuthentication() { return new PasswordAuthentication(userEmail, appPassword); }
         });
-
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(userEmail));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
         message.setSubject(subject);
-
         Multipart multipart = new MimeMultipart();
         BodyPart messageBodyPart = new MimeBodyPart();
         messageBodyPart.setText(body);
         multipart.addBodyPart(messageBodyPart);
-
         if (attachments != null && !attachments.isEmpty()) {
             for (File file : attachments) {
                 if (file.exists()) {
