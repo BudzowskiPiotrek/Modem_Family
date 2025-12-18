@@ -18,12 +18,19 @@ public class ServiceLogin {
 
 	public boolean authenticateUser(String usuario, String password) {
 
-		final String SQL = "SELECT username, password FROM usuarios WHERE username = ? AND password = ?";
+		// Modified to use BCrypt password verification
+		// Instead of comparing passwords in SQL, we fetch the hash and verify it
+		final String SQL = "SELECT password FROM usuarios WHERE username = ?";
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
 			ps.setString(1, usuario);
-			ps.setString(2, password);
 			try (ResultSet rs = ps.executeQuery()) {
-				return rs.next();
+				if (rs.next()) {
+					String hashedPassword = rs.getString("password");
+					// Verify the plain password against the BCrypt hash
+					return PasswordUtil.verifyPassword(password, hashedPassword);
+				}
+				// User not found
+				return false;
 			}
 		} catch (SQLException e) {
 			String errorMessage = Language.get(184) + e.getMessage();
