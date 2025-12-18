@@ -37,7 +37,11 @@ public class NotificationClient {
     public boolean connect(String serverHost) {
         this.serverHost = serverHost;
         try {
-            socket = new Socket(serverHost, SERVER_PORT);
+            // Create socket with short timeout (3 seconds) to fail fast if server is not
+            // available
+            socket = new Socket();
+            socket.connect(new java.net.InetSocketAddress(serverHost, SERVER_PORT), 3000); // 3 second timeout
+
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             isConnected = true;
