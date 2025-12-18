@@ -24,6 +24,7 @@ import metroMalaga.Controller.ftp.FTPButtonsEditor;
 import metroMalaga.Controller.ftp.FTPButtonsRenderer;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
+import metroMalaga.Model.Language;
 
 public class PanelFTP extends JPanel {
 	private Usuario user;
@@ -31,7 +32,10 @@ public class PanelFTP extends JPanel {
 	private JTable fileTable;
 	private JTextField searchField;
 	private JButton uploadButton, upButton, returnButton, folderButton;
+	private JLabel lblFilter;
 	private ServiceFTP service;
+	private FTPButtonsEditor buttonsEditor;
+	private FTPButtonsRenderer buttonsRenderer;
 
 	private static final Color ACCENT_RED = new Color(220, 53, 69);
 	private static final Color BACKGROUND_LIGHT = Color.WHITE;
@@ -46,15 +50,38 @@ public class PanelFTP extends JPanel {
 		setupLayout();
 	}
 
+	public void updateAllTexts() {
+		returnButton.setText(Language.get(84));
+		folderButton.setText("📁 " + Language.get(85));
+		lblFilter.setText(Language.get(86));
+		
+		ftpModel.updateColumnNames();
+		
+		restoreButtonColumn();
+		
+		revalidate();
+		repaint();
+	}
+
+	private void restoreButtonColumn() {
+		fileTable.getColumnModel().getColumn(3).setCellRenderer(buttonsRenderer);
+		fileTable.getColumnModel().getColumn(3).setCellEditor(buttonsEditor);
+		fileTable.getColumnModel().getColumn(3).setPreferredWidth(150);
+	}
+
 	private void initializeComponents() {
 		this.fileTable = new JTable(this.ftpModel);
 		this.searchField = new JTextField(20);
 		this.uploadButton = new JButton("⤒");
 		this.upButton = new JButton("🔙");
-		this.returnButton = new JButton("Return");
-		this.folderButton = new JButton("📁 New Folder");
-		FTPButtonsEditor buttonsEditor = new FTPButtonsEditor(this.service, this.ftpModel, user);
-		fileTable.getColumnModel().getColumn(3).setCellRenderer(new FTPButtonsRenderer());
+		this.returnButton = new JButton(Language.get(84));
+		this.folderButton = new JButton("📁 " + Language.get(85));
+		this.lblFilter = new JLabel(Language.get(86));
+		
+		buttonsEditor = new FTPButtonsEditor(this.service, this.ftpModel, user);
+		buttonsRenderer = new FTPButtonsRenderer();
+		
+		fileTable.getColumnModel().getColumn(3).setCellRenderer(buttonsRenderer);
 		fileTable.getColumnModel().getColumn(3).setCellEditor(buttonsEditor);
 		fileTable.setRowHeight(30);
 	}
@@ -107,16 +134,13 @@ public class PanelFTP extends JPanel {
 		actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 		actionPanel.add(this.uploadButton);
 		actionPanel.add(this.upButton);
-		actionPanel.add(this.returnButton);
-		actionPanel.setBackground(HEADER_GRAY);
-		actionPanel.add(this.uploadButton);
-		actionPanel.add(this.upButton);
 		actionPanel.add(this.folderButton);
 		actionPanel.add(this.returnButton);
+		actionPanel.setBackground(HEADER_GRAY);
 
 		JPanel filterPanel = new JPanel();
 		filterPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-		filterPanel.add(new JLabel("Filtrar:"));
+		filterPanel.add(lblFilter);
 		filterPanel.add(this.searchField);
 		filterPanel.setBackground(HEADER_GRAY);
 		filterPanel.setBorder(new EmptyBorder(0, 10, 0, 10));
@@ -156,5 +180,4 @@ public class PanelFTP extends JPanel {
 	public JButton getReturnButton() {
 		return returnButton;
 	}
-
 }
