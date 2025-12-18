@@ -5,6 +5,7 @@ import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.EmailModel;
+import metroMalaga.Model.Language;
 
 public class DeleteEmailTask implements Runnable {
 
@@ -31,7 +32,7 @@ public class DeleteEmailTask implements Runnable {
 			backend.deleteEmail(uid);
 			currentEmailList.remove(row);
 			tableModel.removeRow(row);
-			txtViewer.setText("Deleted.");
+			txtViewer.setText(Language.get(162));
 		} catch (Exception e) {
 		}
 	}
