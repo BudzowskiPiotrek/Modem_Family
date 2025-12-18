@@ -6,19 +6,25 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+import metroMalaga.Controller.ServiceSMTP;
 import metroMalaga.Controller.smtp.tasks.*;
 import metroMalaga.Model.EmailModel;
+import metroMalaga.Model.Language;
 import metroMalaga.View.PanelSMTP;
 
 public class ButtonHandleSMTP implements ActionListener {
 
 	private final PanelSMTP view;
 	private final HandleSMTP backend;
+	private ServiceSMTP serviceSMTP;
 	private Runnable onReturnCallback;
 
 	private final JTextField txtTo;
@@ -34,9 +40,12 @@ public class ButtonHandleSMTP implements ActionListener {
 	private List<EmailModel> currentEmailList;
 	private List<File> attachmentsList;
 
+	private final Set<String> pendingUpdateIds = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
 	public ButtonHandleSMTP(PanelSMTP view, HandleSMTP backend) {
 		this.view = view;
 		this.backend = backend;
+		this.serviceSMTP = new ServiceSMTP();
 
 		this.txtTo = view.getTxtTo();
 		this.txtSubject = view.getTxtSubject();
@@ -60,6 +69,18 @@ public class ButtonHandleSMTP implements ActionListener {
 		initListeners();
 
 		new Thread(new AutoRefreshAgent(this)).start();
+	}
+
+	public void addPendingId(String uid) {
+		if (uid != null) pendingUpdateIds.add(uid);
+	}
+
+	public void removePendingId(String uid) {
+		if (uid != null) pendingUpdateIds.remove(uid);
+	}
+
+	public boolean isPending(String uid) {
+		return uid != null && pendingUpdateIds.contains(uid);
 	}
 
 	private void initListeners() {
@@ -115,13 +136,14 @@ public class ButtonHandleSMTP implements ActionListener {
 	public void displayContent(EmailModel mail) {
 		String attachmentsInfo = "";
 		if (mail.hasAttachments()) {
-			attachmentsInfo = "\n\n=== ATTACHMENTS ===\n";
+			attachmentsInfo = Language.get(159);
 			for (String n : mail.getAttachmentNames())
 				attachmentsInfo += "> " + n + "\n";
 		}
 		btnDownloadEmail.setEnabled(true);
-		txtViewer.setText("FROM: " + mail.getSender() + "\nSUBJECT: " + mail.getSubject()
-				+ "\n--------------------------------\n" + mail.getContent() + attachmentsInfo);
+		txtViewer.setText(Language.get(157) + mail.getSender() + 
+				"\n" + Language.get(158) + mail.getSubject() +
+				"\n--------------------------------\n" + mail.getContent() + attachmentsInfo);
 	}
 
 	private void attachFiles() {
@@ -135,7 +157,7 @@ public class ButtonHandleSMTP implements ActionListener {
 
 	private void clearAttachments() {
 		attachmentsList.clear();
-		lblAttachedFile.setText("NO FILES");
+		lblAttachedFile.setText(Language.get(148));
 		lblAttachedFile.setForeground(Color.GRAY);
 	}
 
@@ -160,10 +182,17 @@ public class ButtonHandleSMTP implements ActionListener {
 		String body = txtBody.getText().trim();
 
 		if (recipient.isEmpty()) {
-			JOptionPane.showMessageDialog(view, "Recipient needed.");
+			JOptionPane.showMessageDialog(view, Language.get(149));
 			return;
 		}
 
+		if (!serviceSMTP.isEmailInWhitelist(recipient) && !serviceSMTP.isEmailInUsers(recipient)) {
+			JOptionPane.showMessageDialog(view,
+					Language.get(150) + recipient + Language.get(151),
+					Language.get(152),
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		EmailSenderTask task = new EmailSenderTask(backend, view, recipient, subject, body, attachmentsList,
 				btnSend, txtTo, txtSubject, txtBody, lblAttachedFile);
 		new Thread(task).start();
@@ -171,7 +200,7 @@ public class ButtonHandleSMTP implements ActionListener {
 
 	public void refreshInbox(boolean isAuto) {
 		RefreshInboxTask task = new RefreshInboxTask(backend, isAuto, btnRefresh, txtViewer, emailTable, tableModel,
-				currentEmailList);
+				currentEmailList, this);
 		new Thread(task).start();
 	}
 
@@ -181,11 +210,21 @@ public class ButtonHandleSMTP implements ActionListener {
 			return;
 		EmailModel mail = currentEmailList.get(row);
 		boolean newSt = !mail.isRead();
+		
+		addPendingId(mail.getUniqueId());
+		
 		mail.setRead(newSt);
-		tableModel.setValueAt(newSt ? "READ" : "UNREAD", row, 0);
+		tableModel.setValueAt(newSt ? Language.get(153) : Language.get(154), row, 0);
 
-		ToggleReadStatusTask task = new ToggleReadStatusTask(backend, mail.getUniqueId(), newSt);
-		new Thread(task).start();
+		new Thread(() -> {
+			try {
+				backend.updateReadStatusIMAP(mail.getUniqueId(), newSt);
+				Thread.sleep(2000); 
+			} catch (Exception e) {
+			} finally {
+				removePendingId(mail.getUniqueId());
+			}
+		}).start();
 	}
 
 	private void downloadFullEmail() {
@@ -212,7 +251,7 @@ public class ButtonHandleSMTP implements ActionListener {
 		int row = emailTable.getSelectedRow();
 		if (row == -1)
 			return;
-		if (JOptionPane.showConfirmDialog(view, "Delete?", "CONFIRM",
+		if (JOptionPane.showConfirmDialog(view, Language.get(155), Language.get(156),
 				JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
 			return;
 		EmailModel mail = currentEmailList.get(row);

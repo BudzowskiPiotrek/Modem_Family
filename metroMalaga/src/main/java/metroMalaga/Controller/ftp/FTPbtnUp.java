@@ -11,9 +11,9 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.net.ftp.FTPFile;
 
-import metroMalaga.Controller.Common;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
+import metroMalaga.Model.Language;
 
 public class FTPbtnUp implements ActionListener {
 
@@ -38,12 +38,16 @@ public class FTPbtnUp implements ActionListener {
 				model.setData(updatedFilesList);
 
 			} else {
-				JOptionPane.showMessageDialog(null, "You are already in the root directory or the change failed.",
-						"Error de Navegación", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null, 
+					Language.get(129),
+					Language.get(130), 
+					JOptionPane.WARNING_MESSAGE);
 			}
 		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(null, "Error trying to return:" + ex.getMessage(), "FTP Error",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, 
+				Language.get(131) + ex.getMessage(), 
+				Language.get(101),
+				JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

@@ -7,10 +7,12 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import metroMalaga.Controller.smtp.tasks.LoadContentTask;
 import metroMalaga.Model.EmailModel;
+import metroMalaga.Model.Language;
 
 public class MouseClickListener extends MouseAdapter {
 
@@ -35,15 +37,32 @@ public class MouseClickListener extends MouseAdapter {
 	public void mouseClicked(MouseEvent e) {
 		if (e.getSource() == emailTable) {
 			int row = emailTable.getSelectedRow();
-			
+
 			List<EmailModel> currentList = controller.getCurrentEmailList();
 
 			if (row >= 0 && row < currentList.size()) {
 				EmailModel mail = currentList.get(row);
 
-				if ("[Click to load content...]".equals(mail.getContent())) {
-					txtViewer.setText("Downloading message content...\nPlease wait.");
-					
+				if (!mail.isRead()) {
+					controller.addPendingId(mail.getUniqueId());
+
+					mail.setRead(true);
+					SwingUtilities.invokeLater(() -> tableModel.setValueAt(Language.get(153), row, 0));
+
+					new Thread(() -> {
+						try {
+							backend.updateReadStatusIMAP(mail.getUniqueId(), true);
+							Thread.sleep(2500);
+						} catch (InterruptedException ex) {
+						} finally {
+							controller.removePendingId(mail.getUniqueId());
+						}
+					}).start();
+				}
+
+				if (Language.get(160).equals(mail.getContent())) {
+					txtViewer.setText(Language.get(161));
+
 					LoadContentTask task = new LoadContentTask(backend, mail, txtViewer, btnDownloadEmail, tableModel,
 							row);
 					new Thread(task).start();

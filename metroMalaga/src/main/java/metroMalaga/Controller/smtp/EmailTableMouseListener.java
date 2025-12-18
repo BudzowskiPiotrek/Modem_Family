@@ -11,6 +11,7 @@ import javax.swing.table.DefaultTableModel;
 
 import metroMalaga.Controller.smtp.tasks.LoadContentTask;
 import metroMalaga.Model.EmailModel;
+import metroMalaga.Model.Language;
 
 public class EmailTableMouseListener extends MouseAdapter {
 
@@ -35,15 +36,15 @@ public class EmailTableMouseListener extends MouseAdapter {
 	public void mouseClicked(MouseEvent e) {
 		if (e.getSource() == emailTable) {
 			int row = emailTable.getSelectedRow();
-			
+
 			List<EmailModel> currentList = controller.getCurrentEmailList();
 
 			if (row >= 0 && row < currentList.size()) {
 				EmailModel mail = currentList.get(row);
 
-				if ("[Click to load content...]".equals(mail.getContent())) {
-					txtViewer.setText("Downloading message content...\nPlease wait.");
-					
+				if (Language.get(160).equals(mail.getContent())) {
+					txtViewer.setText(Language.get(161));
+
 					LoadContentTask task = new LoadContentTask(backend, mail, txtViewer, btnDownloadEmail, tableModel,
 							row);
 					new Thread(task).start();
@@ -57,12 +58,12 @@ public class EmailTableMouseListener extends MouseAdapter {
 	private void displayContent(EmailModel mail) {
 		String attachmentsInfo = "";
 		if (mail.hasAttachments()) {
-			attachmentsInfo = "\n\n=== ATTACHMENTS ===\n";
+			attachmentsInfo = Language.get(159);
 			for (String n : mail.getAttachmentNames())
 				attachmentsInfo += "> " + n + "\n";
 		}
 		btnDownloadEmail.setEnabled(true);
-		txtViewer.setText("FROM: " + mail.getSender() + "\nSUBJECT: " + mail.getSubject()
+		txtViewer.setText(Language.get(157) + mail.getSender() + "\n" + Language.get(158) + mail.getSubject()
 				+ "\n--------------------------------\n" + mail.getContent() + attachmentsInfo);
 	}
 }

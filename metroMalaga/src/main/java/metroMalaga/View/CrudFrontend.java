@@ -9,20 +9,20 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import metroMalaga.Model.Usuario;
+import metroMalaga.Model.Language;
 
 public class CrudFrontend extends JPanel {
 
     private Usuario user;
 
     private final Color COLOR_FONDO = Color.WHITE;
-    private final Color COLOR_BORDE = new Color(220, 220, 220); // Gris suave
-    private final Color COLOR_PRIMARIO = new Color(66, 139, 202); // Azul
-    private final Color COLOR_PELIGRO = new Color(220, 53, 69); // Rojo
+    private final Color COLOR_BORDE = new Color(220, 220, 220);
+    private final Color COLOR_PRIMARIO = new Color(66, 139, 202);
+    private final Color COLOR_PELIGRO = new Color(220, 53, 69);
     private final Color COLOR_TEXTO = new Color(50, 50, 50);
     private final Font FUENTE_PRINCIPAL = new Font("Segoe UI", Font.PLAIN, 14);
     private final Font FUENTE_TITULO = new Font("Segoe UI", Font.BOLD, 14);
 
-    // Componentes de la interfaz
     private JList<String> listaTablas;
     private DefaultListModel<String> modeloListaTablas;
 
@@ -37,8 +37,14 @@ public class CrudFrontend extends JPanel {
     private JButton btnCancelarEdicion;
     private JLabel lblEstadoFormulario;
 
-    // Listener para acciones de fila
+    private JPanel panelSur; // Panel inferior con formulario
+
+    private JScrollPane scrollTablasPanel;
+    private JScrollPane scrollTablaPanel;
+
     private AccionFilaListener accionFilaListener;
+
+    private String tablaActual; // Para verificar permisos según la tabla actual
 
     public CrudFrontend(Usuario user) {
         this.user = user;
@@ -54,7 +60,70 @@ public class CrudFrontend extends JPanel {
         crearPanelInferior();
     }
 
-    // --- MENÚ LATERAL ---
+    public void updateAllTexts() {
+        scrollTablasPanel.setBorder(BorderFactory.createTitledBorder(
+                new LineBorder(COLOR_BORDE), Language.get(71),
+                javax.swing.border.TitledBorder.LEFT,
+                javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
+
+        scrollTablaPanel.setBorder(BorderFactory.createTitledBorder(
+                new LineBorder(COLOR_BORDE), Language.get(72),
+                javax.swing.border.TitledBorder.LEFT,
+                javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
+
+        if (lblEstadoFormulario.getText().contains("Editar") || lblEstadoFormulario.getText().contains("Edit")) {
+            lblEstadoFormulario.setText(Language.get(73));
+        } else if (lblEstadoFormulario.getText().contains("Crear")
+                || lblEstadoFormulario.getText().contains("Create")) {
+            lblEstadoFormulario.setText(Language.get(78));
+        } else if (lblEstadoFormulario.getText().contains("Editando")
+                || lblEstadoFormulario.getText().contains("Editing")) {
+            lblEstadoFormulario.setText(Language.get(79));
+        }
+
+        btnCancelarEdicion.setText(Language.get(74));
+
+        if (btnGuardar.getText().contains("Actualizar") || btnGuardar.getText().contains("Update")) {
+            btnGuardar.setText(Language.get(77));
+        } else {
+            btnGuardar.setText(Language.get(75));
+        }
+
+        btnVolver.setText(Language.get(76));
+
+        if (modeloTabla.getColumnCount() > 0) {
+            Object[] columnNames = getUpdatedColumnNames();
+
+            int rowCount = modeloTabla.getRowCount();
+            int colCount = modeloTabla.getColumnCount();
+            Object[][] data = new Object[rowCount][colCount];
+            for (int i = 0; i < rowCount; i++) {
+                for (int j = 0; j < colCount; j++) {
+                    data[i][j] = modeloTabla.getValueAt(i, j);
+                }
+            }
+
+            modeloTabla.setDataVector(data, columnNames);
+
+            int accionesCol = modeloTabla.getColumnCount() - 1;
+            tablaDatos.getColumnModel().getColumn(accionesCol).setCellRenderer(new ButtonRenderer());
+            tablaDatos.getColumnModel().getColumn(accionesCol).setCellEditor(new ButtonEditor(new JCheckBox()));
+            tablaDatos.getColumnModel().getColumn(accionesCol).setPreferredWidth(150);
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    private Object[] getUpdatedColumnNames() {
+        Object[] currentColumns = new Object[modeloTabla.getColumnCount()];
+        for (int i = 0; i < modeloTabla.getColumnCount() - 1; i++) {
+            currentColumns[i] = modeloTabla.getColumnName(i);
+        }
+        currentColumns[modeloTabla.getColumnCount() - 1] = Language.get(82);
+        return currentColumns;
+    }
+
     private void crearMenuLateral() {
         modeloListaTablas = new DefaultListModel<>();
 
@@ -66,19 +135,17 @@ public class CrudFrontend extends JPanel {
         listaTablas.setSelectionBackground(new Color(230, 240, 255));
         listaTablas.setSelectionForeground(Color.BLACK);
 
-        JScrollPane scroll = new JScrollPane(listaTablas);
-        scroll.setPreferredSize(new Dimension(200, 0));
-        // Borde estilo imagen (Gris fino) con Título
-        scroll.setBorder(BorderFactory.createTitledBorder(
-                new LineBorder(COLOR_BORDE), "Tablas",
+        scrollTablasPanel = new JScrollPane(listaTablas);
+        scrollTablasPanel.setPreferredSize(new Dimension(200, 0));
+        scrollTablasPanel.setBorder(BorderFactory.createTitledBorder(
+                new LineBorder(COLOR_BORDE), Language.get(71),
                 javax.swing.border.TitledBorder.LEFT,
                 javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
-        scroll.getViewport().setBackground(COLOR_FONDO);
+        scrollTablasPanel.getViewport().setBackground(COLOR_FONDO);
 
-        add(scroll, BorderLayout.WEST);
+        add(scrollTablasPanel, BorderLayout.WEST);
     }
 
-    // --- TABLA DE DATOS ---
     private void crearPanelCentral() {
         modeloTabla = new DefaultTableModel() {
             @Override
@@ -87,7 +154,6 @@ public class CrudFrontend extends JPanel {
             }
         };
 
-        // Configuración visual de la tabla
         tablaDatos = new JTable(modeloTabla);
         tablaDatos.setRowHeight(35);
         tablaDatos.setFont(FUENTE_PRINCIPAL);
@@ -113,52 +179,45 @@ public class CrudFrontend extends JPanel {
         });
         header.setPreferredSize(new Dimension(0, 35));
 
-        JScrollPane scrollTabla = new JScrollPane(tablaDatos);
-        scrollTabla.getViewport().setBackground(COLOR_FONDO);
-        scrollTabla.setBorder(BorderFactory.createTitledBorder(
-                new LineBorder(COLOR_BORDE), "Registros",
+        scrollTablaPanel = new JScrollPane(tablaDatos);
+        scrollTablaPanel.getViewport().setBackground(COLOR_FONDO);
+        scrollTablaPanel.setBorder(BorderFactory.createTitledBorder(
+                new LineBorder(COLOR_BORDE), Language.get(72),
                 javax.swing.border.TitledBorder.LEFT,
                 javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
 
-        add(scrollTabla, BorderLayout.CENTER);
+        add(scrollTablaPanel, BorderLayout.CENTER);
     }
 
-    // --- FORMULARIO ---
     private void crearPanelInferior() {
-        JPanel panelSur = new JPanel(new BorderLayout());
+        panelSur = new JPanel(new BorderLayout());
         panelSur.setBackground(COLOR_FONDO);
         panelSur.setBorder(new CompoundBorder(
                 new LineBorder(COLOR_BORDE),
                 new EmptyBorder(15, 15, 15, 15)));
 
-        // Cabecera del formulario
-        lblEstadoFormulario = new JLabel("Editar / Crear Registro");
+        lblEstadoFormulario = new JLabel(Language.get(73));
         lblEstadoFormulario.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblEstadoFormulario.setForeground(COLOR_TEXTO);
         lblEstadoFormulario.setBorder(new EmptyBorder(0, 0, 15, 0));
         panelSur.add(lblEstadoFormulario, BorderLayout.NORTH);
 
-        // Panel de campos dinámicos
         panelFormulario = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelFormulario.setBackground(COLOR_FONDO);
-        // Sin borde o borde muy sutil para el área de inputs
         panelFormulario.setBorder(null);
 
-        // Panel de Botones
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelBotones.setBackground(COLOR_FONDO);
         panelBotones.setBorder(new EmptyBorder(15, 0, 0, 0));
 
-        // --- Estilos de Botones ---
-
-        btnCancelarEdicion = new JButton("Cancelar");
+        btnCancelarEdicion = new JButton(Language.get(74));
         estilarBotonSolido(btnCancelarEdicion, COLOR_PELIGRO, Color.WHITE);
         btnCancelarEdicion.setVisible(true);
 
-        btnGuardar = new JButton("Guardar Nuevo");
+        btnGuardar = new JButton(Language.get(75));
         estilarBotonOutline(btnGuardar, COLOR_PRIMARIO);
 
-        btnVolver = new JButton("Volver");
+        btnVolver = new JButton(Language.get(76));
         estilarBotonOutline(btnVolver, Color.GRAY);
 
         panelBotones.add(btnCancelarEdicion);
@@ -170,9 +229,10 @@ public class CrudFrontend extends JPanel {
         panelSur.setPreferredSize(new Dimension(0, 250));
 
         add(panelSur, BorderLayout.SOUTH);
-    }
 
-    // --- UTILIDADES DE ESTILO ---
+        // Ocultar panel inferior si el usuario no tiene permisos de modificación
+        updatePanelInferiorVisibility();
+    }
 
     private void estilarBotonSolido(JButton btn, Color bg, Color fg) {
         btn.setFont(FUENTE_TITULO);
@@ -196,10 +256,6 @@ public class CrudFrontend extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
-    // --- MÉTODOS PÚBLICOS PARA EL CONTROLADOR ---
-
-    // Getters para componentes UI (para que el controlador registre listeners
-    // directamente)
     public JList<String> getListaTablas() {
         return listaTablas;
     }
@@ -216,7 +272,6 @@ public class CrudFrontend extends JPanel {
         return btnVolver;
     }
 
-    // Table Selection
     public String getTablaSeleccionada() {
         return listaTablas.getSelectedValue();
     }
@@ -228,20 +283,22 @@ public class CrudFrontend extends JPanel {
         }
     }
 
-    // Table Data Display
     public void actualizarTablaDatos(String[] columnas, Object[][] datos) {
         modeloTabla.setDataVector(datos, columnas);
 
-        // Agregar columna de acciones si no existe
-        if (modeloTabla.getColumnCount() > 0) {
-            // Añadir renderizador de botones para la última columna (acciones)
+        // Solo agregar columna de acciones si el usuario puede modificar
+        if (modeloTabla.getColumnCount() > 0 && canModifyCurrentTable()) {
             agregarColumnaAcciones();
         }
     }
 
+    public void setTablaActual(String tabla) {
+        this.tablaActual = tabla;
+        updatePanelInferiorVisibility();
+    }
+
     private void agregarColumnaAcciones() {
-        // Agregar columna de acciones
-        modeloTabla.addColumn("Acciones");
+        modeloTabla.addColumn(Language.get(82));
 
         int accionesCol = modeloTabla.getColumnCount() - 1;
         tablaDatos.getColumnModel().getColumn(accionesCol).setCellRenderer(new ButtonRenderer());
@@ -253,7 +310,6 @@ public class CrudFrontend extends JPanel {
         return modeloTabla.getValueAt(fila, columna);
     }
 
-    // Form Management
     public void generarFormulario(String[] nombresColumnas) {
         panelFormulario.removeAll();
         camposFormulario.clear();
@@ -288,16 +344,16 @@ public class CrudFrontend extends JPanel {
         for (JTextField campo : camposFormulario) {
             campo.setText("");
         }
-        btnGuardar.setText("Guardar Nuevo");
-        lblEstadoFormulario.setText("Crear Nuevo Registro");
+        btnGuardar.setText(Language.get(75));
+        lblEstadoFormulario.setText(Language.get(78));
     }
 
     public void llenarFormularioParaEditar(Object[] datosFila) {
         for (int i = 0; i < datosFila.length && i < camposFormulario.size(); i++) {
             camposFormulario.get(i).setText(datosFila[i] != null ? datosFila[i].toString() : "");
         }
-        btnGuardar.setText("Actualizar");
-        lblEstadoFormulario.setText("Editando Registro");
+        btnGuardar.setText(Language.get(77));
+        lblEstadoFormulario.setText(Language.get(79));
     }
 
     public List<String> getDatosFormulario() {
@@ -308,19 +364,15 @@ public class CrudFrontend extends JPanel {
         return datos;
     }
 
-    // Método para establecer el listener de acciones de fila
     public void setAccionFilaListener(AccionFilaListener listener) {
         this.accionFilaListener = listener;
     }
 
-    // Inner interface for row actions
     public interface AccionFilaListener {
         void onEditar(int fila);
 
         void onEliminar(int fila);
     }
-
-    // --- RENDERIZADORES Y EDITORES DE BOTONES ---
 
     class ButtonRenderer extends JPanel implements TableCellRenderer {
         private JButton btnEditar;
@@ -330,14 +382,14 @@ public class CrudFrontend extends JPanel {
             setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
             setBackground(Color.WHITE);
 
-            btnEditar = new JButton("Editar");
+            btnEditar = new JButton(Language.get(80));
             btnEditar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             btnEditar.setBackground(COLOR_PRIMARIO);
             btnEditar.setForeground(Color.WHITE);
             btnEditar.setFocusPainted(false);
             btnEditar.setBorder(new EmptyBorder(3, 10, 3, 10));
 
-            btnEliminar = new JButton("Eliminar");
+            btnEliminar = new JButton(Language.get(81));
             btnEliminar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             btnEliminar.setBackground(COLOR_PELIGRO);
             btnEliminar.setForeground(Color.WHITE);
@@ -351,6 +403,16 @@ public class CrudFrontend extends JPanel {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+            // Ocultar botones si el usuario no tiene permisos de modificación
+            if (canModifyCurrentTable()) {
+                btnEditar.setVisible(true);
+                btnEliminar.setVisible(true);
+                btnEditar.setText(Language.get(80));
+                btnEliminar.setText(Language.get(81));
+            } else {
+                btnEditar.setVisible(false);
+                btnEliminar.setVisible(false);
+            }
             return this;
         }
     }
@@ -367,7 +429,7 @@ public class CrudFrontend extends JPanel {
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 2));
             panel.setBackground(Color.WHITE);
 
-            btnEditar = new JButton("Editar");
+            btnEditar = new JButton(Language.get(80));
             btnEditar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             btnEditar.setBackground(COLOR_PRIMARIO);
             btnEditar.setForeground(Color.WHITE);
@@ -380,7 +442,7 @@ public class CrudFrontend extends JPanel {
                 }
             });
 
-            btnEliminar = new JButton("Eliminar");
+            btnEliminar = new JButton(Language.get(81));
             btnEliminar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             btnEliminar.setBackground(COLOR_PELIGRO);
             btnEliminar.setForeground(Color.WHITE);
@@ -401,6 +463,16 @@ public class CrudFrontend extends JPanel {
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             filaActual = row;
+            // Ocultar botones si el usuario no tiene permisos de modificación
+            if (canModifyCurrentTable()) {
+                btnEditar.setVisible(true);
+                btnEliminar.setVisible(true);
+                btnEditar.setText(Language.get(80));
+                btnEliminar.setText(Language.get(81));
+            } else {
+                btnEditar.setVisible(false);
+                btnEliminar.setVisible(false);
+            }
             return panel;
         }
 
@@ -412,5 +484,52 @@ public class CrudFrontend extends JPanel {
 
     public Usuario getUser() {
         return user;
+    }
+
+    /**
+     * Verifica si el usuario actual puede modificar la tabla actual
+     */
+    private boolean canModifyCurrentTable() {
+        if (user == null || user.getRol() == null || tablaActual == null) {
+            return false;
+        }
+
+        String permiso = user.getRol().getPermiso();
+
+        if ("usuario".equalsIgnoreCase(permiso)) {
+            // Usuario no puede modificar ninguna tabla
+            return false;
+        } else if ("admin".equalsIgnoreCase(permiso)) {
+            // Admin puede modificar todas las tablas excepto log
+            return !tablaActual.equalsIgnoreCase("logs");
+        }
+
+        return false;
+    }
+
+    /**
+     * Actualiza la visibilidad del panel inferior según los permisos del usuario
+     */
+    private void updatePanelInferiorVisibility() {
+        if (panelSur == null) {
+            return;
+        }
+
+        if (user == null || user.getRol() == null) {
+            panelSur.setVisible(false);
+            return;
+        }
+
+        String permiso = user.getRol().getPermiso();
+
+        // Usuario con rol "usuario" no puede añadir ni modificar, ocultar panel
+        if ("usuario".equalsIgnoreCase(permiso)) {
+            panelSur.setVisible(false);
+        } else {
+            panelSur.setVisible(true);
+        }
+
+        revalidate();
+        repaint();
     }
 }
