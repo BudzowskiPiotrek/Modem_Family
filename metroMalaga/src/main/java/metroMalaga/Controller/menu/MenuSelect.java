@@ -20,6 +20,7 @@ import metroMalaga.Controller.ftp.FTPlist;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.CrudFrontend;
+import metroMalaga.View.LoadingDialog;
 import metroMalaga.View.PanelFTP;
 import metroMalaga.View.PanelMenu;
 import metroMalaga.View.PanelSMTP;
@@ -92,23 +93,79 @@ public class MenuSelect implements ChangeListener {
 
 	private void initializeFTP() {
 		System.out.println("Inicializando panel FTP...");
-		ftpService = new ServiceFTP(user.getRol().getPermiso());
-		FTPFile[] fileArray = ftpService.listAllFiles();
-		List<FTPFile> initialFiles = Arrays.asList(fileArray);
 
-		FTPTableModel ftpModel = new FTPTableModel(initialFiles, ftpService);
+		// Create and show loading dialog immediately
+		final LoadingDialog loadingDialog = new LoadingDialog();
+		loadingDialog.showDialog();
 
-		ftpPanel = new PanelFTP(user, ftpService, initialFiles, ftpModel);
-		ftpService.setTableModel(ftpModel);
+		// Connect to FTP server in background thread
+		SwingWorker<Void, String> worker = new SwingWorker<Void, String>() {
+			private ServiceFTP service;
+			private FTPTableModel model;
+			private PanelFTP panel;
 
-		new FTPlist(ftpPanel.getSearchField(), ftpModel);
-		new FTPbtnUpFile(ftpPanel.getUploadButton(), ftpService, ftpModel, user);
-		new FTPbtnUp(ftpPanel.getUpButton(), ftpService, ftpModel);
-		new FTPdoubleClick(ftpPanel.getFileTable(), ftpService, ftpModel);
-		new FTPbtnReturn(ftpPanel, ftpPanel.getReturnButton(), user, this);
-		new FTPbtnNewFolder(ftpPanel.getFolderButton(), ftpService, ftpModel, user);
+			@Override
+			protected Void doInBackground() throws Exception {
+				publish("Conectando al servidor FTP...");
+				service = new ServiceFTP(user.getRol().getPermiso());
 
-		tabbedPane.setComponentAt(1, ftpPanel);
+				publish("Listando archivos...");
+				FTPFile[] fileArray = service.listAllFiles();
+				List<FTPFile> initialFiles = Arrays.asList(fileArray);
+
+				publish("Inicializando sistema de notificaciones...");
+				model = new FTPTableModel(initialFiles, service);
+				service.setTableModel(model);
+
+				publish("Configurando interfaz...");
+				panel = new PanelFTP(user, service, initialFiles, model);
+
+				new FTPlist(panel.getSearchField(), model);
+				new FTPbtnUpFile(panel.getUploadButton(), service, model, user);
+				new FTPbtnUp(panel.getUpButton(), service, model);
+				new FTPdoubleClick(panel.getFileTable(), service, model);
+				new FTPbtnReturn(panel, panel.getReturnButton(), user, MenuSelect.this);
+				new FTPbtnNewFolder(panel.getFolderButton(), service, model, user);
+
+				return null;
+			}
+
+			@Override
+			protected void process(java.util.List<String> chunks) {
+				// Update loading dialog with current status
+				for (String status : chunks) {
+					loadingDialog.updateStatus(status);
+				}
+			}
+
+			@Override
+			protected void done() {
+				try {
+					get(); // Check for exceptions
+
+					// Close loading dialog
+					loadingDialog.closeDialog();
+
+					// Set the FTP panel in the UI
+					ftpService = service;
+					ftpPanel = panel;
+					tabbedPane.setComponentAt(1, ftpPanel);
+
+					System.out.println("Panel FTP inicializado correctamente");
+				} catch (Exception e) {
+					loadingDialog.closeDialog();
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(null,
+							"Error al conectar con el servidor FTP:\n" + e.getMessage(),
+							"Error de Conexión",
+							JOptionPane.ERROR_MESSAGE);
+					// Revert to previous tab
+					tabbedPane.setSelectedIndex(previousTabIndex);
+				}
+			}
+		};
+
+		worker.execute();
 	}
 
 	private void initializeSMTP() {
