@@ -6,14 +6,17 @@ import javax.swing.border.MatteBorder;
 
 import metroMalaga.Controller.menu.MenuSelect;
 import metroMalaga.Model.Usuario;
+import metroMalaga.Model.Language;
 
 public class PanelMenu extends JFrame {
 
 	private Usuario user;
 	private JTabbedPane tabbedPane;
 	private MenuSelect menuController;
+	private JButton btnLanguage;
+	private JLabel lblMessage;
+	private JButton btnConfirm, btnCancel;
 
-	// --- ESTÉTICA PERSONA 5 ---
 	private final Color P5_RED = new Color(220, 20, 60);
 	private final Color P5_BRIGHT_RED = new Color(255, 0, 0);
 	private final Color P5_BLACK = new Color(20, 20, 20);
@@ -24,6 +27,7 @@ public class PanelMenu extends JFrame {
 
 		propertiesWindow();
 		createTabbedPane();
+		createLanguageButton();
 		setTitle();
 
 		this.setVisible(true);
@@ -44,34 +48,87 @@ public class PanelMenu extends JFrame {
 	}
 
 	private void setTitle() {
-		this.setTitle("Menú Principal - Metro Málaga");
+		this.setTitle(Language.get(91));
+	}
+
+	private void createLanguageButton() {
+		String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
+		btnLanguage = new JButton(langText);
+		btnLanguage.setFont(new Font("Dialog", Font.BOLD, 14));
+		btnLanguage.setBackground(P5_BRIGHT_RED);
+		btnLanguage.setForeground(P5_WHITE);
+		btnLanguage.setBorder(new MatteBorder(2, 2, 4, 4, P5_BLACK));
+		btnLanguage.setFocusPainted(false);
+		btnLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		btnLanguage.setPreferredSize(new Dimension(80, 35));
+		btnLanguage.addActionListener(e -> toggleLanguage());
+
+		JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+		topPanel.setBackground(P5_RED);
+		topPanel.add(btnLanguage);
+
+		this.add(topPanel, BorderLayout.NORTH);
+	}
+
+	private void toggleLanguage() {
+		if (Language.getCurrentLanguage().equals("espanol")) {
+			Language.setEnglish();
+			btnLanguage.setText("EN");
+		} else {
+			Language.setSpanish();
+			btnLanguage.setText("ES");
+		}
+		updateAllTexts();
+		notifyPanelsLanguageChange();
+	}
+
+	private void notifyPanelsLanguageChange() {
+		for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+			Component comp = tabbedPane.getComponentAt(i);
+			if (comp instanceof PanelSMTP) {
+				((PanelSMTP) comp).updateAllTexts();
+			} else if (comp instanceof CrudFrontend) {
+				((CrudFrontend) comp).updateAllTexts();
+			}
+		}
+	}
+
+	public void updateAllTexts() {
+		setTitle();
+		
+		tabbedPane.setTitleAt(0, Language.get(92));
+		tabbedPane.setTitleAt(1, Language.get(93));
+		tabbedPane.setTitleAt(2, Language.get(94));
+		tabbedPane.setTitleAt(3, Language.get(95));
+		
+		lblMessage.setText(Language.get(96));
+		btnConfirm.setText(Language.get(97));
+		btnCancel.setText(Language.get(98));
+		
+		revalidate();
+		repaint();
 	}
 
 	private void createTabbedPane() {
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
-		// Aplicar estilo Persona 5 al JTabbedPane
 		tabbedPane.setBackground(P5_BLACK);
 		tabbedPane.setForeground(P5_WHITE);
 		tabbedPane.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 16));
 
-		// Crear el controlador que manejará las pestañas
 		menuController = new MenuSelect(this, tabbedPane, user);
 
-		// Añadir las pestañas (inicialmente vacías, se cargarán bajo demanda)
-		tabbedPane.addTab("CRUD", null);
-		tabbedPane.addTab("FTP", null);
-		tabbedPane.addTab("SMTP", null);
-		tabbedPane.addTab("Salir", createExitPanel());
+		tabbedPane.addTab(Language.get(92), null);
+		tabbedPane.addTab(Language.get(93), null);
+		tabbedPane.addTab(Language.get(94), null);
+		tabbedPane.addTab(Language.get(95), createExitPanel());
 
-		// Aplicar estilo personalizado a las pestañas
 		styleTabPane();
 
 		this.add(tabbedPane, BorderLayout.CENTER);
 	}
 
 	private void styleTabPane() {
-		// Personalizar el UI del JTabbedPane
 		UIManager.put("TabbedPane.selected", P5_BRIGHT_RED);
 		UIManager.put("TabbedPane.background", P5_BLACK);
 		UIManager.put("TabbedPane.foreground", P5_WHITE);
@@ -91,7 +148,7 @@ public class PanelMenu extends JFrame {
 		contentPanel.setBackground(P5_BLACK);
 		contentPanel.setBorder(new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED));
 
-		JLabel lblMessage = new JLabel("¿Desea salir de la aplicación?");
+		lblMessage = new JLabel(Language.get(96));
 		lblMessage.setFont(new Font("Dialog", Font.BOLD, 24));
 		lblMessage.setForeground(P5_WHITE);
 		lblMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -100,11 +157,11 @@ public class PanelMenu extends JFrame {
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
 		buttonPanel.setBackground(P5_BLACK);
 
-		JButton btnConfirm = new JButton("Sí, Salir");
+		btnConfirm = new JButton(Language.get(97));
 		styleExitButton(btnConfirm, P5_BRIGHT_RED, P5_WHITE);
 		btnConfirm.addActionListener(e -> System.exit(0));
 
-		JButton btnCancel = new JButton("No, Volver");
+		btnCancel = new JButton(Language.get(98));
 		styleExitButton(btnCancel, P5_WHITE, P5_BLACK);
 		btnCancel.addActionListener(e -> tabbedPane.setSelectedIndex(0));
 
@@ -128,7 +185,6 @@ public class PanelMenu extends JFrame {
 		btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		btn.setBorder(new MatteBorder(4, 4, 8, 6, P5_BRIGHT_RED));
 
-		// Hover effect
 		btn.addMouseListener(new java.awt.event.MouseAdapter() {
 			Color originalBg = btn.getBackground();
 			Color originalFg = btn.getForeground();
