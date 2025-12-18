@@ -118,7 +118,7 @@ public class CorreosActivity extends BaseManualActivity {
                                 content.setLength(0);
 
                                 // Imagen principal de gestión de correos
-                                addImageToLayout(R.drawable.image6);
+                                addImageToLayout(R.drawable.image4); // Email management overview
 
                                 if (envioTitle != null)
                                     content.append("═══ ").append(envioTitle).append(" ═══\n\n");
@@ -150,7 +150,7 @@ public class CorreosActivity extends BaseManualActivity {
                                 content.setLength(0);
 
                                 // Imagen de bandeja de entrada
-                                addImageToLayout(R.drawable.image1);
+                                addImageToLayout(R.drawable.image10);  // Email inbox table
 
                                 if (recepcionButtonsIntro != null)
                                     content.append(recepcionButtonsIntro).append("\n");
@@ -209,3 +209,4 @@ public class CorreosActivity extends BaseManualActivity {
         loadData();
     }
 }
+

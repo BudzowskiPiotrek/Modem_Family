@@ -88,8 +88,9 @@ public class MenuManualActivity extends BaseManualActivity {
                                     addTextToLayout(description);
                                 }
 
-                                // Add menu images - only tabs bars and buttons
+                                // Add menu images (4 from HTML in order)
                                 addImageToLayout(R.drawable.image14); // Navigation tabs (light mode)
+                                addImageToLayout(R.drawable.image11); // Exit dialog
                                 addImageToLayout(R.drawable.image2); // Theme/language buttons
                                 addImageToLayout(R.drawable.image6); // Navigation tabs (dark mode)
 
