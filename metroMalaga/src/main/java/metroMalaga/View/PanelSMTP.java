@@ -56,7 +56,7 @@ public class PanelSMTP extends JPanel {
 	}
 
 	private void createLanguageButton() {
-		String langText = Language.getCurrentLanguage().equals("espanol") ? "🇪🇸 ES" : "🇬🇧 EN";
+		String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
 		btnLanguage = new JButton(langText);
 		btnLanguage.setFont(new Font("Segoe UI", Font.BOLD, 13));
 		btnLanguage.setBackground(C_ACCENT);
@@ -78,10 +78,10 @@ public class PanelSMTP extends JPanel {
 	private void toggleLanguage() {
 		if (Language.getCurrentLanguage().equals("espanol")) {
 			Language.setEnglish();
-			btnLanguage.setText("🇬🇧 EN");
+			btnLanguage.setText("EN");
 		} else {
 			Language.setSpanish();
-			btnLanguage.setText("🇪🇸 ES");
+			btnLanguage.setText("ES");
 		}
 		updateAllTexts();
 	}
