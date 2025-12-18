@@ -37,10 +37,14 @@ public class CrudFrontend extends JPanel {
     private JButton btnCancelarEdicion;
     private JLabel lblEstadoFormulario;
 
+    private JPanel panelSur; // Panel inferior con formulario
+
     private JScrollPane scrollTablasPanel;
     private JScrollPane scrollTablaPanel;
 
     private AccionFilaListener accionFilaListener;
+
+    private String tablaActual; // Para verificar permisos según la tabla actual
 
     public CrudFrontend(Usuario user) {
         this.user = user;
@@ -61,33 +65,35 @@ public class CrudFrontend extends JPanel {
                 new LineBorder(COLOR_BORDE), Language.get(71),
                 javax.swing.border.TitledBorder.LEFT,
                 javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
-        
+
         scrollTablaPanel.setBorder(BorderFactory.createTitledBorder(
                 new LineBorder(COLOR_BORDE), Language.get(72),
                 javax.swing.border.TitledBorder.LEFT,
                 javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
-        
+
         if (lblEstadoFormulario.getText().contains("Editar") || lblEstadoFormulario.getText().contains("Edit")) {
             lblEstadoFormulario.setText(Language.get(73));
-        } else if (lblEstadoFormulario.getText().contains("Crear") || lblEstadoFormulario.getText().contains("Create")) {
+        } else if (lblEstadoFormulario.getText().contains("Crear")
+                || lblEstadoFormulario.getText().contains("Create")) {
             lblEstadoFormulario.setText(Language.get(78));
-        } else if (lblEstadoFormulario.getText().contains("Editando") || lblEstadoFormulario.getText().contains("Editing")) {
+        } else if (lblEstadoFormulario.getText().contains("Editando")
+                || lblEstadoFormulario.getText().contains("Editing")) {
             lblEstadoFormulario.setText(Language.get(79));
         }
-        
+
         btnCancelarEdicion.setText(Language.get(74));
-        
+
         if (btnGuardar.getText().contains("Actualizar") || btnGuardar.getText().contains("Update")) {
             btnGuardar.setText(Language.get(77));
         } else {
             btnGuardar.setText(Language.get(75));
         }
-        
+
         btnVolver.setText(Language.get(76));
-        
+
         if (modeloTabla.getColumnCount() > 0) {
             Object[] columnNames = getUpdatedColumnNames();
-            
+
             int rowCount = modeloTabla.getRowCount();
             int colCount = modeloTabla.getColumnCount();
             Object[][] data = new Object[rowCount][colCount];
@@ -96,15 +102,15 @@ public class CrudFrontend extends JPanel {
                     data[i][j] = modeloTabla.getValueAt(i, j);
                 }
             }
-            
+
             modeloTabla.setDataVector(data, columnNames);
-            
+
             int accionesCol = modeloTabla.getColumnCount() - 1;
             tablaDatos.getColumnModel().getColumn(accionesCol).setCellRenderer(new ButtonRenderer());
             tablaDatos.getColumnModel().getColumn(accionesCol).setCellEditor(new ButtonEditor(new JCheckBox()));
             tablaDatos.getColumnModel().getColumn(accionesCol).setPreferredWidth(150);
         }
-        
+
         revalidate();
         repaint();
     }
@@ -184,7 +190,7 @@ public class CrudFrontend extends JPanel {
     }
 
     private void crearPanelInferior() {
-        JPanel panelSur = new JPanel(new BorderLayout());
+        panelSur = new JPanel(new BorderLayout());
         panelSur.setBackground(COLOR_FONDO);
         panelSur.setBorder(new CompoundBorder(
                 new LineBorder(COLOR_BORDE),
@@ -223,6 +229,9 @@ public class CrudFrontend extends JPanel {
         panelSur.setPreferredSize(new Dimension(0, 250));
 
         add(panelSur, BorderLayout.SOUTH);
+
+        // Ocultar panel inferior si el usuario no tiene permisos de modificación
+        updatePanelInferiorVisibility();
     }
 
     private void estilarBotonSolido(JButton btn, Color bg, Color fg) {
@@ -277,9 +286,15 @@ public class CrudFrontend extends JPanel {
     public void actualizarTablaDatos(String[] columnas, Object[][] datos) {
         modeloTabla.setDataVector(datos, columnas);
 
-        if (modeloTabla.getColumnCount() > 0) {
+        // Solo agregar columna de acciones si el usuario puede modificar
+        if (modeloTabla.getColumnCount() > 0 && canModifyCurrentTable()) {
             agregarColumnaAcciones();
         }
+    }
+
+    public void setTablaActual(String tabla) {
+        this.tablaActual = tabla;
+        updatePanelInferiorVisibility();
     }
 
     private void agregarColumnaAcciones() {
@@ -355,6 +370,7 @@ public class CrudFrontend extends JPanel {
 
     public interface AccionFilaListener {
         void onEditar(int fila);
+
         void onEliminar(int fila);
     }
 
@@ -387,8 +403,16 @@ public class CrudFrontend extends JPanel {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            btnEditar.setText(Language.get(80));
-            btnEliminar.setText(Language.get(81));
+            // Ocultar botones si el usuario no tiene permisos de modificación
+            if (canModifyCurrentTable()) {
+                btnEditar.setVisible(true);
+                btnEliminar.setVisible(true);
+                btnEditar.setText(Language.get(80));
+                btnEliminar.setText(Language.get(81));
+            } else {
+                btnEditar.setVisible(false);
+                btnEliminar.setVisible(false);
+            }
             return this;
         }
     }
@@ -439,8 +463,16 @@ public class CrudFrontend extends JPanel {
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             filaActual = row;
-            btnEditar.setText(Language.get(80));
-            btnEliminar.setText(Language.get(81));
+            // Ocultar botones si el usuario no tiene permisos de modificación
+            if (canModifyCurrentTable()) {
+                btnEditar.setVisible(true);
+                btnEliminar.setVisible(true);
+                btnEditar.setText(Language.get(80));
+                btnEliminar.setText(Language.get(81));
+            } else {
+                btnEditar.setVisible(false);
+                btnEliminar.setVisible(false);
+            }
             return panel;
         }
 
@@ -452,5 +484,52 @@ public class CrudFrontend extends JPanel {
 
     public Usuario getUser() {
         return user;
+    }
+
+    /**
+     * Verifica si el usuario actual puede modificar la tabla actual
+     */
+    private boolean canModifyCurrentTable() {
+        if (user == null || user.getRol() == null || tablaActual == null) {
+            return false;
+        }
+
+        String permiso = user.getRol().getPermiso();
+
+        if ("usuario".equalsIgnoreCase(permiso)) {
+            // Usuario no puede modificar ninguna tabla
+            return false;
+        } else if ("admin".equalsIgnoreCase(permiso)) {
+            // Admin puede modificar todas las tablas excepto log
+            return !tablaActual.equalsIgnoreCase("logs");
+        }
+
+        return false;
+    }
+
+    /**
+     * Actualiza la visibilidad del panel inferior según los permisos del usuario
+     */
+    private void updatePanelInferiorVisibility() {
+        if (panelSur == null) {
+            return;
+        }
+
+        if (user == null || user.getRol() == null) {
+            panelSur.setVisible(false);
+            return;
+        }
+
+        String permiso = user.getRol().getPermiso();
+
+        // Usuario con rol "usuario" no puede añadir ni modificar, ocultar panel
+        if ("usuario".equalsIgnoreCase(permiso)) {
+            panelSur.setVisible(false);
+        } else {
+            panelSur.setVisible(true);
+        }
+
+        revalidate();
+        repaint();
     }
 }
