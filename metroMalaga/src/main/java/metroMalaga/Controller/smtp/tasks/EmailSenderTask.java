@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.List;
 import javax.swing.*;
 import metroMalaga.Controller.smtp.HandleSMTP;
+import metroMalaga.Model.Language;
 
 public class EmailSenderTask implements Runnable {
 
@@ -37,22 +38,22 @@ public class EmailSenderTask implements Runnable {
 	@Override
 	public void run() {
 		btnSend.setEnabled(false);
-		btnSend.setText("SENDING...");
+		btnSend.setText(Language.get(165));
 
 		try {
 			backend.sendEmail(recipient, subject, body, attachments);
-			JOptionPane.showMessageDialog(parentView, "Email sent.");
+			JOptionPane.showMessageDialog(parentView, Language.get(166));
 			txtTo.setText("");
 			txtSubject.setText("");
 			txtBody.setText("");
 			attachments.clear();
-			lblAttachedFile.setText("NO FILES");
+			lblAttachedFile.setText(Language.get(148));
 			lblAttachedFile.setForeground(Color.GRAY);
-			btnSend.setText("SEND EMAIL");
+			btnSend.setText(Language.get(59));
 			btnSend.setEnabled(true);
 		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(parentView, "Error: " + ex.getMessage());
-			btnSend.setText("SEND EMAIL");
+			JOptionPane.showMessageDialog(parentView, Language.get(164) + ex.getMessage());
+			btnSend.setText(Language.get(59));
 			btnSend.setEnabled(true);
 		}
 	}

@@ -17,6 +17,7 @@ import javax.swing.table.DefaultTableModel;
 import metroMalaga.Controller.ServiceSMTP;
 import metroMalaga.Controller.smtp.tasks.*;
 import metroMalaga.Model.EmailModel;
+import metroMalaga.Model.Language;
 import metroMalaga.View.PanelSMTP;
 
 public class ButtonHandleSMTP implements ActionListener {
@@ -135,13 +136,14 @@ public class ButtonHandleSMTP implements ActionListener {
 	public void displayContent(EmailModel mail) {
 		String attachmentsInfo = "";
 		if (mail.hasAttachments()) {
-			attachmentsInfo = "\n\n=== ATTACHMENTS ===\n";
+			attachmentsInfo = Language.get(159);
 			for (String n : mail.getAttachmentNames())
 				attachmentsInfo += "> " + n + "\n";
 		}
 		btnDownloadEmail.setEnabled(true);
-		txtViewer.setText("FROM: " + mail.getSender() + "\nSUBJECT: " + mail.getSubject()
-				+ "\n--------------------------------\n" + mail.getContent() + attachmentsInfo);
+		txtViewer.setText(Language.get(157) + mail.getSender() + 
+				"\n" + Language.get(158) + mail.getSubject() +
+				"\n--------------------------------\n" + mail.getContent() + attachmentsInfo);
 	}
 
 	private void attachFiles() {
@@ -155,7 +157,7 @@ public class ButtonHandleSMTP implements ActionListener {
 
 	private void clearAttachments() {
 		attachmentsList.clear();
-		lblAttachedFile.setText("NO FILES");
+		lblAttachedFile.setText(Language.get(148));
 		lblAttachedFile.setForeground(Color.GRAY);
 	}
 
@@ -180,14 +182,14 @@ public class ButtonHandleSMTP implements ActionListener {
 		String body = txtBody.getText().trim();
 
 		if (recipient.isEmpty()) {
-			JOptionPane.showMessageDialog(view, "Recipient needed.");
+			JOptionPane.showMessageDialog(view, Language.get(149));
 			return;
 		}
 
 		if (!serviceSMTP.isEmailInWhitelist(recipient) && !serviceSMTP.isEmailInUsers(recipient)) {
 			JOptionPane.showMessageDialog(view,
-					"Error: The email " + recipient + " is not in the whitelist or is not a user.",
-					"Email blocked",
+					Language.get(150) + recipient + Language.get(151),
+					Language.get(152),
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
@@ -212,7 +214,7 @@ public class ButtonHandleSMTP implements ActionListener {
 		addPendingId(mail.getUniqueId());
 		
 		mail.setRead(newSt);
-		tableModel.setValueAt(newSt ? "READ" : "UNREAD", row, 0);
+		tableModel.setValueAt(newSt ? Language.get(153) : Language.get(154), row, 0);
 
 		new Thread(() -> {
 			try {
@@ -249,7 +251,7 @@ public class ButtonHandleSMTP implements ActionListener {
 		int row = emailTable.getSelectedRow();
 		if (row == -1)
 			return;
-		if (JOptionPane.showConfirmDialog(view, "Delete?", "CONFIRM",
+		if (JOptionPane.showConfirmDialog(view, Language.get(155), Language.get(156),
 				JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
 			return;
 		EmailModel mail = currentEmailList.get(row);

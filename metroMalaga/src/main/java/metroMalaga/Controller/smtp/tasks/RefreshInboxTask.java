@@ -6,6 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import metroMalaga.Controller.smtp.ButtonHandleSMTP;
 import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.EmailModel;
+import metroMalaga.Model.Language;
 
 public class RefreshInboxTask implements Runnable {
 
@@ -21,7 +22,7 @@ public class RefreshInboxTask implements Runnable {
 	private static volatile boolean isRefreshing = false;
 
 	public RefreshInboxTask(HandleSMTP backend, boolean isAuto, JButton btnRefresh, JTextArea txtViewer,
-			JTable emailTable, DefaultTableModel tableModel, List<EmailModel> currentEmailList, 
+			JTable emailTable, DefaultTableModel tableModel, List<EmailModel> currentEmailList,
 			ButtonHandleSMTP controller) {
 		this.backend = backend;
 		this.isAuto = isAuto;
@@ -41,7 +42,7 @@ public class RefreshInboxTask implements Runnable {
 
 		if (!isAuto) {
 			btnRefresh.setEnabled(false);
-			txtViewer.setText("Checking new emails...");
+			txtViewer.setText(Language.get(167));
 		}
 
 		try {
@@ -52,25 +53,25 @@ public class RefreshInboxTask implements Runnable {
 					cloudMail.setRead(true);
 				}
 			}
-			
+
 			currentEmailList.clear();
 			currentEmailList.addAll(mailsFromCloud);
 
 			SwingUtilities.invokeLater(() -> {
 				int selectedRow = emailTable.getSelectedRow();
 				String selectedUid = (selectedRow != -1 && selectedRow < currentEmailList.size())
-						? currentEmailList.get(selectedRow).getUniqueId() 
+						? currentEmailList.get(selectedRow).getUniqueId()
 						: null;
 
 				tableModel.setRowCount(0);
 				int newSel = -1;
-				
+
 				for (int i = 0; i < currentEmailList.size(); i++) {
 					EmailModel m = currentEmailList.get(i);
-					String st = m.isRead() ? "READ" : "UNREAD";
+					String st = m.isRead() ? Language.get(153) : Language.get(154);
 					String sub = m.getSubject() + (m.hasAttachments() ? " 📎" : "");
 					tableModel.addRow(new Object[] { st, m.getSender(), sub });
-					
+
 					if (selectedUid != null && selectedUid.equals(m.getUniqueId()))
 						newSel = i;
 				}
@@ -81,12 +82,12 @@ public class RefreshInboxTask implements Runnable {
 			});
 
 			if (!isAuto) {
-				txtViewer.setText("Inbox updated. " + mailsFromCloud.size() + " messages.");
+				txtViewer.setText(Language.get(168) + mailsFromCloud.size() + Language.get(169));
 				btnRefresh.setEnabled(true);
 			}
 		} catch (Exception e) {
 			if (!isAuto)
-				txtViewer.setText("Error updating inbox.");
+				txtViewer.setText(Language.get(170));
 			btnRefresh.setEnabled(true);
 		} finally {
 			isRefreshing = false;
