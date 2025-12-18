@@ -8,9 +8,9 @@ import javax.swing.JOptionPane;
 
 public class ConnecionSQL {
 
-	private final String RUTA = "jdbc:mysql://192.168.1.32:3306/centimetromalaga";
-	private final String USUARIO = "remoto";
-	private final String PASS = "proyecto";
+	private final String RUTA = "jdbc:mysql://localhost/proyectomultidisciplinar";
+	private final String USUARIO = "root";
+	private final String PASS = "";
 
 	public Connection connect() {
 		Connection con = null;
