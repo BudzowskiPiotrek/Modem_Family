@@ -2,6 +2,7 @@ package metroMalaga.Controller.smtp;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import metroMalaga.Controller.ServiceSMTP;
 import metroMalaga.Model.EmailModel;
 
 import java.io.*;
@@ -11,6 +12,7 @@ public class HandleSMTP {
 
     private String userEmail;
     private String appPassword;
+    
 
     public boolean login(String email, String password) {
         this.userEmail = email;
