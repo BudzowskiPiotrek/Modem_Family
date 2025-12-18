@@ -8,6 +8,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 
 import metroMalaga.Model.Usuario;
+import metroMalaga.Model.Language;
 import metroMalaga.Controller.smtp.ButtonHandleSMTP;
 import metroMalaga.Controller.smtp.ButtonHoverHandle;
 import metroMalaga.Controller.smtp.FieldFocusHandle;
@@ -22,9 +23,10 @@ public class PanelSMTP extends JPanel {
 	private JTextArea txtBody, txtViewer;
 	private JTable emailTable;
 	private DefaultTableModel tableModel;
-	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail,
-			btnReturn;
-	private JLabel lblAttachedFile;
+	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail, btnReturn;
+	private JButton btnLanguage;
+	private JLabel lblAttachedFile, lblTo, lblSubject;
+	private JPanel pCompose, pInbox;
 	private ButtonHandleSMTP buttonHandler;
 
 	private final Color BG_MAIN = new Color(245, 247, 250);
@@ -43,6 +45,7 @@ public class PanelSMTP extends JPanel {
 
 		setupPanel();
 		initUI();
+		createLanguageButton();
 		registerListeners();
 	}
 
@@ -52,17 +55,105 @@ public class PanelSMTP extends JPanel {
 		setBorder(new EmptyBorder(15, 15, 15, 15));
 	}
 
+	private void createLanguageButton() {
+		String langText = Language.getCurrentLanguage().equals("espanol") ? "🇪🇸 ES" : "🇬🇧 EN";
+		btnLanguage = new JButton(langText);
+		btnLanguage.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		btnLanguage.setBackground(C_ACCENT);
+		btnLanguage.setForeground(Color.WHITE);
+		btnLanguage.setBorder(new CompoundBorder(
+			new LineBorder(C_ACCENT, 1, true),
+			new EmptyBorder(5, 10, 5, 10)
+		));
+		btnLanguage.setFocusPainted(false);
+		btnLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		btnLanguage.addActionListener(e -> toggleLanguage());
+		
+		JPanel languagePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		languagePanel.setBackground(BG_MAIN);
+		languagePanel.add(btnLanguage);
+		add(languagePanel, BorderLayout.NORTH);
+	}
+
+	private void toggleLanguage() {
+		if (Language.getCurrentLanguage().equals("espanol")) {
+			Language.setEnglish();
+			btnLanguage.setText("🇬🇧 EN");
+		} else {
+			Language.setSpanish();
+			btnLanguage.setText("🇪🇸 ES");
+		}
+		updateAllTexts();
+	}
+
+	public void updateAllTexts() {
+		updatePanelTitle(pCompose, Language.get(53));
+		updatePanelTitle(pInbox, Language.get(54));
+		
+		lblTo.setText(Language.get(55));
+		lblSubject.setText(Language.get(56));
+		
+		String currentLabel = lblAttachedFile.getText();
+		if (currentLabel.contains("No ") || currentLabel.contains("files")) {
+			lblAttachedFile.setText(Language.get(60));
+		}
+		
+		btnAttach.setText(Language.get(57));
+		btnClearAttach.setText(Language.get(58));
+		btnSend.setText(Language.get(59));
+		
+		tableModel.setColumnIdentifiers(new String[]{
+			Language.get(61),
+			Language.get(62),
+			Language.get(63)
+		});
+		
+		btnRefresh.setText(Language.get(64));
+		btnToggleRead.setText(Language.get(65));
+		btnDownloadEmail.setText(Language.get(66));
+		btnDelete.setText(Language.get(67));
+		btnReturn.setText(Language.get(69));
+		
+		String viewerText = txtViewer.getText();
+		if (viewerText.contains("Select") || viewerText.contains("Selecciona")) {
+			txtViewer.setText(Language.get(68));
+		}
+		
+		revalidate();
+		repaint();
+	}
+
+	private void updatePanelTitle(JPanel panel, String newTitle) {
+		Border border = panel.getBorder();
+		if (border instanceof CompoundBorder) {
+			CompoundBorder cb = (CompoundBorder) border;
+			Border outer = cb.getOutsideBorder();
+			TitledBorder titledBorder = new TitledBorder(
+				new EmptyBorder(10, 10, 10, 10),
+				newTitle,
+				TitledBorder.LEFT,
+				TitledBorder.TOP,
+				F_HEADER,
+				TXT_DARK
+			);
+			panel.setBorder(new CompoundBorder(outer, titledBorder));
+		}
+	}
+
 	private void initUI() {
-		JPanel pCompose = createStyledPanel("New Message");
+		pCompose = createStyledPanel(Language.get(53));
 		JPanel pFields = new JPanel(new GridBagLayout());
 		pFields.setBackground(BG_PANEL);
 
 		txtTo = createField();
 		txtSubject = createField();
 
-		addGBC(pFields, new JLabel("To:"), 0, 0, 0.05);
+		lblTo = new JLabel(Language.get(55));
+		lblSubject = new JLabel(Language.get(56));
+
+		addGBC(pFields, lblTo, 0, 0, 0.05);
 		addGBC(pFields, txtTo, 1, 0, 0.95);
-		addGBC(pFields, new JLabel("Subject:"), 0, 1, 0.05);
+		addGBC(pFields, lblSubject, 0, 1, 0.05);
 		addGBC(pFields, txtSubject, 1, 1, 0.95);
 
 		txtBody = createTextArea();
@@ -71,13 +162,13 @@ public class PanelSMTP extends JPanel {
 		JPanel pButtonsCompose = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
 		pButtonsCompose.setBackground(BG_PANEL);
 
-		btnAttach = createButton("Attach File", false);
-		btnClearAttach = createButton("Clear", true);
-		btnSend = createButton("Send Email", false);
+		btnAttach = createButton(Language.get(57), false);
+		btnClearAttach = createButton(Language.get(58), true);
+		btnSend = createButton(Language.get(59), false);
 		btnSend.setBorder(new LineBorder(C_ACCENT, 1, true));
 		btnSend.setForeground(C_ACCENT);
 
-		lblAttachedFile = new JLabel("No files attached");
+		lblAttachedFile = new JLabel(Language.get(60));
 		lblAttachedFile.setForeground(Color.GRAY);
 		lblAttachedFile.setFont(F_TEXT);
 		lblAttachedFile.setPreferredSize(new Dimension(250, 30));
@@ -92,9 +183,13 @@ public class PanelSMTP extends JPanel {
 		pCompose.add(scrollBody, BorderLayout.CENTER);
 		pCompose.add(pButtonsCompose, BorderLayout.SOUTH);
 
-		JPanel pInbox = createStyledPanel("Inbox");
+		pInbox = createStyledPanel(Language.get(54));
 
-		String[] cols = { "Status", "Sender", "Subject" };
+		String[] cols = {
+			Language.get(61),
+			Language.get(62),
+			Language.get(63)
+		};
 		tableModel = new DefaultTableModel(cols, 0) {
 			public boolean isCellEditable(int r, int c) {
 				return false;
@@ -104,7 +199,7 @@ public class PanelSMTP extends JPanel {
 
 		txtViewer = createTextArea();
 		txtViewer.setEditable(false);
-		txtViewer.setText("Select an email to read...");
+		txtViewer.setText(Language.get(68));
 
 		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, createScrollPane(emailTable),
 				createScrollPane(txtViewer));
@@ -116,12 +211,12 @@ public class PanelSMTP extends JPanel {
 		JPanel pButtonsInbox = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 		pButtonsInbox.setBackground(BG_PANEL);
 
-		btnRefresh = createButton("Refresh", false);
-		btnToggleRead = createButton("Mark Read/Unread", false);
-		btnDownloadEmail = createButton("Download .eml", false);
+		btnRefresh = createButton(Language.get(64), false);
+		btnToggleRead = createButton(Language.get(65), false);
+		btnDownloadEmail = createButton(Language.get(66), false);
 		btnDownloadEmail.setEnabled(false);
-		btnDelete = createButton("Delete Email", true);
-		btnReturn = createButton("Return", true);
+		btnDelete = createButton(Language.get(67), true);
+		btnReturn = createButton(Language.get(69), true);
 
 		pButtonsInbox.add(btnRefresh);
 		pButtonsInbox.add(btnToggleRead);
@@ -152,6 +247,7 @@ public class PanelSMTP extends JPanel {
 		applyHover(btnClearAttach, C_DANGER, Color.WHITE, true);
 		applyHover(btnDelete, C_DANGER, Color.WHITE, true);
 		applyHover(btnReturn, C_DANGER, Color.WHITE, true);
+		applyHover(btnLanguage, C_ACCENT, Color.WHITE, false);
 	}
 
 	private void addGBC(JPanel p, Component c, int x, int y, double weight) {
@@ -248,74 +344,26 @@ public class PanelSMTP extends JPanel {
 		btn.addMouseListener(new ButtonHoverHandle(btn, bg, fg, hoverBg, fg, b, b));
 	}
 
-	public JTextField getTxtTo() {
-		return txtTo;
-	}
-
-	public JTextField getTxtSubject() {
-		return txtSubject;
-	}
-
-	public JTextArea getTxtBody() {
-		return txtBody;
-	}
-
-	public JTextArea getTxtViewer() {
-		return txtViewer;
-	}
-
-	public JTable getEmailTable() {
-		return emailTable;
-	}
-
-	public DefaultTableModel getTableModel() {
-		return tableModel;
-	}
-
-	public JButton getBtnSend() {
-		return btnSend;
-	}
-
-	public JButton getBtnAttach() {
-		return btnAttach;
-	}
-
-	public JButton getBtnClearAttach() {
-		return btnClearAttach;
-	}
-
-	public JButton getBtnRefresh() {
-		return btnRefresh;
-	}
-
-	public JButton getBtnDelete() {
-		return btnDelete;
-	}
-
-	public JButton getBtnToggleRead() {
-		return btnToggleRead;
-	}
-
-	public JButton getBtnDownloadEmail() {
-		return btnDownloadEmail;
-	}
-
-	public JLabel getLblAttachedFile() {
-		return lblAttachedFile;
-	}
-
-	public JButton getBtnReturn() {
-		return btnReturn;
-	}
-
-	public void setBtnReturn(JButton btnReturn) {
-		this.btnReturn = btnReturn;
-	}
+	public JTextField getTxtTo() { return txtTo; }
+	public JTextField getTxtSubject() { return txtSubject; }
+	public JTextArea getTxtBody() { return txtBody; }
+	public JTextArea getTxtViewer() { return txtViewer; }
+	public JTable getEmailTable() { return emailTable; }
+	public DefaultTableModel getTableModel() { return tableModel; }
+	public JButton getBtnSend() { return btnSend; }
+	public JButton getBtnAttach() { return btnAttach; }
+	public JButton getBtnClearAttach() { return btnClearAttach; }
+	public JButton getBtnRefresh() { return btnRefresh; }
+	public JButton getBtnDelete() { return btnDelete; }
+	public JButton getBtnToggleRead() { return btnToggleRead; }
+	public JButton getBtnDownloadEmail() { return btnDownloadEmail; }
+	public JLabel getLblAttachedFile() { return lblAttachedFile; }
+	public JButton getBtnReturn() { return btnReturn; }
+	public void setBtnReturn(JButton btnReturn) { this.btnReturn = btnReturn; }
 
 	public void setOnReturnCallback(Runnable callback) {
 		if (buttonHandler != null) {
 			buttonHandler.setOnReturnCallback(callback);
 		}
 	}
-
 }
