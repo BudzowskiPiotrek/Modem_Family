@@ -12,6 +12,7 @@ public class HandleSMTP {
     private String userEmail;
     private String appPassword;
     private boolean credentialsValid = true;
+    private String currentFolder = "INBOX"; // 👈 Nueva variable
 
     public boolean login(String email, String password) {
         this.userEmail = email;
@@ -22,6 +23,38 @@ public class HandleSMTP {
     
     public boolean isCredentialsValid() {
         return credentialsValid;
+    }
+
+    public void setCurrentFolder(String folderName) {
+        this.currentFolder = folderName;
+    }
+
+    public String getCurrentFolder() {
+        return currentFolder;
+    }
+
+    public List<String> getAvailableFolders() {
+        List<String> folders = new ArrayList<>();
+        Store store = null;
+        try {
+            Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
+            store = session.getStore("imaps");
+            store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
+
+            Folder defaultFolder = store.getDefaultFolder();
+            Folder[] allFolders = defaultFolder.list("*");
+            
+            for (Folder folder : allFolders) {
+                folders.add(folder.getFullName());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (store != null && store.isConnected()) store.close();
+            } catch (Exception ex) {}
+        }
+        return folders;
     }
 
     public List<EmailModel> fetchEmails() {
@@ -36,7 +69,7 @@ public class HandleSMTP {
             store = session.getStore("imaps");
             store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
 
-            emailFolder = store.getFolder("INBOX");
+            emailFolder = store.getFolder(currentFolder);
             emailFolder.open(Folder.READ_ONLY);
 
             int totalMessages = emailFolder.getMessageCount();
@@ -92,7 +125,7 @@ public class HandleSMTP {
             store = session.getStore("imaps");
             store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
 
-            emailFolder = store.getFolder("INBOX");
+            emailFolder = store.getFolder(currentFolder);
             emailFolder.open(Folder.READ_ONLY);
 
             int totalMessages = emailFolder.getMessageCount();
@@ -136,14 +169,13 @@ public class HandleSMTP {
         }
     }
 
-    
     public void updateReadStatusIMAP(String uid, boolean markAsRead) {
         if (!credentialsValid) return;
         try {
             Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
             Store store = session.getStore("imaps");
             store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
-            Folder emailFolder = store.getFolder("INBOX");
+            Folder emailFolder = store.getFolder(currentFolder);
             emailFolder.open(Folder.READ_WRITE);
             
             int totalMessages = emailFolder.getMessageCount();
@@ -171,7 +203,7 @@ public class HandleSMTP {
             Session session = Session.getDefaultInstance(EmailConfig.getImapProperties());
             Store store = session.getStore("imaps");
             store.connect(EmailConfig.IMAP_HOST, userEmail, appPassword);
-            Folder emailFolder = store.getFolder("INBOX");
+            Folder emailFolder = store.getFolder(currentFolder); // 👈 Usa carpeta actual
             emailFolder.open(Folder.READ_WRITE);
             
             int totalMessages = emailFolder.getMessageCount();

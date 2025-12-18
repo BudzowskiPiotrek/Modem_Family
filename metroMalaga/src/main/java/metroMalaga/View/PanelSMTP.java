@@ -6,6 +6,7 @@ import javax.swing.table.*;
 import javax.swing.text.JTextComponent;
 
 import java.awt.*;
+import java.util.List;
 
 import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
@@ -24,7 +25,8 @@ public class PanelSMTP extends JPanel {
 	private JTable emailTable;
 	private DefaultTableModel tableModel;
 	private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail, btnReturn;
-	private JLabel lblAttachedFile, lblTo, lblSubject;
+	private JLabel lblAttachedFile, lblTo, lblSubject, lblFolder;
+	private JComboBox<String> cboFolders;
 	private JPanel pCompose, pInbox;
 	private ButtonHandleSMTP buttonHandler;
 
@@ -59,6 +61,7 @@ public class PanelSMTP extends JPanel {
 
 		lblTo.setText(Language.get(55));
 		lblSubject.setText(Language.get(56));
+		lblFolder.setText(Language.get(197));
 
 		String currentLabel = lblAttachedFile.getText();
 		if (currentLabel.contains("No ") || currentLabel.contains("files")) {
@@ -152,6 +155,28 @@ public class PanelSMTP extends JPanel {
 
 		pInbox = createStyledPanel(Language.get(54));
 
+		JPanel pFolderSelector = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+		pFolderSelector.setBackground(BG_PANEL);
+		
+		lblFolder = new JLabel(Language.get(197));
+		lblFolder.setFont(F_TEXT);
+		lblFolder.setForeground(TXT_DARK);
+		
+		cboFolders = new JComboBox<>();
+		cboFolders.setPreferredSize(new Dimension(200, 30));
+		cboFolders.setFont(F_TEXT);
+		cboFolders.setBackground(Color.WHITE);
+		cboFolders.setBorder(new LineBorder(C_BORDER, 1));
+		
+		cboFolders.addItem("INBOX");
+		cboFolders.addItem("[Gmail]/Spam");
+		cboFolders.addItem("[Gmail]/Trash");
+		
+		cboFolders.setSelectedItem("INBOX");
+		
+		pFolderSelector.add(lblFolder);
+		pFolderSelector.add(cboFolders);
+
 		String[] cols = {
 			Language.get(61),
 			Language.get(62),
@@ -191,7 +216,13 @@ public class PanelSMTP extends JPanel {
 		pButtonsInbox.add(btnDelete);
 		pButtonsInbox.add(btnReturn);
 
-		pInbox.add(split, BorderLayout.CENTER);
+		// 👇 Añadir selector de carpetas en la parte superior
+		JPanel pInboxTop = new JPanel(new BorderLayout());
+		pInboxTop.setBackground(BG_PANEL);
+		pInboxTop.add(pFolderSelector, BorderLayout.NORTH);
+		pInboxTop.add(split, BorderLayout.CENTER);
+
+		pInbox.add(pInboxTop, BorderLayout.CENTER);
 		pInbox.add(pButtonsInbox, BorderLayout.SOUTH);
 
 		JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, pCompose, pInbox);
@@ -205,6 +236,14 @@ public class PanelSMTP extends JPanel {
 
 	private void registerListeners() {
 		buttonHandler = new ButtonHandleSMTP(this, backend);
+
+		cboFolders.addActionListener(e -> {
+			String selectedFolder = (String) cboFolders.getSelectedItem();
+			if (selectedFolder != null) {
+				backend.setCurrentFolder(selectedFolder);
+				buttonHandler.refreshInbox(false);
+			}
+		});
 
 		applyHover(btnAttach, BG_PANEL, TXT_DARK, false);
 		applyHover(btnRefresh, BG_PANEL, TXT_DARK, false);
