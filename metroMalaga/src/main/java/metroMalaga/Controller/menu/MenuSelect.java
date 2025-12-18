@@ -40,7 +40,7 @@ public class MenuSelect implements ChangeListener {
 	public void updateActivePanelTheme() {
 		
 		if (crudPanel != null && tabbedPane.getSelectedComponent() == crudPanel) {
-			// crudPanel.applyTheme();
+			crudPanel.applyTheme();
 		} 
 		else if (ftpPanel != null && tabbedPane.getSelectedComponent() == ftpPanel) {
 			// ftpPanel.applyTheme(); 
