@@ -77,6 +77,7 @@ public class MenuManualActivity extends BaseManualActivity {
 
                                 String title = document.getString("title");
                                 String description = document.getString("description");
+                                String features = document.getString("features");
 
                                 tvTitle.setText(title != null ? title : "Menu");
 
@@ -85,6 +86,11 @@ public class MenuManualActivity extends BaseManualActivity {
 
                                 if (description != null) {
                                     addTextToLayout(description);
+                                }
+
+                                if (features != null) {
+                                    addTextToLayout(""); // Add some spacing
+                                    addTextToLayout(features);
                                 }
 
                             } else {

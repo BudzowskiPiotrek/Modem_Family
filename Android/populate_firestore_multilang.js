@@ -36,7 +36,8 @@ const manualDataEN = {
 
   menu: {
     title: "Menu",
-    description: "The visualization of the different systems will be done through tabs"
+    description: "We use a series of tabs located in the upper right to navigate between the different pages of the application. CRUD serves as the main page, being the one that loads when starting the program. The other tabs are FTP, SMTP (Email Management) and Exit.",
+    features: "The application has a button to change the language, with options for English and Spanish, and another that allows you to change the application theme, switching between light mode and dark mode."
   },
 
   gestion_correos: {
@@ -189,7 +190,8 @@ const manualDataES = {
 
   menu: {
     title: "Menú",
-    description: "La visualización de los distintos sistemas se hará mediante pestañas"
+    description: "Utilizamos una serie de pestañas ubicadas arriba a la derecha para navegar entre las distintas páginas de la aplicación. El CRUD hace de página principal, siendo esta la que carga al iniciar el programa. Las otras pestañas son FTP, SMTP (Gestión de correos) y Salir.",
+    features: "Además, cuenta con un botón para cambiar el idioma, teniendo las opciones de inglés y español, y con otro que permite cambiar el tema de la aplicación, cambiando entre modo claro y modo oscuro."
   },
 
   gestion_correos: {
