@@ -46,21 +46,21 @@ public class ServiceLoginTest {
 		assertFalse(resultado);
 	}
 
-//	@Test
-//	public void testObtenerDatosUsuario() {
-//		Usuario usuario = service.getUserData("admin");
-//
-//		assertNotNull(usuario);
-//		assertEquals("admin", usuario.getUsernameApp());
-//		assertNotNull(usuario.getEmailReal());
-//		assertNotNull(usuario.getRol());
-//	}
-//
-//	@Test
-//	public void testObtenerUsuarioNoExiste() {
-//		Usuario usuario = service.getUserData("usuarioInexistente999");
-//		assertNull(usuario);
-//	}
+	@Test
+	public void testObtenerDatosUsuario() {
+		Usuario usuario = service.getUserData("admin","");
+
+		assertNotNull(usuario);
+		assertEquals("admin", usuario.getUsernameApp());
+		assertNotNull(usuario.getEmailReal());
+		assertNotNull(usuario.getRol());
+	}
+
+	@Test
+	public void testObtenerUsuarioNoExiste() {
+		Usuario usuario = service.getUserData("usuarioInexistente999","");
+		assertNull(usuario);
+	}
 
 	@Test
 	public void testRegistrarLog() {
@@ -76,13 +76,13 @@ public class ServiceLoginTest {
 		});
 	}
 
-//	@Test
-//	public void testUsuarioTieneRolValido() {
-//		Usuario usuario = service.getUserData("admin");
-//
-//		assertNotNull(usuario);
-//		assertNotNull(usuario.getRol());
-//		assertTrue(usuario.getRol().getId() > 0);
-//		assertFalse(usuario.getRol().getNombre().isEmpty());
-//	}
+	@Test
+	public void testUsuarioTieneRolValido() {
+		Usuario usuario = service.getUserData("admin","");
+
+		assertNotNull(usuario);
+		assertNotNull(usuario.getRol());
+		assertTrue(usuario.getRol().getId() > 0);
+		assertFalse(usuario.getRol().getNombre().isEmpty());
+	}
 }
