@@ -20,7 +20,7 @@ public class CrudController {
     private MenuSelect menuSelect;
 
     private String tablaActual;
-    private List<String> nombresColumnas; 
+    private List<String> nombresColumnas;
     private String idRegistroEdicion = null;
 
     public CrudController(CrudFrontend vista, MenuSelect menuSelect) {
@@ -48,7 +48,7 @@ public class CrudController {
                 String seleccion = vista.getTablaSeleccionada();
                 if (seleccion != null) {
                     tablaActual = seleccion;
-                    idRegistroEdicion = null; 
+                    idRegistroEdicion = null;
                     vista.limpiarCamposFormulario();
                     cargarDatosTabla();
                 }
@@ -95,7 +95,7 @@ public class CrudController {
 
             if (catalogo == null) {
                 JOptionPane.showMessageDialog(vista,
-                        Language.get(172), 
+                        Language.get(172),
                         Language.get(173),
                         JOptionPane.ERROR_MESSAGE);
                 return;
@@ -116,9 +116,9 @@ public class CrudController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(vista, 
+            JOptionPane.showMessageDialog(vista,
                     Language.get(174) + e.getMessage(),
-                    Language.get(175), 
+                    Language.get(175),
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -147,7 +147,13 @@ public class CrudController {
             while (rs.next()) {
                 Object[] fila = new Object[colCount];
                 for (int i = 1; i <= colCount; i++) {
-                    fila[i - 1] = rs.getObject(i);
+                    // Hide passwords in the usuarios table
+                    if (tablaActual.equalsIgnoreCase("usuarios") &&
+                            nombresColumnas.get(i - 1).equalsIgnoreCase("password")) {
+                        fila[i - 1] = "********";
+                    } else {
+                        fila[i - 1] = rs.getObject(i);
+                    }
                 }
                 datos.add(fila);
             }
@@ -166,14 +172,27 @@ public class CrudController {
             return;
 
         if (!canModifyTable(tablaActual)) {
-            JOptionPane.showMessageDialog(vista, 
-                    Language.get(177), 
+            JOptionPane.showMessageDialog(vista,
+                    Language.get(177),
                     Language.get(178),
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         List<String> valores = vista.getDatosFormulario();
+
+        // Hash passwords before saving if this is the usuarios table
+        if (tablaActual.equalsIgnoreCase("usuarios")) {
+            int passwordIndex = nombresColumnas.indexOf("password");
+            if (passwordIndex != -1 && passwordIndex < valores.size()) {
+                String plainPassword = valores.get(passwordIndex);
+                // Only hash if it's not already a BCrypt hash and not the placeholder
+                if (!plainPassword.equals("********") && !PasswordUtil.isBCryptHash(plainPassword)) {
+                    String hashedPassword = PasswordUtil.hashPassword(plainPassword);
+                    valores.set(passwordIndex, hashedPassword);
+                }
+            }
+        }
 
         try {
             PreparedStatement pst;
@@ -224,8 +243,8 @@ public class CrudController {
 
     private void accionEliminar(int fila) {
         if (!canModifyTable(tablaActual)) {
-            JOptionPane.showMessageDialog(vista, 
-                    Language.get(181), 
+            JOptionPane.showMessageDialog(vista,
+                    Language.get(181),
                     Language.get(178),
                     JOptionPane.WARNING_MESSAGE);
             return;
@@ -234,9 +253,9 @@ public class CrudController {
         Object id = vista.getTableValueAt(fila, 0);
         String nombreColID = nombresColumnas.get(0);
 
-        int confirm = JOptionPane.showConfirmDialog(vista, 
+        int confirm = JOptionPane.showConfirmDialog(vista,
                 Language.get(182) + id + Language.get(183));
-        
+
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 String sql = "DELETE FROM " + tablaActual + " WHERE " + nombreColID + " = ?";
