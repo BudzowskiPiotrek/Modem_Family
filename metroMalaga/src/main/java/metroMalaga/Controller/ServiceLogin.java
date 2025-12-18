@@ -42,7 +42,8 @@ public class ServiceLogin {
 	public Usuario getUserData(String usuario, String password) {
 		Usuario user = null;
 
-		final String SQL = "SELECT u.username, u.password, u.correo_electronico, u.fk_id_rol, r.nombre AS rol_nombre, r.permiso "
+		final String SQL = "SELECT u.username, u.password, u.correo_electronico, u.fk_id_rol, r.nombre AS rol_nombre, r.permiso, "
+				+ "r.can_download, r.can_modify, r.can_delete "
 				+ "FROM usuarios u JOIN roles r ON u.fk_id_rol = r.id_roles WHERE u.username = ?";
 
 		try (Connection con = conSQL.connect(); PreparedStatement ps = con.prepareStatement(SQL)) {
@@ -50,7 +51,13 @@ public class ServiceLogin {
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 
-					Rol rol = new Rol(rs.getInt("fk_id_rol"), rs.getString("permiso"), rs.getString("rol_nombre"));
+					Rol rol = new Rol(
+							rs.getInt("fk_id_rol"),
+							rs.getString("permiso"),
+							rs.getString("rol_nombre"),
+							rs.getBoolean("can_download"),
+							rs.getBoolean("can_modify"),
+							rs.getBoolean("can_delete"));
 
 					user = new Usuario(rs.getString("username"), password,
 							rs.getString("correo_electronico"), rol);
