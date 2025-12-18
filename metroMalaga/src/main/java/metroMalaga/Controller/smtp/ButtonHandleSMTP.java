@@ -6,7 +6,10 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -36,6 +39,8 @@ public class ButtonHandleSMTP implements ActionListener {
 	private List<EmailModel> currentEmailList;
 	private List<File> attachmentsList;
 
+	private final Set<String> pendingUpdateIds = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
 	public ButtonHandleSMTP(PanelSMTP view, HandleSMTP backend) {
 		this.view = view;
 		this.backend = backend;
@@ -63,6 +68,18 @@ public class ButtonHandleSMTP implements ActionListener {
 		initListeners();
 
 		new Thread(new AutoRefreshAgent(this)).start();
+	}
+
+	public void addPendingId(String uid) {
+		if (uid != null) pendingUpdateIds.add(uid);
+	}
+
+	public void removePendingId(String uid) {
+		if (uid != null) pendingUpdateIds.remove(uid);
+	}
+
+	public boolean isPending(String uid) {
+		return uid != null && pendingUpdateIds.contains(uid);
 	}
 
 	private void initListeners() {
@@ -158,30 +175,30 @@ public class ButtonHandleSMTP implements ActionListener {
 	}
 
 	private void sendEmail() {
-	    String recipient = txtTo.getText().trim();
-	    String subject = txtSubject.getText().trim();
-	    String body = txtBody.getText().trim();
+		String recipient = txtTo.getText().trim();
+		String subject = txtSubject.getText().trim();
+		String body = txtBody.getText().trim();
 
-	    if (recipient.isEmpty()) {
-	        JOptionPane.showMessageDialog(view, "Recipient needed.");
-	        return;
-	    }
+		if (recipient.isEmpty()) {
+			JOptionPane.showMessageDialog(view, "Recipient needed.");
+			return;
+		}
 
-	    if (!serviceSMTP.isEmailInWhitelist(recipient) && !serviceSMTP.isEmailInUsers(recipient)) {
-	        JOptionPane.showMessageDialog(view, 
-	            "Error: The email " + recipient + " is not in the whitelist or is not a user.", 
-	            "Email blocked", 
-	            JOptionPane.ERROR_MESSAGE);
-	        return;
-	    }
-	    EmailSenderTask task = new EmailSenderTask(backend, view, recipient, subject, body, attachmentsList,
-	            btnSend, txtTo, txtSubject, txtBody, lblAttachedFile);
-	    new Thread(task).start();
+		if (!serviceSMTP.isEmailInWhitelist(recipient) && !serviceSMTP.isEmailInUsers(recipient)) {
+			JOptionPane.showMessageDialog(view,
+					"Error: The email " + recipient + " is not in the whitelist or is not a user.",
+					"Email blocked",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		EmailSenderTask task = new EmailSenderTask(backend, view, recipient, subject, body, attachmentsList,
+				btnSend, txtTo, txtSubject, txtBody, lblAttachedFile);
+		new Thread(task).start();
 	}
 
 	public void refreshInbox(boolean isAuto) {
 		RefreshInboxTask task = new RefreshInboxTask(backend, isAuto, btnRefresh, txtViewer, emailTable, tableModel,
-				currentEmailList);
+				currentEmailList, this);
 		new Thread(task).start();
 	}
 
@@ -191,11 +208,21 @@ public class ButtonHandleSMTP implements ActionListener {
 			return;
 		EmailModel mail = currentEmailList.get(row);
 		boolean newSt = !mail.isRead();
+		
+		addPendingId(mail.getUniqueId());
+		
 		mail.setRead(newSt);
 		tableModel.setValueAt(newSt ? "READ" : "UNREAD", row, 0);
 
-		ToggleReadStatusTask task = new ToggleReadStatusTask(backend, mail.getUniqueId(), newSt);
-		new Thread(task).start();
+		new Thread(() -> {
+			try {
+				backend.updateReadStatusIMAP(mail.getUniqueId(), newSt);
+				Thread.sleep(2000); 
+			} catch (Exception e) {
+			} finally {
+				removePendingId(mail.getUniqueId());
+			}
+		}).start();
 	}
 
 	private void downloadFullEmail() {
