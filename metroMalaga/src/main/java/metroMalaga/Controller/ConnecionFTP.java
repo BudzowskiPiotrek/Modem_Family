@@ -8,17 +8,11 @@ import metroMalaga.Model.Language;
 public class ConnecionFTP {
 	private static final String SERVER = "192.168.1.35";
 	private static final int PORT = 21;
-	private String user;
+	private String user= "proyecto";
 	private static final String PASS = "proyecto";
 
-	public ConnecionFTP(String tipo) {
-		if (tipo.equalsIgnoreCase("admin")) {
-			this.user = "proyecto";
-		} else if (tipo.equalsIgnoreCase("usuario")) {
-			this.user = "write";
-		} else if (tipo.equalsIgnoreCase("super")) {
-			this.user = "read";
-		}
+	public ConnecionFTP() {
+		
 	}
 
 	public FTPClient getConnection() {
