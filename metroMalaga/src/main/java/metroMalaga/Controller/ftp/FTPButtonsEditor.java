@@ -19,6 +19,7 @@ import metroMalaga.Controller.Common;
 import metroMalaga.Controller.ServiceFTP;
 import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
+import metroMalaga.Model.Language;
 
 public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
 
@@ -89,7 +90,7 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 
 	private void handleDownload(FTPFile file) {
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setDialogTitle("Guardar " + file.getName() + " como...");
+		fileChooser.setDialogTitle(Language.get(105) + file.getName() + Language.get(106));
 		fileChooser.setSelectedFile(new java.io.File(file.getName()));
 
 		int result = fileChooser.showSaveDialog(null);
@@ -101,75 +102,88 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				boolean success = service.downloadFile(file.getName(), localFilePath);
 
 				if (success) {
-					JOptionPane.showMessageDialog(null, "File successfully downloaded to:\n" + localFilePath);
+					JOptionPane.showMessageDialog(null, 
+						Language.get(107) + localFilePath);
 					cn.registerLog(user.getUsernameApp(), "File downloaded:" + localFilePath);
 				} else {
-					JOptionPane.showMessageDialog(null, "Error: The folder cannot be downloaded", "DownloadError",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, 
+						Language.get(108), 
+						Language.get(109),
+						JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, "I/O error during download: " + e.getMessage(), "DownloadError",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, 
+					Language.get(110) + e.getMessage(), 
+					Language.get(109),
+					JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
 	private void handleDelete(FTPFile file) {
-		int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete it?" + file.getName() + "?",
-
-				"Confirm Deletion", JOptionPane.YES_NO_OPTION);
+		int confirm = JOptionPane.showConfirmDialog(null, 
+			Language.get(111) + file.getName() + Language.get(112),
+			Language.get(113), 
+			JOptionPane.YES_NO_OPTION);
 
 		if (confirm == JOptionPane.YES_OPTION) {
 			try {
 				boolean success = service.deleteFile(file.getName());
 
 				if (success) {
-					JOptionPane.showMessageDialog(null, "File successfully deleted.");
+					JOptionPane.showMessageDialog(null, Language.get(114));
 
-					// Notify other clients about the deletion
 					service.notifyFTPChange("DELETE", file.getName());
 
 					updateTable();
 					cn.registerLog(user.getUsernameApp(), "File delete:" + file.getName());
 				} else {
-					JOptionPane.showMessageDialog(null, "You can't delete the folder", "Error de Borrado",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, 
+						Language.get(115), 
+						Language.get(116),
+						JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, "I/O error during erase: " + e.getMessage(), "Error de Borrado",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, 
+					Language.get(117) + e.getMessage(), 
+					Language.get(116),
+					JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
 	private void handleRename(FTPFile file) {
-		String newName = JOptionPane.showInputDialog(null, "New name for" + file.getName() + ":");
+		String newName = JOptionPane.showInputDialog(null, 
+			Language.get(118) + file.getName() + Language.get(119));
+		
 		if (newName != null && !newName.trim().isEmpty()) {
 			try {
 				boolean success = service.renameFile(file.getName(), newName.trim());
 
 				if (success) {
-					JOptionPane.showMessageDialog(null, "File renamed successfully.");
+					JOptionPane.showMessageDialog(null, Language.get(120));
 
-					// Notify other clients about the rename
 					service.notifyFTPChange("RENAME", file.getName() + " -> " + newName.trim());
 
 					updateTable();
 					cn.registerLog(user.getUsernameApp(),
 							"File renamed :" + file.getName() + " for: " + newName.trim());
 				} else {
-					JOptionPane.showMessageDialog(null, "Fallo al renombrar el archivo.", "Error de Renombrado",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, 
+						Language.get(121), 
+						Language.get(122),
+						JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, "Error de E/S durante el renombrado: ", "Error de Renombrado",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, 
+					Language.get(123) + e.getMessage(), 
+					Language.get(122),
+					JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
 	private void updateTable() {
-
 		FTPFile[] updatedFilesArray = service.listAllFiles();
 		List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
 		model.setData(updatedFilesList);
