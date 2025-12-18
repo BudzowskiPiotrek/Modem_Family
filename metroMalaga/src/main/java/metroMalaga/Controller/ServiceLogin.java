@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 
 import metroMalaga.Model.Rol;
 import metroMalaga.Model.Usuario;
+import metroMalaga.Model.Language;
 
 public class ServiceLogin {
 
@@ -32,8 +33,8 @@ public class ServiceLogin {
 				return false;
 			}
 		} catch (SQLException e) {
-			String errorMessage = "Connection/SQL Error. Please contact support. Detail: " + e.getMessage();
-			JOptionPane.showMessageDialog(null, errorMessage, "System Error", JOptionPane.ERROR_MESSAGE);
+			String errorMessage = Language.get(184) + e.getMessage();
+			JOptionPane.showMessageDialog(null, errorMessage, Language.get(185), JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 	}
@@ -56,8 +57,8 @@ public class ServiceLogin {
 				}
 			}
 		} catch (SQLException e) {
-			String errorMessage = "Error retrieving user data: " + e.getMessage();
-			JOptionPane.showMessageDialog(null, errorMessage, "Error SQL", JOptionPane.ERROR_MESSAGE);
+			String errorMessage = Language.get(186) + e.getMessage();
+			JOptionPane.showMessageDialog(null, errorMessage, Language.get(187), JOptionPane.ERROR_MESSAGE);
 		}
 		return user;
 	}

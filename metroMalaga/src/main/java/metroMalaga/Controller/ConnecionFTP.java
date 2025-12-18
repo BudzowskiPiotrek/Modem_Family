@@ -3,9 +3,9 @@ package metroMalaga.Controller;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import org.apache.commons.net.ftp.FTPClient;
+import metroMalaga.Model.Language;
 
 public class ConnecionFTP {
-	//private static final String SERVER = "192.168.1.32";
 	private static final String SERVER = "192.168.1.35";
 	private static final int PORT = 21;
 	private String user;
@@ -22,38 +22,33 @@ public class ConnecionFTP {
 	public FTPClient getConnection() {
 		FTPClient ftpClient = new FTPClient();
 		try {
-			// Configure timeouts before connecting (these methods only accept int
-			// milliseconds)
-			ftpClient.setDefaultTimeout(60000); // 60 seconds for connection timeout
-			ftpClient.setConnectTimeout(60000); // 60 seconds for socket connection
+			ftpClient.setDefaultTimeout(60000);
+			ftpClient.setConnectTimeout(60000);
 
-			// Set keep-alive to prevent connection from closing during idle time
-			ftpClient.setControlKeepAliveTimeout(java.time.Duration.ofMinutes(5)); // Send NOOP every 5 minutes
+			ftpClient.setControlKeepAliveTimeout(java.time.Duration.ofMinutes(5));
 
 			ftpClient.connect(SERVER, PORT);
 			boolean login = ftpClient.login(user, PASS);
 			if (login) {
 				ftpClient.enterLocalPassiveMode();
 
-				// Set data timeout and keep-alive reply timeout after connection is established
-				ftpClient.setDataTimeout(java.time.Duration.ofSeconds(60)); // 60 seconds for data transfer
-				ftpClient.setControlKeepAliveReplyTimeout(java.time.Duration.ofSeconds(60)); // 60 seconds timeout for
-																								// keep-alive responses
+				ftpClient.setDataTimeout(java.time.Duration.ofSeconds(60));
+				ftpClient.setControlKeepAliveReplyTimeout(java.time.Duration.ofSeconds(60));
 
 				System.out.println("FTP connection established with keep-alive enabled (NOOP every 5 minutes)");
 				return ftpClient;
 			} else {
 				closeConnection(ftpClient);
 				JOptionPane.showMessageDialog(null,
-						"Login Failed for user: " + user
-								+ ". Check password in ConnecionFTP.java and user privileges on FileZilla Server.",
-						"Authentication Error", JOptionPane.ERROR_MESSAGE);
+						Language.get(189) + user + Language.get(190),
+						Language.get(147), 
+						JOptionPane.ERROR_MESSAGE);
 
 			}
 		} catch (IOException e) {
-			String errorMessage = "Could not connect to the FTP Server at " + SERVER + ":" + PORT
-					+ ". The server may be offline or the firewall is blocking access." + e.getMessage();
-			JOptionPane.showMessageDialog(null, errorMessage, "Error FTP", JOptionPane.ERROR_MESSAGE);
+			String errorMessage = Language.get(191) + SERVER + ":" + PORT + 
+					Language.get(192) + e.getMessage();
+			JOptionPane.showMessageDialog(null, errorMessage, Language.get(193), JOptionPane.ERROR_MESSAGE);
 		}
 		return null;
 	}
@@ -64,8 +59,8 @@ public class ConnecionFTP {
 				ftpClient.logout();
 				ftpClient.disconnect();
 			} catch (IOException e) {
-				String errorMessage = "Error while disconnecting FTP: " + e.getMessage();
-				JOptionPane.showMessageDialog(null, errorMessage, "Error FTP", JOptionPane.ERROR_MESSAGE);
+				String errorMessage = Language.get(194) + e.getMessage();
+				JOptionPane.showMessageDialog(null, errorMessage, Language.get(193), JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
