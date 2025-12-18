@@ -106,7 +106,7 @@ public class MenuSelect implements ChangeListener {
 			@Override
 			protected Void doInBackground() throws Exception {
 				publish("Conectando al servidor FTP...");
-				service = new ServiceFTP(user.getUsernameApp(), user.getRol().getNombre());
+				service = new ServiceFTP(user.getUsernameApp(), user.getRol());
 
 				publish("Listando archivos...");
 				FTPFile[] fileArray = service.listAllFiles();
