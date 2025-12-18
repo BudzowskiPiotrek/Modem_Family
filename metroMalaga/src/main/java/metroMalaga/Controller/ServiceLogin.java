@@ -39,7 +39,7 @@ public class ServiceLogin {
 		}
 	}
 
-	public Usuario getUserData(String usuario) {
+	public Usuario getUserData(String usuario, String password) {
 		Usuario user = null;
 
 		final String SQL = "SELECT u.username, u.password, u.correo_electronico, u.fk_id_rol, r.nombre AS rol_nombre, r.permiso "
@@ -52,7 +52,7 @@ public class ServiceLogin {
 
 					Rol rol = new Rol(rs.getInt("fk_id_rol"), rs.getString("permiso"), rs.getString("rol_nombre"));
 
-					user = new Usuario(rs.getString("username"), rs.getString("password"),
+					user = new Usuario(rs.getString("username"), password,
 							rs.getString("correo_electronico"), rol);
 				}
 			}
