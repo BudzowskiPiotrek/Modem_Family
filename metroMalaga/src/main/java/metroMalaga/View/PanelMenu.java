@@ -110,7 +110,7 @@ public class PanelMenu extends JFrame {
 		if (tabbedPane != null) {
 			Color tabBg = p5Mode ? P5_BLACK : new Color(230, 230, 230);
 			Color tabFg = p5Mode ? P5_WHITE : Color.BLACK;
-			Color tabSel = p5Mode ? P5_RED : Common.getAccent();
+			Color tabSel = p5Mode ? P5_RED : Common.getDanger();
 			
 			tabbedPane.setBackground(tabBg);
 			tabbedPane.setForeground(tabFg);
