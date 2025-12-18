@@ -183,7 +183,7 @@ public class ServiceFTP {
 	public synchronized boolean deleteFile(String path) {
 		try {
 			FTPFile file = ftpClient.mlistFile(path);
-			
+
 			if (file == null) {
 				return false;
 			}
@@ -289,14 +289,20 @@ public class ServiceFTP {
 	 * otherwise connect as client to the server
 	 */
 	private void initializeNotificationSystem() {
-		if (NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
-			// We are on the notification server host, start the server
-			NotificationServer.getInstance().start();
-			System.out.println("Running as NOTIFICATION SERVER (FTP server at " + ftpServerHost + ")");
-		} else {
-			// We are a remote client, will connect to notification server when table model
-			// is set
-			System.out.println("Running as NOTIFICATION CLIENT (will connect to server at " + ftpServerHost + ")");
+		try {
+			if (NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
+				// We are on the notification server host, start the server
+				NotificationServer.getInstance().start();
+				System.out.println("Running as NOTIFICATION SERVER (FTP server at " + ftpServerHost + ")");
+			} else {
+				// We are a remote client, will connect to notification server when table model
+				// is set
+				System.out.println("Running as NOTIFICATION CLIENT (will connect to server at " + ftpServerHost + ")");
+			}
+		} catch (Exception e) {
+			// If notification system fails, log it but don't prevent FTP from working
+			System.err.println("Warning: Notification system initialization failed: " + e.getMessage());
+			System.out.println("FTP will work normally, but without real-time synchronization");
 		}
 	}
 
@@ -309,9 +315,18 @@ public class ServiceFTP {
 	 */
 	public void setTableModel(FTPTableModel tableModel) {
 		if (tableModel != null) {
-			// Only create notification controller (client) if we're NOT running as server
-			this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
-			notificationsInitialized = true;
+			try {
+				// Try to create notification controller (client)
+				this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
+				notificationsInitialized = true;
+				System.out.println("Notification system initialized successfully");
+			} catch (Exception e) {
+				// If notification system fails to initialize, log it but DON'T block FTP access
+				System.err.println("Warning: Notification system could not be initialized: " + e.getMessage());
+				System.out.println("FTP will work normally, but without real-time updates from other clients");
+				this.notificationController = null;
+				notificationsInitialized = false;
+			}
 		}
 	}
 
@@ -355,4 +370,3 @@ public class ServiceFTP {
 		this.notificationController = controller;
 	}
 }
-
