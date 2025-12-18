@@ -88,6 +88,12 @@ public class MenuManualActivity extends BaseManualActivity {
                                     addTextToLayout(description);
                                 }
 
+                                // Add menu images
+                                addImageToLayout(R.drawable.image14); // Navigation tabs
+                                addImageToLayout(R.drawable.image11); // Full menu view
+                                addImageToLayout(R.drawable.image2); // Theme/language buttons
+                                addImageToLayout(R.drawable.image6); // Tabs close-up
+
                                 if (features != null) {
                                     addTextToLayout(""); // Add some spacing
                                     addTextToLayout(features);
@@ -118,6 +124,19 @@ public class MenuManualActivity extends BaseManualActivity {
         textView.setTextSize(14);
         textView.setTextColor(getResources().getColor(android.R.color.white));
         contentLayout.addView(textView);
+    }
+
+    private void addImageToLayout(int imageResourceId) {
+        ImageView imageView = new ImageView(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 16, 0, 16);
+        imageView.setLayoutParams(params);
+        imageView.setImageResource(imageResourceId);
+        imageView.setAdjustViewBounds(true);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        contentLayout.addView(imageView);
     }
 
     @Override
