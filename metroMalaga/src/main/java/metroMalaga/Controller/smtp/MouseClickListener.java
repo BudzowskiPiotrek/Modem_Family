@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import metroMalaga.Controller.smtp.tasks.LoadContentTask;
@@ -40,6 +41,23 @@ public class MouseClickListener extends MouseAdapter {
 
 			if (row >= 0 && row < currentList.size()) {
 				EmailModel mail = currentList.get(row);
+
+				if (!mail.isRead()) {
+					controller.addPendingId(mail.getUniqueId());
+					
+					mail.setRead(true);
+					SwingUtilities.invokeLater(() -> tableModel.setValueAt("READ", row, 0));
+					
+					new Thread(() -> {
+						try {
+							backend.updateReadStatusIMAP(mail.getUniqueId(), true);
+							Thread.sleep(2500); 
+						} catch (InterruptedException ex) {
+						} finally {
+							controller.removePendingId(mail.getUniqueId());
+						}
+					}).start();
+				}
 
 				if ("[Click to load content...]".equals(mail.getContent())) {
 					txtViewer.setText("Downloading message content...\nPlease wait.");
