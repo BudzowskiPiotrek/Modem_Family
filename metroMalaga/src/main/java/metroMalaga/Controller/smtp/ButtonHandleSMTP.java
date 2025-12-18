@@ -167,9 +167,9 @@ public class ButtonHandleSMTP implements ActionListener {
 	        return;
 	    }
 
-	    if (!serviceSMTP.isEmailInWhitelist(recipient)) {
+	    if (!serviceSMTP.isEmailInWhitelist(recipient) && !serviceSMTP.isEmailInUsers(recipient)) {
 	        JOptionPane.showMessageDialog(view, 
-	            "Error: The email " + recipient + " is not in the whitelist.", 
+	            "Error: The email " + recipient + " is not in the whitelist or is not a user.", 
 	            "Email blocked", 
 	            JOptionPane.ERROR_MESSAGE);
 	        return;
