@@ -11,10 +11,18 @@ public class ConnecionFTP {
 	private String user = "proyecto";
 	private static final String PASS = "proyecto";
 
+	/**
+	 * Constructor for ConnecionFTP.
+	 */
 	public ConnecionFTP() {
 
 	}
 
+	/**
+	 * Establishes a connection to the FTP server.
+	 * 
+	 * @return The connected FTPClient object, or null if connection failed.
+	 */
 	public FTPClient getConnection() {
 		FTPClient ftpClient = new FTPClient();
 		try {
@@ -46,6 +54,11 @@ public class ConnecionFTP {
 		return null;
 	}
 
+	/**
+	 * Closes the FTP connection.
+	 * 
+	 * @param ftpClient The FTPClient object to close.
+	 */
 	public void closeConnection(FTPClient ftpClient) {
 		if (ftpClient != null && ftpClient.isConnected()) {
 			try {
@@ -58,6 +71,11 @@ public class ConnecionFTP {
 		}
 	}
 
+	/**
+	 * Retrieves the FTP server host address.
+	 * 
+	 * @return The server IP address.
+	 */
 	public String getServerHost() {
 		return SERVER;
 	}

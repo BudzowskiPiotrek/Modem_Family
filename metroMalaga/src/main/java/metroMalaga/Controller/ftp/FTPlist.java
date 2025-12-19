@@ -19,12 +19,21 @@ public class FTPlist implements DocumentListener {
 	private JTextField text;
 	private FTPTableModel ftpTable;
 
+	/**
+	 * Constructor for FTPlist class.
+	 * 
+	 * @param text     The search text field.
+	 * @param ftpTable The FTP table model.
+	 */
 	public FTPlist(JTextField text, FTPTableModel ftpTable) {
 		this.ftpTable = ftpTable;
 		this.text = text;
 		this.text.getDocument().addDocumentListener(this);
 	}
 
+	/**
+	 * Filters the table based on the search text.
+	 */
 	private void filterTable() {
 		String searchText = text.getText().trim().toLowerCase();
 
@@ -34,15 +43,15 @@ public class FTPlist implements DocumentListener {
 			return;
 		}
 		for (FTPFile file : ftpTable.getMasterList()) {
-	        if (file.isValid()) {
-	            
-	            String fileName = file.getName().toLowerCase(); 
-	            
-	            if (fileName.contains(searchText)) {
-	                filteredList.add(file);
-	            }
-	        }
-	    }
+			if (file.isValid()) {
+
+				String fileName = file.getName().toLowerCase();
+
+				if (fileName.contains(searchText)) {
+					filteredList.add(file);
+				}
+			}
+		}
 
 		ftpTable.setData(filteredList);
 	}

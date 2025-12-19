@@ -20,22 +20,34 @@ public class FTPdoubleClick extends MouseAdapter {
     private final ServiceFTP service;
     private final FTPTableModel model;
 
+    /**
+     * Constructor for FTPdoubleClick class.
+     * 
+     * @param table   The JTable component.
+     * @param service The FTP service instance.
+     * @param model   The FTP table model.
+     */
     public FTPdoubleClick(JTable table, ServiceFTP service, FTPTableModel model) {
         this.ftpTable = table;
         this.service = service;
         this.model = model;
-        this.ftpTable.addMouseListener(this); 
+        this.ftpTable.addMouseListener(this);
     }
 
+    /**
+     * Handles double-click events on the table to navigate into directories.
+     * 
+     * @param e The MouseEvent.
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {
             int row = ftpTable.getSelectedRow();
             if (row != -1) {
                 int modelRow = ftpTable.convertRowIndexToModel(row);
-                
-                FTPFile selectedFile = (FTPFile) model.getValueAt(modelRow, 3); 
-                
+
+                FTPFile selectedFile = (FTPFile) model.getValueAt(modelRow, 3);
+
                 handleNavigation(selectedFile);
             }
         }
@@ -43,14 +55,14 @@ public class FTPdoubleClick extends MouseAdapter {
 
     private void handleNavigation(FTPFile file) {
         if (file.isDirectory()) {
-            boolean success = service.changeDirectory(file.getName()); 
-            
+            boolean success = service.changeDirectory(file.getName());
+
             if (success) {
                 FTPFile[] updatedFilesArray = service.listAllFiles();
                 List<FTPFile> updatedFilesList = new ArrayList<>(Arrays.asList(updatedFilesArray));
                 model.setData(updatedFilesList);
-            } 
-            
+            }
+
         } else {
             JOptionPane.showMessageDialog(null, Language.get(99));
         }

@@ -56,6 +56,13 @@ public class ServiceFTP {
 		initializeNotificationSystem();
 	}
 
+	/**
+	 * Creates a new directory on the FTP server.
+	 * 
+	 * @param path The path of the directory to be created.
+	 * @return true if the directory was created successfully, false otherwise.
+	 * @throws IOException If an I/O error occurs or the directory already exists.
+	 */
 	public synchronized boolean makeDirectory(String path) throws IOException {
 
 		if (!isConnected()) {
@@ -82,6 +89,11 @@ public class ServiceFTP {
 		return true;
 	}
 
+	/**
+	 * Lists all files in the current working directory.
+	 * 
+	 * @return An array of FTPFile objects representing the files in the directory.
+	 */
 	public synchronized FTPFile[] listAllFiles() {
 		try {
 			if (!isConnected()) {
@@ -141,6 +153,12 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Changes the current working directory on the FTP server.
+	 * 
+	 * @param directoryName The name of the directory to change to.
+	 * @return true if the directory change was successful, false otherwise.
+	 */
 	public synchronized boolean changeDirectory(String directoryName) {
 		try {
 			return ftpClient.changeWorkingDirectory(directoryName);
@@ -150,6 +168,11 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Changes the working directory to the parent directory.
+	 * 
+	 * @return true if the directory change was successful, false otherwise.
+	 */
 	public boolean changeDirectoryUp() {
 		try {
 			return ftpClient.changeWorkingDirectory("..");
@@ -159,6 +182,11 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Retrieves the current working directory path.
+	 * 
+	 * @return The current working directory path as a String.
+	 */
 	public String getCurrentDirectory() {
 		try {
 			return ftpClient.printWorkingDirectory();
@@ -168,6 +196,13 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Uploads a local file to the FTP server.
+	 * 
+	 * @param localFilePath  The path of the local file to upload.
+	 * @param remoteFilePath The path on the server where the file should be stored.
+	 * @return true if the upload was successful, false otherwise.
+	 */
 	public synchronized boolean uploadFile(String localFilePath, String remoteFilePath) {
 		File localFile = new File(localFilePath);
 
@@ -201,6 +236,14 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Downloads a file from the FTP server to the local machine.
+	 * 
+	 * @param remoteFilePath The path of the file on the FTP server.
+	 * @param localFilePath  The path on the local machine where the file should be
+	 *                       saved.
+	 * @return true if the download was successful, false otherwise.
+	 */
 	public synchronized boolean downloadFile(String remoteFilePath, String localFilePath) {
 		try (OutputStream outputStream = new FileOutputStream(localFilePath)) {
 			return ftpClient.retrieveFile(remoteFilePath, outputStream);
@@ -210,6 +253,12 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Deletes a file or directory on the FTP server.
+	 * 
+	 * @param path The path of the file or directory to delete.
+	 * @return true if the deletion was successful, false otherwise.
+	 */
 	public synchronized boolean deleteFile(String path) {
 		// Check if user has permission to delete this file
 		if (currentUsername != null && userRole != null) {
@@ -244,6 +293,12 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Recursively deletes a directory and its contents.
+	 * 
+	 * @param dirPath The path of the directory to delete.
+	 * @throws IOException If an I/O error occurs during deletion.
+	 */
 	private void deleteDirectoryRecursive(String dirPath) throws IOException {
 		FTPFile[] files = ftpClient.listFiles(dirPath);
 		for (FTPFile file : files) {
@@ -261,6 +316,13 @@ public class ServiceFTP {
 		metroMalaga.Model.FTPFileOwnershipDAO.deleteFile(dirPath);
 	}
 
+	/**
+	 * Renames a file or directory on the FTP server.
+	 * 
+	 * @param remoteFrom The current name/path of the file.
+	 * @param remoteTo   The new name/path for the file.
+	 * @return true if the rename was successful, false otherwise.
+	 */
 	public synchronized boolean renameFile(String remoteFrom, String remoteTo) {
 		// Check if user has permission to rename this file
 		if (currentUsername != null && userRole != null) {
@@ -287,6 +349,9 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Closes the FTP connection and logs out.
+	 */
 	public void close() {
 		if (ftpClient != null && ftpClient.isConnected()) {
 			try {
@@ -298,6 +363,12 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Calculates the total size of a directory recursively.
+	 * 
+	 * @param directoryName The name of the directory to calculate.
+	 * @return The total size in bytes.
+	 */
 	public synchronized long calculateDirectorySize(String directoryName) {
 		long totalSize = 0;
 		String originalDirectory = getCurrentDirectory();
