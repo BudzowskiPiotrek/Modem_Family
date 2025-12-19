@@ -48,7 +48,7 @@ public class LoadingDialog extends JDialog {
         panel.add(statusLabel, BorderLayout.NORTH);
         panel.add(progressBar, BorderLayout.CENTER);
 
-        panel.add(panel);
+        add(panel);
     }
 
     /**
