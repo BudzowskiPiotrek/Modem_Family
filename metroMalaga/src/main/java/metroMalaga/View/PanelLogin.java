@@ -15,6 +15,9 @@ import metroMalaga.Controller.login.LoginPlaceholderPasswordFieldHandler;
 import metroMalaga.Controller.login.LoginPlaceholderTextFieldHandler;
 import metroMalaga.Model.Usuario;
 
+/**
+ * Panel for the login screen.
+ */
 public class PanelLogin extends JFrame {
 
 	private JTextField userField;
@@ -31,6 +34,9 @@ public class PanelLogin extends JFrame {
 	private final Font P5_INPUT_FONT = new Font("SansSerif", Font.BOLD | Font.ITALIC, 24);
 	private final Font P5_BUTTON_FONT = new Font("Dialog", Font.BOLD | Font.ITALIC, 24);
 
+	/**
+	 * Constructor for PanelLogin.
+	 */
 	public PanelLogin() {
 		settingsFrame();
 		JPanel backgroundPanel = new JPanel(new GridBagLayout());
@@ -45,11 +51,18 @@ public class PanelLogin extends JFrame {
 		this.getContentPane().requestFocusInWindow();
 	}
 
+	/**
+	 * Actions to perform when login is successful.
+	 * Hides and disposes the login window.
+	 */
 	public void loginSuccessful() {
 		this.setVisible(false);
 		this.dispose();
 	}
 
+	/**
+	 * Configures UI components.
+	 */
 	private void settingsComponents() {
 		settingsLabel();
 		settingsUser();
@@ -57,6 +70,9 @@ public class PanelLogin extends JFrame {
 		settingsButton();
 	}
 
+	/**
+	 * Configures the login label.
+	 */
 	private void settingsLabel() {
 		String p5StyledText = "<html>"
 				+ "<span style='background-color:black; color:white; font-size:32px; font-family:Sans-serif; font-style:italic;'>L</span>"
@@ -70,6 +86,9 @@ public class PanelLogin extends JFrame {
 		labelLogin.setBorder(new MatteBorder(0, 0, 5, 0, P5_BLACK));
 	}
 
+	/**
+	 * Configures the username field.
+	 */
 	private void settingsUser() {
 		userField = new JTextField(20);
 
@@ -83,6 +102,9 @@ public class PanelLogin extends JFrame {
 				P5_GRAY_PLACEHOLDER, focusedBorder, unfocusedBorder, padding));
 	}
 
+	/**
+	 * Configures the password field.
+	 */
 	private void settingsPass() {
 		passwordField = new JPasswordField(15);
 
@@ -97,6 +119,12 @@ public class PanelLogin extends JFrame {
 				P5_WHITE, P5_GRAY_PLACEHOLDER, focusedBorder, unfocusedBorder, padding));
 	}
 
+	/**
+	 * Styles a text field.
+	 * 
+	 * @param field       The text field to style.
+	 * @param placeholder The placeholder text.
+	 */
 	private void styleP5Field(JTextField field, String placeholder) {
 		field.setPreferredSize(new Dimension(250, 50));
 		field.setBackground(P5_BLACK);
@@ -110,6 +138,9 @@ public class PanelLogin extends JFrame {
 		field.setBorder(new CompoundBorder(field.getBorder(), new EmptyBorder(5, 15, 5, 15)));
 	}
 
+	/**
+	 * Configures the login button.
+	 */
 	private void settingsButton() {
 		buttonLogin = new JButton("LOGIN");
 		buttonLogin.setPreferredSize(new Dimension(180, 60));
@@ -128,6 +159,11 @@ public class PanelLogin extends JFrame {
 				defaultBorder, hoverBorder));
 	}
 
+	/**
+	 * Adds components to the frame container.
+	 * 
+	 * @param container The container to add components to.
+	 */
 	private void addComponentsFrame(Container container) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -152,8 +188,13 @@ public class PanelLogin extends JFrame {
 		container.add(buttonLogin, gbc);
 	}
 
+	/**
+	 * Configures the frame properties.
+	 */
 	private void settingsFrame() {
+
 		setTitle(Language.get(198));
+
 		setSize(700, 700);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
