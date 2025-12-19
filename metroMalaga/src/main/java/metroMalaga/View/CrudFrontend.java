@@ -12,6 +12,12 @@ import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
 import metroMalaga.Controller.Common;
 
+/**
+ * Frontend panel for CRUD (Create, Read, Update, Delete) operations.
+ * Provides a dynamic interface to interact with different database tables,
+ * including a sidebar for table selection, a central data table, and a 
+ * bottom form for data entry and editing.
+ */
 public class CrudFrontend extends JPanel {
 
     private Usuario user;
@@ -43,6 +49,10 @@ public class CrudFrontend extends JPanel {
 
     private String tablaActual;
 
+    /**
+     * Constructs the CRUD frontend for a specific user.
+     * @param user The user session to determine permissions and access levels.
+     */
     public CrudFrontend(Usuario user) {
         this.user = user;
         setLayout(new BorderLayout(10, 10));
@@ -57,6 +67,10 @@ public class CrudFrontend extends JPanel {
         applyTheme();
     }
 
+    /**
+     * Applies the current visual theme (colors, borders, and fonts) to all 
+     * components in the CRUD interface based on global settings.
+     */
     public void applyTheme() {
         Color bgMain = Common.getBackground();
         Color bgPanel = Common.getPanelBackground();
@@ -68,7 +82,6 @@ public class CrudFrontend extends JPanel {
 
         setBackground(bgMain);
 
-        // Lista de tablas lateral
         if (listaTablas != null) {
             listaTablas.setBackground(fieldBg);
             listaTablas.setForeground(txt);
@@ -85,7 +98,6 @@ public class CrudFrontend extends JPanel {
             scrollTablasPanel.setBackground(fieldBg);
         }
 
-        // Tabla central - CELDAS NORMALES
         if (tablaDatos != null) {
             tablaDatos.setBackground(fieldBg);
             tablaDatos.setForeground(txt);
@@ -93,7 +105,6 @@ public class CrudFrontend extends JPanel {
             tablaDatos.setSelectionBackground(Common.isDarkMode ? new Color(200, 0, 0) : new Color(230, 240, 255));
             tablaDatos.setSelectionForeground(Common.isDarkMode ? Color.WHITE : Color.BLACK);
 
-            // 👇 RENDERER PARA CELDAS NORMALES
             tablaDatos.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value,
@@ -113,7 +124,6 @@ public class CrudFrontend extends JPanel {
                 }
             });
 
-            // Header de la tabla
             JTableHeader header = tablaDatos.getTableHeader();
             header.setBackground(Common.isDarkMode ? new Color(40, 40, 40) : new Color(245, 245, 245));
             header.setForeground(txt);
@@ -142,7 +152,6 @@ public class CrudFrontend extends JPanel {
                 javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, txt));
         }
 
-        // Panel inferior
         if (panelSur != null) {
             panelSur.setBackground(bgPanel);
             panelSur.setBorder(new CompoundBorder(
@@ -209,6 +218,9 @@ public class CrudFrontend extends JPanel {
         repaint();
     }
 
+    /**
+     * Updates all localized texts and titles based on the current language selection.
+     */
     public void updateAllTexts() {
         scrollTablasPanel.setBorder(BorderFactory.createTitledBorder(
                 new LineBorder(Common.getBorder()), Language.get(71),
@@ -263,6 +275,10 @@ public class CrudFrontend extends JPanel {
         applyTheme();
     }
 
+    /**
+     * Retrieves the current column names and updates the action column header localized string.
+     * @return An array of updated column names.
+     */
     private Object[] getUpdatedColumnNames() {
         Object[] currentColumns = new Object[modeloTabla.getColumnCount()];
         for (int i = 0; i < modeloTabla.getColumnCount() - 1; i++) {
@@ -272,6 +288,9 @@ public class CrudFrontend extends JPanel {
         return currentColumns;
     }
 
+    /**
+     * Initializes the side menu containing the list of available database tables.
+     */
     private void crearMenuLateral() {
         modeloListaTablas = new DefaultListModel<>();
 
@@ -286,6 +305,9 @@ public class CrudFrontend extends JPanel {
         add(scrollTablasPanel, BorderLayout.WEST);
     }
 
+    /**
+     * Initializes the central data table area.
+     */
     private void crearPanelCentral() {
         modeloTabla = new DefaultTableModel() {
             @Override
@@ -304,6 +326,9 @@ public class CrudFrontend extends JPanel {
         add(scrollTablaPanel, BorderLayout.CENTER);
     }
 
+    /**
+     * Initializes the bottom panel containing labels, input forms, and action buttons.
+     */
     private void crearPanelInferior() {
         panelSur = new JPanel(new BorderLayout());
 
@@ -368,13 +393,22 @@ public class CrudFrontend extends JPanel {
         return listaTablas.getSelectedValue();
     }
 
-    public void setListaTablas(List<String> tablas) {
+    /**
+     * Populates the table sidebar with a list of table names.
+     * @param tablas List of table names to display.
+     */
+    public void setTablasList(List<String> tablas) {
         modeloListaTablas.clear();
         for (String tabla : tablas) {
             modeloListaTablas.addElement(tabla);
         }
     }
 
+    /**
+     * Updates the main data table with new columns and row data.
+     * @param columnas Array of column names.
+     * @param datos Matrix of row data.
+     */
     public void actualizarTablaDatos(String[] columnas, Object[][] datos) {
         modeloTabla.setDataVector(datos, columnas);
 
@@ -382,15 +416,21 @@ public class CrudFrontend extends JPanel {
             agregarColumnaAcciones();
         }
         
-        // Re-aplicar tema después de actualizar datos
         applyTheme();
     }
 
+    /**
+     * Sets the identifier for the currently active database table.
+     * @param tabla Name of the table.
+     */
     public void setTablaActual(String tabla) {
         this.tablaActual = tabla;
         updatePanelInferiorVisibility();
     }
 
+    /**
+     * Injects an 'Actions' column into the data table containing Edit and Delete buttons.
+     */
     private void agregarColumnaAcciones() {
         modeloTabla.addColumn(Language.get(82));
 
@@ -404,6 +444,10 @@ public class CrudFrontend extends JPanel {
         return modeloTabla.getValueAt(fila, columna);
     }
 
+    /**
+     * Dynamically generates the input form based on the column names of the selected table.
+     * @param nombresColumnas Array of column names to generate labels and text fields.
+     */
     public void generarFormulario(String[] nombresColumnas) {
         panelFormulario.removeAll();
         camposFormulario.clear();
@@ -437,6 +481,9 @@ public class CrudFrontend extends JPanel {
         panelFormulario.repaint();
     }
 
+    /**
+     * Clears all text fields in the data entry form and resets labels to 'Create' mode.
+     */
     public void limpiarCamposFormulario() {
         for (JTextField campo : camposFormulario) {
             campo.setText("");
@@ -445,6 +492,10 @@ public class CrudFrontend extends JPanel {
         lblEstadoFormulario.setText(Language.get(78));
     }
 
+    /**
+     * Fills the form fields with data from an existing row for updating.
+     * @param datosFila Array containing the existing data of the selected row.
+     */
     public void llenarFormularioParaEditar(Object[] datosFila) {
         for (int i = 0; i < datosFila.length && i < camposFormulario.size(); i++) {
             camposFormulario.get(i).setText(datosFila[i] != null ? datosFila[i].toString() : "");
@@ -453,6 +504,10 @@ public class CrudFrontend extends JPanel {
         lblEstadoFormulario.setText(Language.get(79));
     }
 
+    /**
+     * Retrieves the data currently typed into the form fields.
+     * @return A list of strings containing the input values.
+     */
     public List<String> getDatosFormulario() {
         List<String> datos = new ArrayList<>();
         for (JTextField campo : camposFormulario) {
@@ -465,12 +520,17 @@ public class CrudFrontend extends JPanel {
         this.accionFilaListener = listener;
     }
 
+    /**
+     * Interface for listening to row-specific actions (Edit/Delete).
+     */
     public interface AccionFilaListener {
         void onEditar(int fila);
-
         void onEliminar(int fila);
     }
 
+    /**
+     * Custom renderer for the 'Actions' column containing Edit and Delete buttons.
+     */
     class ButtonRenderer extends JPanel implements TableCellRenderer {
         private JButton btnEditar;
         private JButton btnEliminar;
@@ -519,6 +579,9 @@ public class CrudFrontend extends JPanel {
         }
     }
 
+    /**
+     * Custom editor for the 'Actions' column to handle button click events.
+     */
     class ButtonEditor extends DefaultCellEditor {
         private JPanel panel;
         private JButton btnEditar;
@@ -593,6 +656,11 @@ public class CrudFrontend extends JPanel {
         return user;
     }
 
+    /**
+     * Logic to determine if the current user has permissions to modify (Edit/Delete)
+     * the currently selected table.
+     * @return true if modification is allowed, false otherwise.
+     */
     private boolean canModifyCurrentTable() {
         if (user == null || user.getRol() == null || tablaActual == null) {
             return false;
@@ -609,6 +677,9 @@ public class CrudFrontend extends JPanel {
         return false;
     }
 
+    /**
+     * Updates the visibility of the bottom form panel based on user permissions.
+     */
     private void updatePanelInferiorVisibility() {
         if (panelSur == null) {
             return;
