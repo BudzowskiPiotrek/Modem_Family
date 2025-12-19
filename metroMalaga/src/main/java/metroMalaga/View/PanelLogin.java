@@ -1,7 +1,6 @@
 package metroMalaga.View;
 
 import java.awt.*;
-import metroMalaga.Model.Language;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
@@ -192,9 +191,13 @@ public class PanelLogin extends JFrame {
 	 * Configures the frame properties.
 	 */
 	private void settingsFrame() {
+<<<<<<< HEAD
 
 		setTitle(Language.get(198));
 
+=======
+		setTitle("Login - Metro M�laga");
+>>>>>>> parent of 1084133 (Update PanelLogin.java)
 		setSize(700, 700);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
