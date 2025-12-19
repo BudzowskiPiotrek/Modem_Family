@@ -9,15 +9,20 @@ import metroMalaga.Controller.menu.MenuSelect;
 import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
 
+/**
+ * Main menu window for the Metro Malaga application. Manages the primary
+ * navigation through a tabbed interface and provides global settings such as
+ * language toggle and dark mode.
+ */
 public class PanelMenu extends JFrame {
 
 	private Usuario user;
 	private JTabbedPane tabbedPane;
 	private MenuSelect menuController;
-	
+
 	private JButton btnLanguage;
-	private JButton btnDarkMode; 
-	private JPanel topPanel; 
+	private JButton btnDarkMode;
+	private JPanel topPanel;
 
 	private JLabel lblMessage;
 	private JButton btnConfirm, btnCancel;
@@ -26,6 +31,11 @@ public class PanelMenu extends JFrame {
 	private final Color P5_BLACK = new Color(20, 20, 20);
 	private final Color P5_WHITE = new Color(240, 240, 240);
 
+	/**
+	 * Constructs the menu panel for a specific user.
+	 * 
+	 * @param user The logged-in user session.
+	 */
 	public PanelMenu(Usuario user) {
 		this.user = user;
 
@@ -33,17 +43,23 @@ public class PanelMenu extends JFrame {
 		createTabbedPane();
 		createTopBar();
 		setTitle();
-		
+
 		applyTheme();
 
 		this.setVisible(true);
 	}
 
+	/**
+	 * Hides and releases the resources of the current window.
+	 */
 	public void disposeWindow() {
 		this.setVisible(false);
 		this.dispose();
 	}
 
+	/**
+	 * Configures the basic window properties such as size, layout, and position.
+	 */
 	private void propertiesWindow() {
 		this.setLayout(new BorderLayout());
 		this.setSize(1100, 750);
@@ -51,13 +67,19 @@ public class PanelMenu extends JFrame {
 		this.setLocationRelativeTo(null);
 	}
 
+	/**
+	 * Sets the window title based on the current language settings.
+	 */
 	private void setTitle() {
 		this.setTitle(Language.get(91));
 	}
 
+	/**
+	 * Creates the top navigation bar containing language and theme controls.
+	 */
 	private void createTopBar() {
 		topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-		
+
 		String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
 		btnLanguage = new JButton(langText);
 		styleTopButton(btnLanguage);
@@ -72,7 +94,12 @@ public class PanelMenu extends JFrame {
 
 		this.add(topPanel, BorderLayout.NORTH);
 	}
-	
+
+	/**
+	 * Applies consistent styling to the buttons in the top bar.
+	 * 
+	 * @param btn The button to be styled.
+	 */
 	private void styleTopButton(JButton btn) {
 		btn.setFont(new Font("Dialog", Font.BOLD, 14));
 		btn.setFocusPainted(false);
@@ -80,29 +107,37 @@ public class PanelMenu extends JFrame {
 		btn.setPreferredSize(new Dimension(80, 35));
 	}
 
+	/**
+	 * Switches between light and dark visual modes and refreshes the UI.
+	 */
 	private void toggleTheme() {
 		Common.isDarkMode = !Common.isDarkMode;
-		
+
 		btnDarkMode.setText(Common.isDarkMode ? "☀️" : "🌙");
-		
+
 		applyTheme();
-		
+
 		if (menuController != null) {
 			menuController.updateActivePanelTheme();
 		}
 	}
 
+	/**
+	 * Updates the visual theme of the frame and its internal components, including
+	 * UIManager defaults for the tabbed pane.
+	 */
 	public void applyTheme() {
 		boolean p5Mode = Common.isDarkMode;
 
 		Color bgColor = p5Mode ? P5_BLACK : new Color(230, 230, 230);
-		Color headerBg = p5Mode ? P5_BLACK : new Color(230, 230, 230); 
+		Color headerBg = p5Mode ? P5_BLACK : new Color(230, 230, 230);
 		Color btnBg = p5Mode ? P5_RED : Common.getPanelBackground();
 		Color btnFg = p5Mode ? P5_WHITE : Common.getText();
 		Color btnBorder = p5Mode ? P5_BLACK : Common.getBorder();
 
 		this.getContentPane().setBackground(bgColor);
-		if (topPanel != null) topPanel.setBackground(headerBg);
+		if (topPanel != null)
+			topPanel.setBackground(headerBg);
 
 		updateButtonStyle(btnLanguage, btnBg, btnFg, btnBorder);
 		updateButtonStyle(btnDarkMode, btnBg, btnFg, btnBorder);
@@ -111,38 +146,50 @@ public class PanelMenu extends JFrame {
 			Color tabBg = p5Mode ? P5_BLACK : new Color(230, 230, 230);
 			Color tabFg = p5Mode ? P5_WHITE : Color.BLACK;
 			Color tabSel = p5Mode ? P5_RED : Common.getDanger();
-			
+
 			tabbedPane.setBackground(tabBg);
 			tabbedPane.setForeground(tabFg);
-			
+
 			UIManager.put("TabbedPane.selected", tabSel);
-			UIManager.put("TabbedPane.contentAreaColor", bgColor); 
+			UIManager.put("TabbedPane.contentAreaColor", bgColor);
 			UIManager.put("TabbedPane.background", tabBg);
 			UIManager.put("TabbedPane.darkShadow", tabBg);
 			UIManager.put("TabbedPane.light", tabBg);
 			UIManager.put("TabbedPane.highlight", tabBg);
 			UIManager.put("TabbedPane.shadow", tabBg);
-			
+
 			for (int i = 0; i < tabbedPane.getTabCount(); i++) {
 				Component comp = tabbedPane.getComponentAt(i);
 				if (comp != null && comp instanceof JPanel) {
 					comp.setBackground(bgColor);
 				}
 			}
-			
+
 			SwingUtilities.updateComponentTreeUI(tabbedPane);
 		}
-		
+
 		this.repaint();
 	}
 
+	/**
+	 * Updates the style of a specific button with custom colors and borders.
+	 * 
+	 * @param btn    The button to update.
+	 * @param bg     Background color.
+	 * @param fg     Foreground color.
+	 * @param border Border color.
+	 */
 	private void updateButtonStyle(JButton btn, Color bg, Color fg, Color border) {
-		if (btn == null) return;
+		if (btn == null)
+			return;
 		btn.setBackground(bg);
 		btn.setForeground(fg);
 		btn.setBorder(new MatteBorder(2, 2, 4, 4, border));
 	}
 
+	/**
+	 * Toggles the application language between Spanish and English.
+	 */
 	private void toggleLanguage() {
 		if (Language.getCurrentLanguage().equals("espanol")) {
 			Language.setEnglish();
@@ -155,6 +202,9 @@ public class PanelMenu extends JFrame {
 		notifyPanelsLanguageChange();
 	}
 
+	/**
+	 * Notifies all active tabs about a language change to refresh their content.
+	 */
 	private void notifyPanelsLanguageChange() {
 		for (int i = 0; i < tabbedPane.getTabCount(); i++) {
 			Component comp = tabbedPane.getComponentAt(i);
@@ -163,27 +213,37 @@ public class PanelMenu extends JFrame {
 			} else if (comp instanceof CrudFrontend) {
 				((CrudFrontend) comp).updateAllTexts();
 			} else if (comp instanceof PanelFTP) {
-				((PanelFTP) comp).updateAllTexts(); 
+				((PanelFTP) comp).updateAllTexts();
 			}
 		}
 	}
 
+	/**
+	 * Updates all labels, titles, and button texts according to the current
+	 * language.
+	 */
 	public void updateAllTexts() {
 		setTitle();
-		
+
 		tabbedPane.setTitleAt(0, Language.get(92));
 		tabbedPane.setTitleAt(1, Language.get(93));
 		tabbedPane.setTitleAt(2, Language.get(94));
 		tabbedPane.setTitleAt(3, Language.get(95));
-		
-		if (lblMessage != null) lblMessage.setText(Language.get(96));
-		if (btnConfirm != null) btnConfirm.setText(Language.get(97));
-		if (btnCancel != null) btnCancel.setText(Language.get(98));
-		
+
+		if (lblMessage != null)
+			lblMessage.setText(Language.get(96));
+		if (btnConfirm != null)
+			btnConfirm.setText(Language.get(97));
+		if (btnCancel != null)
+			btnCancel.setText(Language.get(98));
+
 		revalidate();
 		repaint();
 	}
 
+	/**
+	 * Initializes the tabbed pane and populates it with the application modules.
+	 */
 	private void createTabbedPane() {
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 16));
@@ -198,6 +258,11 @@ public class PanelMenu extends JFrame {
 		this.add(tabbedPane, BorderLayout.CENTER);
 	}
 
+	/**
+	 * Creates the exit confirmation panel with a custom high-contrast design.
+	 * 
+	 * @return A JPanel containing exit confirmation components.
+	 */
 	private JPanel createExitPanel() {
 		JPanel exitPanel = new JPanel(new GridBagLayout());
 		exitPanel.setOpaque(false);
@@ -235,6 +300,13 @@ public class PanelMenu extends JFrame {
 		return exitPanel;
 	}
 
+	/**
+	 * Styles exit buttons with specific hover effects and borders.
+	 * 
+	 * @param btn The button to style.
+	 * @param bg  Default background color.
+	 * @param fg  Default foreground color.
+	 */
 	private void styleExitButton(JButton btn, Color bg, Color fg) {
 		btn.setPreferredSize(new Dimension(180, 50));
 		btn.setBackground(bg);
