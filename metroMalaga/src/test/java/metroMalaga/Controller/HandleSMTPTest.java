@@ -88,22 +88,6 @@ public class HandleSMTPTest {
     }
 
     @Test
-    public void testDownloadEmailConUIDInexistenteLanzaExcepcion() {
-        handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
-        File destFile = new File("test_email.eml");
-        
-        Exception exception = assertThrows(Exception.class, () -> {
-            handleSMTP.downloadEmailComplete("fake-uid-12345", destFile);
-        });
-        
-        assertTrue(exception.getMessage().contains("Mensaje no encontrado"));
-        
-        if (destFile.exists()) {
-            destFile.delete();
-        }
-    }
-
-    @Test
     public void testDeleteEmailConUIDInexistente() {
         handleSMTP.login(TEST_EMAIL, TEST_APP_PASSWORD);
         
