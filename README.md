@@ -1,7 +1,21 @@
 # 🚇 CentriMetro - Management System (Modem Family)
 
 This is a comprehensive Java-based desktop application designed for the administrative management of **Metro Málaga** services. The platform integrates user administration, remote file management via FTP, and SMTP communication, all built on a robust architecture synchronized in real-time through Sockets.
+---
 
+## 📸 Visual Interface / Interfaz Visual
+
+| **Login & Identity** | **Email Client (SMTP)** |
+|:---:|:---:|
+| ![Login](https://media.licdn.com/dms/image/v2/D4E22AQFKC94fIel7CA/feedshare-shrink_1280/B4EZs2W976GYAs-/0/1766143549613?e=1767830400&v=beta&t=YXDnImaZ8oltLDa6YjjtzuBr55Gf4hq56i63Z8masVs) | ![SMTP Comparison](https://media.licdn.com/dms/image/v2/D4E22AQHbcx9UM7iKgQ/feedshare-shrink_1280/B4EZs2W979HoAs-/0/1766143549657?e=1767830400&v=beta&t=rdo5yParBQkSZPPrcTNvoNEJkaOBy0lZGBlGlXhHcv4) |
+| *Comparison: Light Mode (EN) vs Dark Mode (ES)* | *User Administration in Dark Mode* |
+
+| **User Management (CRUD)** | **File Explorer (FTP)** |
+|:---:|:---:|
+| ![CRUD Dark Mode](https://media.licdn.com/dms/image/v2/D4E22AQH78udZ6UzdVA/feedshare-shrink_1280/B4EZs2W98KIIA0-/0/1766143549601?e=1767830400&v=beta&t=2LquvrelvSwtgwOeyxPWlVt4DQVh89thiMjPa4UGrB8) | ![FTP System](https://media.licdn.com/dms/image/v2/D4E22AQFd2KxbdM09eQ/feedshare-shrink_1280/B4EZs2W98EGUAs-/0/1766143549598?e=1767830400&v=beta&t=17h83TlKr5Rw9UP0_3akXTILT6A5ZWdDhSVjI7xO2vs) |
+| *Remote File Management via TCP Sockets* | *Corporate Metro Málaga Access* |
+
+---
 
 
 ## 🚀 Key Features
