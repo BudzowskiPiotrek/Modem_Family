@@ -5,12 +5,20 @@ import java.io.IOException;
 
 /**
  * Thread responsible for listening to messages from the notification server.
+ * Runs on the client side.
  */
 public class MessageListenerThread implements Runnable {
     private BufferedReader in;
     private NotificationClient.MessageListener listener;
     private NotificationClient client;
 
+    /**
+     * Constructor for MessageListenerThread.
+     * 
+     * @param in       BufferedReader to read input from server.
+     * @param listener Listener callback for received messages.
+     * @param client   Reference to the client instance.
+     */
     public MessageListenerThread(BufferedReader in, NotificationClient.MessageListener listener,
             NotificationClient client) {
         this.in = in;

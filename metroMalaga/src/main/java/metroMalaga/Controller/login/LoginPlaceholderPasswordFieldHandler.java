@@ -9,6 +9,10 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
+/**
+ * Handles focus events for JPasswordField to implement placeholder behavior and
+ * styling.
+ */
 public class LoginPlaceholderPasswordFieldHandler implements FocusListener {
 
     private final JPasswordField field;
@@ -20,10 +24,22 @@ public class LoginPlaceholderPasswordFieldHandler implements FocusListener {
     private final MatteBorder unfocusedBorder;
     private final EmptyBorder padding;
 
-    public LoginPlaceholderPasswordFieldHandler(JPasswordField field, String placeholder, 
-                                          Color focusedColor, Color unfocusedColor, Color placeholderColor,
-                                          MatteBorder focusedBorder, MatteBorder unfocusedBorder,
-                                          EmptyBorder padding) {
+    /**
+     * Full constructor with all styling options.
+     * 
+     * @param field            The JPasswordField to handle.
+     * @param placeholder      The placeholder text.
+     * @param focusedColor     Color when focused.
+     * @param unfocusedColor   Color when unfocused.
+     * @param placeholderColor Color of the placeholder text.
+     * @param focusedBorder    Border when focused.
+     * @param unfocusedBorder  Border when unfocused.
+     * @param padding          Padding inside the field.
+     */
+    public LoginPlaceholderPasswordFieldHandler(JPasswordField field, String placeholder,
+            Color focusedColor, Color unfocusedColor, Color placeholderColor,
+            MatteBorder focusedBorder, MatteBorder unfocusedBorder,
+            EmptyBorder padding) {
         this.field = field;
         this.placeholder = placeholder;
         this.focusedColor = focusedColor;
@@ -34,18 +50,43 @@ public class LoginPlaceholderPasswordFieldHandler implements FocusListener {
         this.padding = padding;
     }
 
-    public LoginPlaceholderPasswordFieldHandler(JPasswordField field, String placeholder, 
-                                          Color focusedColor, Color unfocusedColor, Color placeholderColor,
-                                          MatteBorder focusedBorder, MatteBorder unfocusedBorder) {
-        this(field, placeholder, focusedColor, unfocusedColor, placeholderColor, 
-             focusedBorder, unfocusedBorder, null);
+    /**
+     * Constructor without padding.
+     * 
+     * @param field            The JPasswordField to handle.
+     * @param placeholder      The placeholder text.
+     * @param focusedColor     Color when focused.
+     * @param unfocusedColor   Color when unfocused.
+     * @param placeholderColor Color of the placeholder text.
+     * @param focusedBorder    Border when focused.
+     * @param unfocusedBorder  Border when unfocused.
+     */
+    public LoginPlaceholderPasswordFieldHandler(JPasswordField field, String placeholder,
+            Color focusedColor, Color unfocusedColor, Color placeholderColor,
+            MatteBorder focusedBorder, MatteBorder unfocusedBorder) {
+        this(field, placeholder, focusedColor, unfocusedColor, placeholderColor,
+                focusedBorder, unfocusedBorder, null);
     }
 
-    public LoginPlaceholderPasswordFieldHandler(JPasswordField field, String placeholder, 
-                                          Color focusedColor, Color placeholderColor) {
+    /**
+     * Constructor with fewer styling options.
+     * 
+     * @param field            The JPasswordField to handle.
+     * @param placeholder      The placeholder text.
+     * @param focusedColor     Color when focused.
+     * @param placeholderColor Color of the placeholder text.
+     */
+    public LoginPlaceholderPasswordFieldHandler(JPasswordField field, String placeholder,
+            Color focusedColor, Color placeholderColor) {
         this(field, placeholder, focusedColor, Color.BLACK, placeholderColor, null, null, null);
     }
 
+    /**
+     * Minimal constructor.
+     * 
+     * @param field       The JPasswordField to handle.
+     * @param placeholder The placeholder text.
+     */
     public LoginPlaceholderPasswordFieldHandler(JPasswordField field, String placeholder) {
         this(field, placeholder, Color.BLACK, Color.GRAY);
     }
@@ -53,13 +94,13 @@ public class LoginPlaceholderPasswordFieldHandler implements FocusListener {
     @Override
     public void focusGained(FocusEvent e) {
         String currentText = String.valueOf(field.getPassword());
-        
+
         if (currentText.equals(placeholder) || currentText.isEmpty()) {
             field.setText("");
             field.setEchoChar('.');
             field.setForeground(focusedColor);
         }
-        
+
         if (focusedBorder != null) {
             if (padding != null) {
                 field.setBorder(new CompoundBorder(focusedBorder, padding));
@@ -78,7 +119,7 @@ public class LoginPlaceholderPasswordFieldHandler implements FocusListener {
         } else {
             field.setForeground(unfocusedColor);
         }
-        
+
         if (unfocusedBorder != null) {
             if (padding != null) {
                 field.setBorder(new CompoundBorder(unfocusedBorder, padding));

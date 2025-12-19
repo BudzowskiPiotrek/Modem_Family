@@ -14,6 +14,10 @@ import metroMalaga.Controller.smtp.tasks.LoadContentTask;
 import metroMalaga.Model.EmailModel;
 import metroMalaga.Model.Language;
 
+/**
+ * Extended mouse listener for the emails table.
+ * Handles "mark as read" logic in addition to displaying content.
+ */
 public class MouseClickListener extends MouseAdapter {
 
 	private final HandleSMTP backend;
@@ -23,6 +27,16 @@ public class MouseClickListener extends MouseAdapter {
 	private final JTextArea txtViewer;
 	private final JButton btnDownloadEmail;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param backend          The backend service.
+	 * @param controller       The main controller.
+	 * @param emailTable       The table displaying emails.
+	 * @param tableModel       The table model.
+	 * @param txtViewer        The text area for viewing email content.
+	 * @param btnDownloadEmail The button for downloading email.
+	 */
 	public MouseClickListener(HandleSMTP backend, ButtonHandleSMTP controller, JTable emailTable,
 			DefaultTableModel tableModel, JTextArea txtViewer, JButton btnDownloadEmail) {
 		this.backend = backend;

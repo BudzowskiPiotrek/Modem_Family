@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "342784509692",
+    "project_id": "centimetroandroid",
+    "storage_bucket": "centimetroandroid.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:342784509692:android:a49d4e05d9fe836a93f979",
+        "android_client_info": {
+          "package_name": "com.example.centimetroandroid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_B55_Et0lB8jQWivzhqvlDB5OUghFeGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

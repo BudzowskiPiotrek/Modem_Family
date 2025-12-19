@@ -13,6 +13,9 @@ import metroMalaga.Model.Usuario;
 import metroMalaga.View.PanelLogin;
 import metroMalaga.View.PanelMenu;
 
+/**
+ * Handles the login attempt logic for the application.
+ */
 public class LoginAttempt implements ActionListener {
 	private final JTextField userField;
 	private final JPasswordField passwordField;
@@ -25,6 +28,14 @@ public class LoginAttempt implements ActionListener {
 	private static final String USERNAME_PATTERN = "^[a-zA-Z0-9]+$";
 	private static final String PASSWORD_PATTERN = "^[a-zA-Z0-9]{8,}$";
 
+	/**
+	 * Constructor for LoginAttempt.
+	 * 
+	 * @param userField     The username text field.
+	 * @param passwordField The password text field.
+	 * @param loginButton   The login button.
+	 * @param panelLogin    The login panel instance.
+	 */
 	public LoginAttempt(JTextField userField, JPasswordField passwordField, JButton loginButton,
 			PanelLogin panelLogin) {
 		super();
@@ -41,10 +52,21 @@ public class LoginAttempt implements ActionListener {
 		this.passwordField.addKeyListener(enterKeyListener);
 	}
 
+	/**
+	 * Gets the authenticated user.
+	 * 
+	 * @return The authenticated user.
+	 */
 	public Usuario getUser() {
 		return user;
 	}
 
+	/**
+	 * Handles the action event triggered by the login button or enter key.
+	 * Validates input and attempts authentication.
+	 * 
+	 * @param e The action event.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String username = userField.getText();
@@ -74,7 +96,7 @@ public class LoginAttempt implements ActionListener {
 			this.user = sl.getUserData(username, password);
 
 			if (this.user != null) {
-				JOptionPane.showMessageDialog(null, "Welcome " + username + ", Access granted.", "Login successful",
+				JOptionPane.showMessageDialog(null, "Welcome, " + username + "Access granted.", "Login successful",
 						JOptionPane.INFORMATION_MESSAGE);
 
 				cn.registerLog(username, "Successful login attempt");

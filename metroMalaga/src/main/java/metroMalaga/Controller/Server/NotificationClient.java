@@ -25,6 +25,11 @@ public class NotificationClient {
      * Interface for handling received messages
      */
     public interface MessageListener {
+        /**
+         * Invoked when a message is received from the server.
+         * 
+         * @param message The received message.
+         */
         void onMessageReceived(String message);
     }
 

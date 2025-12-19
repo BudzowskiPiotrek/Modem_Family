@@ -11,10 +11,18 @@ public class FTPButtonsRenderer extends FTPButtonsPanel implements TableCellRend
 
 	private Usuario user;
 
+	/**
+	 * Constructor for FTPButtonsRenderer.
+	 * 
+	 * @param user The current user.
+	 */
 	public FTPButtonsRenderer(Usuario user) {
 		this.user = user;
 	}
 
+	/**
+	 * Configures the renderer component for the table cell.
+	 */
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {

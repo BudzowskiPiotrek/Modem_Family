@@ -12,10 +12,23 @@ import metroMalaga.Model.Rol;
 import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
 
+/**
+ * Service class for handling user authentication and data retrieval.
+ */
 public class ServiceLogin {
 
+	/**
+	 * Database connection instance.
+	 */
 	public ConnecionSQL conSQL = new ConnecionSQL();
 
+	/**
+	 * Authenticates a user by checking the username and verifying the password.
+	 * 
+	 * @param usuario  The username.
+	 * @param password The plain text password.
+	 * @return true if authentication is successful, false otherwise.
+	 */
 	public boolean authenticateUser(String usuario, String password) {
 
 		// Modified to use BCrypt password verification
@@ -39,6 +52,14 @@ public class ServiceLogin {
 		}
 	}
 
+	/**
+	 * Retrieves the full user data object, including role and permissions.
+	 * 
+	 * @param usuario  The username.
+	 * @param password The plain text password (used to populate the user object).
+	 * @return A Usuario object containing the user's data, or null if retrieval
+	 *         fails.
+	 */
 	public Usuario getUserData(String usuario, String password) {
 		Usuario user = null;
 
@@ -71,10 +92,10 @@ public class ServiceLogin {
 	}
 
 	/**
-	 * Refresh user data from database (useful when role permissions change)
+	 * Refresh user data from database (useful when role permissions change).
 	 * 
-	 * @param usuario Usuario object to refresh
-	 * @return Updated Usuario object with current database data
+	 * @param usuario Usuario object to refresh.
+	 * @return Updated Usuario object with current database data.
 	 */
 	public Usuario refreshUserData(Usuario usuario) {
 		if (usuario == null) {

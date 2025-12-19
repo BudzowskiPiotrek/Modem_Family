@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Persona 5 Color Palette -->
+    <!-- Primary: Dark Red/Crimson -->
+    <color name="p5_red">#E60012</color>
+    <color name="p5_dark_red">#B50000</color>
+    <color name="p5_blood_red">#C40000</color>
+    <color name="p5_bright_red">#FF0000</color>
+    
+    <!-- Black & Grays -->
+    <color name="p5_black">#000000</color>
+    <color name="p5_dark_gray">#1A1A1A</color>
+    <color name="p5_medium_gray">#2D2D2D</color>
+    <color name="p5_light_gray">#808080</color>
+    <color name="p5_gray">#6C6C6C</color>
+    
+    <!-- White & Light -->
+    <color name="p5_white">#FFFFFF</color>
+    <color name="p5_off_white">#F5F5F5</color>
+    
+    <!-- Accent Colors -->
+    <color name="p5_yellow">#FFD700</color>
+    <color name="p5_gold">#B8860B</color>
+    
+    <!-- Status Colors -->
+    <color name="p5_success">#4CAF50</color>
+    <color name="p5_warning">#FF9800</color>
+    <color name="p5_error">#E60012</color>
+    
+    <!-- Background -->
+    <color name="p5_bg_primary">#000000</color>
+    <color name="p5_bg_secondary">#1A1A1A</color>
+    <color name="p5_bg_card">#2D2D2D</color>
+    
+    <!-- Text -->
+    <color name="p5_text_primary">#FFFFFF</color>
+    <color name="p5_text_secondary">#B0B0B0</color>
+    <color name="p5_text_accent">#E60012</color>
+</resources>

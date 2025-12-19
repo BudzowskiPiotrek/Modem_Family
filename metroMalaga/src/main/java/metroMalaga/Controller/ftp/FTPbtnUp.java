@@ -20,12 +20,24 @@ public class FTPbtnUp implements ActionListener {
 	private final ServiceFTP service;
 	private final FTPTableModel model;
 
+	/**
+	 * Constructor for FTPbtnUp class.
+	 * 
+	 * @param button  The JButton component.
+	 * @param service The FTP service instance.
+	 * @param model   The FTP table model.
+	 */
 	public FTPbtnUp(JButton button, ServiceFTP service, FTPTableModel model) {
 		this.service = service;
 		this.model = model;
 		button.addActionListener(this);
 	}
 
+	/**
+	 * Handles the action to move up one directory level.
+	 * 
+	 * @param e The ActionEvent.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
@@ -38,16 +50,16 @@ public class FTPbtnUp implements ActionListener {
 				model.setData(updatedFilesList);
 
 			} else {
-				JOptionPane.showMessageDialog(null, 
-					Language.get(129),
-					Language.get(130), 
-					JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null,
+						Language.get(129),
+						Language.get(130),
+						JOptionPane.WARNING_MESSAGE);
 			}
 		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(null, 
-				Language.get(131) + ex.getMessage(), 
-				Language.get(101),
-				JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null,
+					Language.get(131) + ex.getMessage(),
+					Language.get(101),
+					JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

@@ -15,6 +15,10 @@ import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 import metroMalaga.View.*;
 
+/**
+ * Controller class for handling the main menu tabbing and panel switching.
+ * Manages the initialization and cleanup of Crud, FTP, and SMTP panels.
+ */
 public class MenuSelect implements ChangeListener {
 	private final PanelMenu panelMenu;
 	private final JTabbedPane tabbedPane;
@@ -29,6 +33,13 @@ public class MenuSelect implements ChangeListener {
 	private ServiceFTP ftpService;
 	private CrudController crudController;
 
+	/**
+	 * Constructor for MenuSelect.
+	 * 
+	 * @param panelMenu  The main menu panel.
+	 * @param tabbedPane The tabbed pane containing the different modules.
+	 * @param user       The currently logged-in user.
+	 */
 	public MenuSelect(PanelMenu panelMenu, JTabbedPane tabbedPane, Usuario user) {
 		this.panelMenu = panelMenu;
 		this.tabbedPane = tabbedPane;
@@ -49,10 +60,18 @@ public class MenuSelect implements ChangeListener {
 		}
 	}
 
+	/**
+	 * Gets the current user.
+	 * 
+	 * @return The user.
+	 */
 	public Usuario getUser() {
 		return user;
 	}
 
+	/**
+	 * Updates the theme of the currently active panel.
+	 */
 	public void updateActivePanelTheme() {
 
 		if (crudPanel != null && tabbedPane.getSelectedComponent() == crudPanel) {
@@ -64,6 +83,9 @@ public class MenuSelect implements ChangeListener {
 		}
 	}
 
+	/**
+	 * Updates the text language of the currently active panel.
+	 */
 	public void updateActivePanelText() {
 		if (crudPanel != null)
 			crudPanel.updateAllTexts();
@@ -73,6 +95,12 @@ public class MenuSelect implements ChangeListener {
 			smtpPanel.updateAllTexts();
 	}
 
+	/**
+	 * Invoked when the target of the listener has changed its state.
+	 * Handles switching between tabs, initializing and cleaning up panels.
+	 * 
+	 * @param e The change event.
+	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		int selectedIndex = tabbedPane.getSelectedIndex();
@@ -97,6 +125,9 @@ public class MenuSelect implements ChangeListener {
 		previousTabIndex = selectedIndex;
 	}
 
+	/**
+	 * Initializes the CRUD panel.
+	 */
 	private void initializeCRUD() {
 		System.out.println("Init CRUD...");
 		crudPanel = new CrudFrontend(user);
@@ -104,6 +135,9 @@ public class MenuSelect implements ChangeListener {
 		tabbedPane.setComponentAt(0, crudPanel);
 	}
 
+	/**
+	 * Initializes the FTP panel, including background connection.
+	 */
 	private void initializeFTP() {
 		System.out.println("Inicializando panel FTP...");
 
@@ -189,6 +223,9 @@ public class MenuSelect implements ChangeListener {
 		worker.execute();
 	}
 
+	/**
+	 * Initializes the SMTP panel.
+	 */
 	private void initializeSMTP() {
 		System.out.println("Init SMTP...");
 		smtpPanel = new PanelSMTP(user);
@@ -198,6 +235,11 @@ public class MenuSelect implements ChangeListener {
 		tabbedPane.setComponentAt(2, smtpPanel);
 	}
 
+	/**
+	 * Cleans up resources associated with a specific tab.
+	 * 
+	 * @param tabIndex The index of the tab to clean up.
+	 */
 	private void cleanupPanel(int tabIndex) {
 		switch (tabIndex) {
 			case 0:
@@ -228,12 +270,20 @@ public class MenuSelect implements ChangeListener {
 		}
 	}
 
+	/**
+	 * Switches to a specific tab index.
+	 * 
+	 * @param tabIndex The index of the tab to switch to.
+	 */
 	public void switchToTab(int tabIndex) {
 		if (tabIndex >= 0 && tabIndex < tabbedPane.getTabCount()) {
 			tabbedPane.setSelectedIndex(tabIndex);
 		}
 	}
 
+	/**
+	 * Logs out the user and returns to the login screen.
+	 */
 	public void logout() {
 		panelMenu.disposeWindow();
 		new PanelLogin().setVisible(true);

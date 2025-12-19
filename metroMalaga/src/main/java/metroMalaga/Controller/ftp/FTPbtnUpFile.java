@@ -26,6 +26,14 @@ public class FTPbtnUpFile implements ActionListener {
 	private Common cn;
 	private Usuario user;
 
+	/**
+	 * Constructor for FTPbtnUpFile class.
+	 * 
+	 * @param button  The JButton component.
+	 * @param service The FTP service instance.
+	 * @param model   The FTP table model.
+	 * @param user    The current user.
+	 */
 	public FTPbtnUpFile(JButton button, ServiceFTP service, FTPTableModel model, Usuario user) {
 		this.cn = new Common();
 		this.user = user;
@@ -34,6 +42,11 @@ public class FTPbtnUpFile implements ActionListener {
 		button.addActionListener(this);
 	}
 
+	/**
+	 * Handles the action to upload a file to the FTP server.
+	 * 
+	 * @param e The ActionEvent.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JFileChooser fileChooser = new JFileChooser();
@@ -51,8 +64,8 @@ public class FTPbtnUpFile implements ActionListener {
 
 				if (success) {
 
-					JOptionPane.showMessageDialog(null, 
-						Language.get(125) + remoteFileName);
+					JOptionPane.showMessageDialog(null,
+							Language.get(125) + remoteFileName);
 
 					cn.registerLog(user.getUsernameApp(), "File uploaded:" + remoteFileName);
 
@@ -63,16 +76,16 @@ public class FTPbtnUpFile implements ActionListener {
 					model.setData(updatedFilesList);
 
 				} else {
-					JOptionPane.showMessageDialog(null, 
-						Language.get(126), 
-						Language.get(127),
-						JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null,
+							Language.get(126),
+							Language.get(127),
+							JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, 
-					Language.get(128) + ex.getMessage(), 
-					Language.get(127),
-					JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null,
+						Language.get(128) + ex.getMessage(),
+						Language.get(127),
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}

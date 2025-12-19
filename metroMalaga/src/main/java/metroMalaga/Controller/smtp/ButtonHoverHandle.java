@@ -6,6 +6,9 @@ import java.awt.event.MouseListener;
 import javax.swing.JButton;
 import javax.swing.border.MatteBorder;
 
+/**
+ * Handles mouse hover effects for generic buttons in the SMTP module.
+ */
 public class ButtonHoverHandle implements MouseListener {
 
     private final JButton button;
@@ -16,10 +19,21 @@ public class ButtonHoverHandle implements MouseListener {
     private final MatteBorder defaultBorder;
     private final MatteBorder hoverBorder;
 
-    public ButtonHoverHandle(JButton button, 
-                              Color defaultBackground, Color defaultForeground,
-                              Color hoverBackground, Color hoverForeground,
-                              MatteBorder defaultBorder, MatteBorder hoverBorder) {
+    /**
+     * Constructor for ButtonHoverHandle with custom borders.
+     * 
+     * @param button            The button to attach the listener to.
+     * @param defaultBackground Default background color.
+     * @param defaultForeground Default foreground color.
+     * @param hoverBackground   Hover background color.
+     * @param hoverForeground   Hover foreground color.
+     * @param defaultBorder     Default border.
+     * @param hoverBorder       Hover border.
+     */
+    public ButtonHoverHandle(JButton button,
+            Color defaultBackground, Color defaultForeground,
+            Color hoverBackground, Color hoverForeground,
+            MatteBorder defaultBorder, MatteBorder hoverBorder) {
         this.button = button;
         this.defaultBackground = defaultBackground;
         this.defaultForeground = defaultForeground;
@@ -29,27 +43,39 @@ public class ButtonHoverHandle implements MouseListener {
         this.hoverBorder = hoverBorder;
     }
 
-    public ButtonHoverHandle(JButton button, 
-                              Color defaultBackground, Color defaultForeground,
-                              Color hoverBackground, Color hoverForeground) {
-        this(button, defaultBackground, defaultForeground, 
-             hoverBackground, hoverForeground, null, null);
+    /**
+     * Constructor for ButtonHoverHandle without custom borders.
+     * 
+     * @param button            The button to attach the listener to.
+     * @param defaultBackground Default background color.
+     * @param defaultForeground Default foreground color.
+     * @param hoverBackground   Hover background color.
+     * @param hoverForeground   Hover foreground color.
+     */
+    public ButtonHoverHandle(JButton button,
+            Color defaultBackground, Color defaultForeground,
+            Color hoverBackground, Color hoverForeground) {
+        this(button, defaultBackground, defaultForeground,
+                hoverBackground, hoverForeground, null, null);
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {
+    }
 
     @Override
-    public void mousePressed(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {
+    }
 
     @Override
-    public void mouseReleased(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {
+    }
 
     @Override
     public void mouseEntered(MouseEvent e) {
         button.setBackground(hoverBackground);
         button.setForeground(hoverForeground);
-        
+
         if (hoverBorder != null) {
             button.setBorder(hoverBorder);
         }
@@ -59,7 +85,7 @@ public class ButtonHoverHandle implements MouseListener {
     public void mouseExited(MouseEvent e) {
         button.setBackground(defaultBackground);
         button.setForeground(defaultForeground);
-        
+
         if (defaultBorder != null) {
             button.setBorder(defaultBorder);
         }

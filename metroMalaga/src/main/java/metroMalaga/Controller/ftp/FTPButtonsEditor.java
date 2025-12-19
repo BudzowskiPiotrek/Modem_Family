@@ -30,6 +30,13 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 	private Common cn;
 	private Usuario user;
 
+	/**
+	 * Constructor for FTPButtonsEditor.
+	 * 
+	 * @param service The FTP service instance.
+	 * @param model   The FTP table model.
+	 * @param user    The current user.
+	 */
 	public FTPButtonsEditor(ServiceFTP service, FTPTableModel model, Usuario user) {
 		this.cn = new Common();
 		this.user = user;
@@ -91,6 +98,11 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 		return false;
 	}
 
+	/**
+	 * Handles button actions (Download, Delete, Rename).
+	 * 
+	 * @param e The ActionEvent.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		fireEditingStopped();

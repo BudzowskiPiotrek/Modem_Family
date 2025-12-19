@@ -23,6 +23,11 @@ public class PasswordMigrationTool {
 
     private static ConnecionSQL conSQL = new ConnecionSQL();
 
+    /**
+     * Main method to execute the migration tool.
+     * 
+     * @param args Command line arguments (not used).
+     */
     public static void main(String[] args) {
         System.out.println("=== Password Migration Tool ===");
         System.out.println("This tool will migrate all plain text passwords to BCrypt hashes.");
@@ -59,6 +64,11 @@ public class PasswordMigrationTool {
         }
     }
 
+    /**
+     * Performs the password migration process.
+     * 
+     * @throws SQLException If a database error occurs.
+     */
     private static void migratePasswords() throws SQLException {
         List<UserPassword> users = fetchAllUsers();
 
@@ -96,6 +106,12 @@ public class PasswordMigrationTool {
         System.out.println("Skipped (already hashed): " + skipped);
     }
 
+    /**
+     * Fetches all users and their passwords from the database.
+     * 
+     * @return A list of UserPassword objects.
+     * @throws SQLException If a database error occurs.
+     */
     private static List<UserPassword> fetchAllUsers() throws SQLException {
         List<UserPassword> users = new ArrayList<>();
 
@@ -116,6 +132,13 @@ public class PasswordMigrationTool {
         return users;
     }
 
+    /**
+     * Updates the password for a specific user in the database.
+     * 
+     * @param username       The username.
+     * @param hashedPassword The new hashed password.
+     * @throws SQLException If a database error occurs.
+     */
     private static void updatePassword(String username, String hashedPassword) throws SQLException {
         final String SQL = "UPDATE usuarios SET password = ? WHERE username = ?";
 
@@ -128,6 +151,9 @@ public class PasswordMigrationTool {
         }
     }
 
+    /**
+     * Simple inner class to hold user credentials.
+     */
     private static class UserPassword {
         String username;
         String password;
