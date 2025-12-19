@@ -70,4 +70,19 @@ public class ServiceLogin {
 		return user;
 	}
 
+	/**
+	 * Refresh user data from database (useful when role permissions change)
+	 * 
+	 * @param usuario Usuario object to refresh
+	 * @return Updated Usuario object with current database data
+	 */
+	public Usuario refreshUserData(Usuario usuario) {
+		if (usuario == null) {
+			return null;
+		}
+
+		// Reload user data from database using username
+		return getUserData(usuario.getUsernameApp(), usuario.getPasswordApp());
+	}
+
 }
