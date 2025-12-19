@@ -388,7 +388,7 @@ public class CrudFrontend extends JPanel {
 	 * 
 	 * @param tablas List of table names to display.
 	 */
-	public void setTablasList(List<String> tablas) {
+	public void setListaTablas(List<String> tablas) {
 		modeloListaTablas.clear();
 		for (String tabla : tablas) {
 			modeloListaTablas.addElement(tabla);
