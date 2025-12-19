@@ -7,12 +7,20 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 import metroMalaga.Model.Language;
 
+/**
+ * Utility class for establishing connections to the MySQL database.
+ */
 public class ConnecionSQL {
 
-	private final String RUTA = "jdbc:mysql://192.168.1.35/centimetromalaga";
-	private final String USUARIO = "remoto";
-	private final String PASS = "proyecto";
+	private final String RUTA = "jdbc:mysql://localhost/centimetromalaga";
+	private final String USUARIO = "root";
+	private final String PASS = "";
 
+	/**
+	 * Establishes a connection to the database.
+	 * 
+	 * @return A Connection object, or null if connection fails.
+	 */
 	public Connection connect() {
 		Connection con = null;
 		try {
