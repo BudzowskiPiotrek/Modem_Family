@@ -15,12 +15,15 @@ import metroMalaga.Controller.smtp.ButtonHoverHandle;
 import metroMalaga.Controller.smtp.FieldFocusHandle;
 import metroMalaga.Controller.smtp.HandleSMTP;
 
+/**
+ * Panel interface for SMTP and IMAP email management within the application.
+ * Provides functionality for composing, sending, and viewing emails with theme support.
+ */
 public class PanelSMTP extends JPanel {
 
     private final HandleSMTP backend;
     private final Usuario loggedUser;
 
-    // Componentes UI
     private JTextField txtTo, txtSubject;
     private JTextArea txtBody, txtViewer;
     private JTable emailTable;
@@ -29,16 +32,18 @@ public class PanelSMTP extends JPanel {
     private JLabel lblAttachedFile, lblTo, lblSubject, lblFolder;
     private JComboBox<String> cboFolders;
 
-    // Paneles
     private JPanel pCompose, pInbox, pButtonsCompose, pButtonsInbox, pFields, pFolderSelector, pInboxTop;
     private JSplitPane mainSplit, inboxSplit;
 
     private ButtonHandleSMTP buttonHandler;
 
-    // Fuentes
     private final Font F_HEADER = new Font("Segoe UI", Font.BOLD, 16);
     private final Font F_TEXT = new Font("Segoe UI", Font.PLAIN, 14);
 
+    /**
+     * Initializes the SMTP panel with the specified user and backend login.
+     * @param usuario The logged-in user.
+     */
     public PanelSMTP(Usuario usuario) {
         this.loggedUser = usuario;
         this.backend = new HandleSMTP();
@@ -50,11 +55,17 @@ public class PanelSMTP extends JPanel {
         applyTheme();
     }
 
+    /**
+     * Configures the layout and borders of the main panel.
+     */
     private void setupPanel() {
         setLayout(new BorderLayout(15, 15));
         setBorder(new EmptyBorder(15, 15, 15, 15));
     }
 
+    /**
+     * Updates and applies the visual theme to all UI components and table renderers.
+     */
     public void applyTheme() {
         Color bgMain = Common.getBackground();
         Color bgPanel = Common.getPanelBackground();
@@ -62,7 +73,6 @@ public class PanelSMTP extends JPanel {
         Color border = Common.getBorder();
         Color fieldBg = Common.getFieldBackground();
 
-        // 1. Fondos principales
         this.setBackground(bgMain);
         if (mainSplit != null) {
             mainSplit.setBackground(bgMain);
@@ -73,7 +83,6 @@ public class PanelSMTP extends JPanel {
             inboxSplit.setBorder(null);
         }
 
-        // 2. Paneles
         updatePanelStyle(pCompose, Language.get(53));
         updatePanelStyle(pInbox, Language.get(54));
 
@@ -83,7 +92,6 @@ public class PanelSMTP extends JPanel {
         if (pFolderSelector != null) pFolderSelector.setBackground(bgPanel);
         if (pInboxTop != null) pInboxTop.setBackground(bgPanel);
 
-        // 3. Etiquetas
         if (lblTo != null) lblTo.setForeground(txt);
         if (lblSubject != null) lblSubject.setForeground(txt);
         if (lblFolder != null) lblFolder.setForeground(txt);
@@ -97,20 +105,17 @@ public class PanelSMTP extends JPanel {
             }
         }
 
-        // 4. Campos de texto
         updateFieldStyle(txtTo);
         updateFieldStyle(txtSubject);
         updateTextAreaStyle(txtBody);
         updateTextAreaStyle(txtViewer);
 
-        // 5. ComboBox
         if (cboFolders != null) {
             cboFolders.setBackground(fieldBg);
             cboFolders.setForeground(txt);
             cboFolders.setBorder(new LineBorder(border, 1));
         }
 
-        // 6. Tabla - CON RENDERER PERSONALIZADO
         if (emailTable != null) {
             emailTable.setBackground(fieldBg);
             emailTable.setForeground(txt);
@@ -118,7 +123,6 @@ public class PanelSMTP extends JPanel {
             emailTable.setSelectionBackground(Common.isDarkMode ? new Color(200, 0, 0) : new Color(230, 240, 255));
             emailTable.setSelectionForeground(Common.isDarkMode ? Color.WHITE : Color.BLACK);
 
-            // 👇 RENDERER PARA CELDAS NORMALES
             emailTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value,
@@ -143,7 +147,6 @@ public class PanelSMTP extends JPanel {
             header.setForeground(txt);
             header.setBorder(new MatteBorder(0, 0, 1, 0, border));
             
-            // 👇 RENDERER PARA EL HEADER
             header.setDefaultRenderer(new DefaultTableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -158,17 +161,20 @@ public class PanelSMTP extends JPanel {
                 }
             });
 
-            // 👇 Actualizar ScrollPane de la tabla
             updateScrollPaneTheme(emailTable, fieldBg, border);
         }
 
-        // 7. Botones
         updateButtonsTheme();
 
         this.repaint();
         this.revalidate();
     }
 
+    /**
+     * Formats the style and titled border for a specific panel.
+     * @param p The target panel.
+     * @param title The localized title string.
+     */
     private void updatePanelStyle(JPanel p, String title) {
         if (p == null) return;
         p.setBackground(Common.getPanelBackground());
@@ -179,6 +185,10 @@ public class PanelSMTP extends JPanel {
         ));
     }
 
+    /**
+     * Styles text input components according to the current theme.
+     * @param c The component to be updated.
+     */
     private void updateFieldStyle(JTextComponent c) {
         if (c == null) return;
         c.setBackground(Common.getFieldBackground());
@@ -192,6 +202,10 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    /**
+     * Specifically updates the style for JTextArea components.
+     * @param area The text area to update.
+     */
     private void updateTextAreaStyle(JTextArea area) {
         if (area == null) return;
         area.setBackground(Common.getFieldBackground());
@@ -199,10 +213,15 @@ public class PanelSMTP extends JPanel {
         area.setCaretColor(Common.getText());
         area.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        // Actualizar ScrollPane
         updateScrollPaneTheme(area, Common.getFieldBackground(), Common.getBorder());
     }
 
+    /**
+     * Synchronizes scroll pane colors with their internal viewports and components.
+     * @param component The inner component.
+     * @param bg Background color.
+     * @param border Border color.
+     */
     private void updateScrollPaneTheme(Component component, Color bg, Color border) {
         if (component.getParent() instanceof JViewport) {
             JViewport viewport = (JViewport) component.getParent();
@@ -216,6 +235,9 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    /**
+     * Refreshes the color palette for all functional buttons (Normal, Danger, and Accent).
+     */
     private void updateButtonsTheme() {
         Color bg = Common.getPanelBackground();
         Color txt = Common.getText();
@@ -247,6 +269,9 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    /**
+     * Dynamically updates all UI text labels and identifiers based on the current language settings.
+     */
     public void updateAllTexts() {
         lblTo.setText(Language.get(55));
         lblSubject.setText(Language.get(56));
@@ -277,7 +302,6 @@ public class PanelSMTP extends JPanel {
             txtViewer.setText(Language.get(68));
         }
 
-        // Actualizar títulos de paneles
         updatePanelStyle(pCompose, Language.get(53));
         updatePanelStyle(pInbox, Language.get(54));
 
@@ -285,6 +309,9 @@ public class PanelSMTP extends JPanel {
         repaint();
     }
 
+    /**
+     * Initializes all UI components, panels, and layout structures for composition and inbox.
+     */
     private void initUI() {
         pCompose = new JPanel(new BorderLayout(10, 10));
         pFields = new JPanel(new GridBagLayout());
@@ -323,7 +350,6 @@ public class PanelSMTP extends JPanel {
         pCompose.add(scrollBody, BorderLayout.CENTER);
         pCompose.add(pButtonsCompose, BorderLayout.SOUTH);
 
-        // --- Panel Inbox ---
         pInbox = new JPanel(new BorderLayout(10, 10));
 
         pFolderSelector = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -334,7 +360,6 @@ public class PanelSMTP extends JPanel {
         cboFolders.setPreferredSize(new Dimension(200, 30));
         cboFolders.setFont(F_TEXT);
 
-        // Cargar carpetas disponibles
         List<String> allFolders = backend.getAvailableFolders();
         List<String> allowedFolders = List.of("INBOX", "Spam", "Trash", "[Gmail]/Spam", "[Gmail]/Trash");
 
@@ -359,6 +384,7 @@ public class PanelSMTP extends JPanel {
 
         String[] cols = { Language.get(61), Language.get(62), Language.get(63) };
         tableModel = new DefaultTableModel(cols, 0) {
+            @Override
             public boolean isCellEditable(int r, int c) { return false; }
         };
         emailTable = createTable();
@@ -404,6 +430,9 @@ public class PanelSMTP extends JPanel {
         add(mainSplit, BorderLayout.CENTER);
     }
 
+    /**
+     * Registers event listeners for the interactive components of the panel.
+     */
     private void registerListeners() {
         this.buttonHandler = new ButtonHandleSMTP(this, backend);
 
@@ -425,6 +454,11 @@ public class PanelSMTP extends JPanel {
         applyHover(btnReturn, true);
     }
 
+    /**
+     * Applies default styles and hover effects to buttons.
+     * @param btn The button to style.
+     * @param isDanger Whether the button represents a destructive action.
+     */
     private void applyHover(JButton btn, boolean isDanger) {
         Color bg = isDanger ? Common.getDanger() : Common.getPanelBackground();
         Color fg = isDanger ? Color.WHITE : Common.getText();
@@ -444,6 +478,14 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    /**
+     * Utility method to add components to a GridBagLayout panel with specific constraints.
+     * @param p The target panel.
+     * @param c The component to add.
+     * @param x Grid X position.
+     * @param y Grid Y position.
+     * @param weight Horizontal weight.
+     */
     private void addGBC(JPanel p, Component c, int x, int y, double weight) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = x; gbc.gridy = y; gbc.weightx = weight;
@@ -455,6 +497,10 @@ public class PanelSMTP extends JPanel {
         p.add(c, gbc);
     }
 
+    /**
+     * Factory method for creating themed text fields.
+     * @return A stylized JTextField.
+     */
     private JTextField createField() {
         JTextField f = new JTextField();
         f.setPreferredSize(new Dimension(200, 30));
@@ -463,6 +509,10 @@ public class PanelSMTP extends JPanel {
         return f;
     }
 
+    /**
+     * Factory method for creating themed text areas.
+     * @return A stylized JTextArea.
+     */
     private JTextArea createTextArea() {
         JTextArea a = new JTextArea();
         a.setFont(F_TEXT);
@@ -472,10 +522,21 @@ public class PanelSMTP extends JPanel {
         return a;
     }
 
+    /**
+     * Wraps a component in a JScrollPane.
+     * @param c The component to wrap.
+     * @return The resulting JScrollPane.
+     */
     private JScrollPane createScrollPane(Component c) {
         return new JScrollPane(c);
     }
 
+    /**
+     * Factory method for creating themed buttons.
+     * @param text The button label.
+     * @param isDanger Whether it is a danger-type button.
+     * @return A stylized JButton.
+     */
     private JButton createButton(String text, boolean isDanger) {
         JButton b = new JButton(text);
         b.setPreferredSize(new Dimension(140, 35));
@@ -485,6 +546,10 @@ public class PanelSMTP extends JPanel {
         return b;
     }
 
+    /**
+     * Factory method for creating a themed JTable for the inbox.
+     * @return A stylized JTable.
+     */
     private JTable createTable() {
         JTable t = new JTable(tableModel);
         t.setFont(F_TEXT);
@@ -493,7 +558,6 @@ public class PanelSMTP extends JPanel {
         return t;
     }
 
-    // Getters
     public JTextField getTxtTo() { return txtTo; }
     public JTextField getTxtSubject() { return txtSubject; }
     public JTextArea getTxtBody() { return txtBody; }
@@ -511,6 +575,10 @@ public class PanelSMTP extends JPanel {
     public JButton getBtnReturn() { return btnReturn; }
     public void setBtnReturn(JButton btnReturn) { this.btnReturn = btnReturn; }
 
+    /**
+     * Sets a callback action for the return operation.
+     * @param callback The Runnable to execute on return.
+     */
     public void setOnReturnCallback(Runnable callback) {
         if (buttonHandler != null) {
             buttonHandler.setOnReturnCallback(callback);
