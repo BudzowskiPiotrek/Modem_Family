@@ -120,7 +120,7 @@ public class FtpActivity extends BaseManualActivity {
                                 content.setLength(0);
 
                                 // Imagen 1: Interfaz Principal
-                                addImageToLayout(R.drawable.image5);
+                                addImageToLayout(R.drawable.image3); // FTP interface
 
                                 if (interfaceDescription != null)
                                     content.append(interfaceDescription).append("\n");
@@ -135,7 +135,7 @@ public class FtpActivity extends BaseManualActivity {
                                 content.setLength(0);
 
                                 // Imagen 2: Tabla de archivos
-                                addImageToLayout(R.drawable.image4);
+                                addImageToLayout(R.drawable.image13); // FTP table columns
 
                                 if (actionsTitle != null)
                                     content.append("═══ ").append(actionsTitle).append(" ═══\n");
@@ -152,7 +152,7 @@ public class FtpActivity extends BaseManualActivity {
                                 content.setLength(0);
 
                                 // Imagen 3: Botones de acción
-                                addImageToLayout(R.drawable.image11);
+                                addImageToLayout(R.drawable.image9); // FTP action buttons
 
                                 if (navigationTitle != null)
                                     content.append("═══ ").append(navigationTitle).append(" ═══\n");
@@ -169,7 +169,7 @@ public class FtpActivity extends BaseManualActivity {
                                 content.setLength(0);
 
                                 // Imagen 4: Barra de herramientas
-                                addImageToLayout(R.drawable.image8);
+                                addImageToLayout(R.drawable.image5); // FTP toolbar
 
                                 if (searchTitle != null)
                                     content.append("═══ ").append(searchTitle).append(" ═══\n");
@@ -186,7 +186,7 @@ public class FtpActivity extends BaseManualActivity {
                                 content.setLength(0);
 
                                 // Imagen 5: Filtrado
-                                addImageToLayout(R.drawable.image10);
+                                addImageToLayout(R.drawable.image8); // FTP filter
 
                                 if (doubleclickTitle != null)
                                     content.append("═══ ").append(doubleclickTitle).append(" ═══\n");

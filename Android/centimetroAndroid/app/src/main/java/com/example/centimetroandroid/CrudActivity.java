@@ -114,7 +114,7 @@ public class CrudActivity extends BaseManualActivity {
                                 content.setLength(0);
 
                                 // Imagen de tabla CRUD
-                                addImageToLayout(R.drawable.image2);
+                                addImageToLayout(R.drawable.image1); // CRUD table view
 
                                 if (editMode != null) {
                                     content.append(editMode).append("\n\n");
@@ -123,7 +123,7 @@ public class CrudActivity extends BaseManualActivity {
                                 addTextToLayout(content.toString());
 
                                 // Imagen de modo edición
-                                addImageToLayout(R.drawable.image9);
+                                addImageToLayout(R.drawable.image7); // CRUD edit mode
 
                             } else {
                                 Toast.makeText(CrudActivity.this,

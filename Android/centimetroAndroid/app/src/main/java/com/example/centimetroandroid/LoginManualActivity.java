@@ -88,7 +88,7 @@ public class LoginManualActivity extends BaseManualActivity {
                                 contentLayout.removeAllViews();
 
                                 // Imagen de login AL INICIO (como en el HTML)
-                                addImageToLayout(R.drawable.image3);
+                                addImageToLayout(R.drawable.image12); // Login screen
 
                                 // Texto después de la imagen
                                 StringBuilder content = new StringBuilder();
