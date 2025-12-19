@@ -14,10 +14,10 @@ public class PanelMenu extends JFrame {
 	private Usuario user;
 	private JTabbedPane tabbedPane;
 	private MenuSelect menuController;
-	
+
 	private JButton btnLanguage;
-	private JButton btnDarkMode; 
-	private JPanel topPanel; 
+	private JButton btnDarkMode;
+	private JPanel topPanel;
 
 	private JLabel lblMessage;
 	private JButton btnConfirm, btnCancel;
@@ -33,7 +33,7 @@ public class PanelMenu extends JFrame {
 		createTabbedPane();
 		createTopBar();
 		setTitle();
-		
+
 		applyTheme();
 
 		this.setVisible(true);
@@ -57,7 +57,7 @@ public class PanelMenu extends JFrame {
 
 	private void createTopBar() {
 		topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-		
+
 		String langText = Language.getCurrentLanguage().equals("espanol") ? "ES" : "EN";
 		btnLanguage = new JButton(langText);
 		styleTopButton(btnLanguage);
@@ -72,7 +72,7 @@ public class PanelMenu extends JFrame {
 
 		this.add(topPanel, BorderLayout.NORTH);
 	}
-	
+
 	private void styleTopButton(JButton btn) {
 		btn.setFont(new Font("Dialog", Font.BOLD, 14));
 		btn.setFocusPainted(false);
@@ -82,11 +82,11 @@ public class PanelMenu extends JFrame {
 
 	private void toggleTheme() {
 		Common.isDarkMode = !Common.isDarkMode;
-		
+
 		btnDarkMode.setText(Common.isDarkMode ? "☀️" : "🌙");
-		
+
 		applyTheme();
-		
+
 		if (menuController != null) {
 			menuController.updateActivePanelTheme();
 		}
@@ -96,13 +96,14 @@ public class PanelMenu extends JFrame {
 		boolean p5Mode = Common.isDarkMode;
 
 		Color bgColor = p5Mode ? P5_BLACK : new Color(230, 230, 230);
-		Color headerBg = p5Mode ? P5_BLACK : new Color(230, 230, 230); 
+		Color headerBg = p5Mode ? P5_BLACK : new Color(230, 230, 230);
 		Color btnBg = p5Mode ? P5_RED : Common.getPanelBackground();
 		Color btnFg = p5Mode ? P5_WHITE : Common.getText();
 		Color btnBorder = p5Mode ? P5_BLACK : Common.getBorder();
 
 		this.getContentPane().setBackground(bgColor);
-		if (topPanel != null) topPanel.setBackground(headerBg);
+		if (topPanel != null)
+			topPanel.setBackground(headerBg);
 
 		updateButtonStyle(btnLanguage, btnBg, btnFg, btnBorder);
 		updateButtonStyle(btnDarkMode, btnBg, btnFg, btnBorder);
@@ -111,33 +112,34 @@ public class PanelMenu extends JFrame {
 			Color tabBg = p5Mode ? P5_BLACK : new Color(230, 230, 230);
 			Color tabFg = p5Mode ? P5_WHITE : Color.BLACK;
 			Color tabSel = p5Mode ? P5_RED : Common.getDanger();
-			
+
 			tabbedPane.setBackground(tabBg);
 			tabbedPane.setForeground(tabFg);
-			
+
 			UIManager.put("TabbedPane.selected", tabSel);
-			UIManager.put("TabbedPane.contentAreaColor", bgColor); 
+			UIManager.put("TabbedPane.contentAreaColor", bgColor);
 			UIManager.put("TabbedPane.background", tabBg);
 			UIManager.put("TabbedPane.darkShadow", tabBg);
 			UIManager.put("TabbedPane.light", tabBg);
 			UIManager.put("TabbedPane.highlight", tabBg);
 			UIManager.put("TabbedPane.shadow", tabBg);
-			
+
 			for (int i = 0; i < tabbedPane.getTabCount(); i++) {
 				Component comp = tabbedPane.getComponentAt(i);
 				if (comp != null && comp instanceof JPanel) {
 					comp.setBackground(bgColor);
 				}
 			}
-			
+
 			SwingUtilities.updateComponentTreeUI(tabbedPane);
 		}
-		
+
 		this.repaint();
 	}
 
 	private void updateButtonStyle(JButton btn, Color bg, Color fg, Color border) {
-		if (btn == null) return;
+		if (btn == null)
+			return;
 		btn.setBackground(bg);
 		btn.setForeground(fg);
 		btn.setBorder(new MatteBorder(2, 2, 4, 4, border));
@@ -163,23 +165,26 @@ public class PanelMenu extends JFrame {
 			} else if (comp instanceof CrudFrontend) {
 				((CrudFrontend) comp).updateAllTexts();
 			} else if (comp instanceof PanelFTP) {
-				((PanelFTP) comp).updateAllTexts(); 
+				((PanelFTP) comp).updateAllTexts();
 			}
 		}
 	}
 
 	public void updateAllTexts() {
 		setTitle();
-		
+
 		tabbedPane.setTitleAt(0, Language.get(92));
 		tabbedPane.setTitleAt(1, Language.get(93));
 		tabbedPane.setTitleAt(2, Language.get(94));
 		tabbedPane.setTitleAt(3, Language.get(95));
-		
-		if (lblMessage != null) lblMessage.setText(Language.get(96));
-		if (btnConfirm != null) btnConfirm.setText(Language.get(97));
-		if (btnCancel != null) btnCancel.setText(Language.get(98));
-		
+
+		if (lblMessage != null)
+			lblMessage.setText(Language.get(96));
+		if (btnConfirm != null)
+			btnConfirm.setText(Language.get(97));
+		if (btnCancel != null)
+			btnCancel.setText(Language.get(98));
+
 		revalidate();
 		repaint();
 	}
@@ -188,12 +193,12 @@ public class PanelMenu extends JFrame {
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 16));
 
-		menuController = new MenuSelect(this, tabbedPane, user);
-
 		tabbedPane.addTab(Language.get(92), null);
 		tabbedPane.addTab(Language.get(93), null);
 		tabbedPane.addTab(Language.get(94), null);
 		tabbedPane.addTab(Language.get(95), createExitPanel());
+
+		menuController = new MenuSelect(this, tabbedPane, user);
 
 		this.add(tabbedPane, BorderLayout.CENTER);
 	}
@@ -218,11 +223,9 @@ public class PanelMenu extends JFrame {
 
 		btnConfirm = new JButton(Language.get(97));
 		styleExitButton(btnConfirm, P5_RED, P5_WHITE);
-		btnConfirm.addActionListener(e -> System.exit(0));
 
 		btnCancel = new JButton(Language.get(98));
 		styleExitButton(btnCancel, P5_WHITE, P5_BLACK);
-		btnCancel.addActionListener(e -> tabbedPane.setSelectedIndex(0));
 
 		buttonPanel.add(btnCancel);
 		buttonPanel.add(btnConfirm);
@@ -270,5 +273,13 @@ public class PanelMenu extends JFrame {
 
 	public Usuario getUser() {
 		return user;
+	}
+
+	public JButton getBtnConfirm() {
+		return btnConfirm;
+	}
+
+	public JButton getBtnCancel() {
+		return btnCancel;
 	}
 }
