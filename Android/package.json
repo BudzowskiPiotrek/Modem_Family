@@ -1,0 +1,13 @@
+{
+  "name": "populate-firestore",
+  "version": "1.0.0",
+  "description": "Script para poblar Firestore con datos del manual",
+  "main": "populate_firestore.js",
+  "scripts": {
+    "populate": "node populate_firestore.js",
+    "populate-multilang": "node populate_firestore_multilang.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

@@ -22,6 +22,11 @@ public class NotificationServer {
         this.isRunning = false;
     }
 
+    /**
+     * Gets the singleton instance of the NotificationServer.
+     * 
+     * @return The singleton instance.
+     */
     public static synchronized NotificationServer getInstance() {
         if (instance == null) {
             instance = new NotificationServer();
@@ -30,7 +35,7 @@ public class NotificationServer {
     }
 
     /**
-     * Start the notification server
+     * Start the notification server on port 5000.
      */
     public synchronized void start() {
         if (isRunning) {
@@ -57,7 +62,8 @@ public class NotificationServer {
     }
 
     /**
-     * Broadcast a message to all connected clients
+     * Broadcast a message to all connected clients.
+     * Disconnected clients are removed from the list.
      * 
      * @param message The message to broadcast
      */
@@ -81,7 +87,7 @@ public class NotificationServer {
     }
 
     /**
-     * Stop the notification server
+     * Stop the notification server and close all connections.
      */
     public synchronized void stop() {
         if (!isRunning) {

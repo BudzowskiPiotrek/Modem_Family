@@ -6,19 +6,23 @@ import org.apache.commons.net.ftp.FTPClient;
 import metroMalaga.Model.Language;
 
 public class ConnecionFTP {
-	private static final String SERVER = "192.168.1.35";
+	private static final String SERVER = "127.0.0.1";
 	private static final int PORT = 21;
-	private String user;
+	private String user = "proyecto";
 	private static final String PASS = "proyecto";
 
-	public ConnecionFTP(String tipo) {
-		if (tipo.equalsIgnoreCase("admin")) {
-			this.user = "proyecto";
-		} else if (tipo.equalsIgnoreCase("LECTURA")) {
-			this.user = "read";
-		}
+	/**
+	 * Constructor for ConnecionFTP.
+	 */
+	public ConnecionFTP() {
+
 	}
 
+	/**
+	 * Establishes a connection to the FTP server.
+	 * 
+	 * @return The connected FTPClient object, or null if connection failed.
+	 */
 	public FTPClient getConnection() {
 		FTPClient ftpClient = new FTPClient();
 		try {
@@ -39,20 +43,22 @@ public class ConnecionFTP {
 				return ftpClient;
 			} else {
 				closeConnection(ftpClient);
-				JOptionPane.showMessageDialog(null,
-						Language.get(189) + user + Language.get(190),
-						Language.get(147), 
+				JOptionPane.showMessageDialog(null, Language.get(189) + user + Language.get(190), Language.get(147),
 						JOptionPane.ERROR_MESSAGE);
 
 			}
 		} catch (IOException e) {
-			String errorMessage = Language.get(191) + SERVER + ":" + PORT + 
-					Language.get(192) + e.getMessage();
+			String errorMessage = Language.get(191) + SERVER + ":" + PORT + Language.get(192) + e.getMessage();
 			JOptionPane.showMessageDialog(null, errorMessage, Language.get(193), JOptionPane.ERROR_MESSAGE);
 		}
 		return null;
 	}
 
+	/**
+	 * Closes the FTP connection.
+	 * 
+	 * @param ftpClient The FTPClient object to close.
+	 */
 	public void closeConnection(FTPClient ftpClient) {
 		if (ftpClient != null && ftpClient.isConnected()) {
 			try {
@@ -65,6 +71,11 @@ public class ConnecionFTP {
 		}
 	}
 
+	/**
+	 * Retrieves the FTP server host address.
+	 * 
+	 * @return The server IP address.
+	 */
 	public String getServerHost() {
 		return SERVER;
 	}

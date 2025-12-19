@@ -15,6 +15,14 @@ public class FTPbtnReturn implements ActionListener {
     private Usuario user;
     private MenuSelect menuSelect;
 
+    /**
+     * Constructor for FTPbtnReturn class.
+     * 
+     * @param panelFTP   The FTP panel.
+     * @param button     The JButton component.
+     * @param user       The current user.
+     * @param menuSelect The MenuSelect controller.
+     */
     public FTPbtnReturn(PanelFTP panelFTP, JButton button, Usuario user, MenuSelect menuSelect) {
         this.panelFTP = panelFTP;
         this.user = user;
@@ -22,6 +30,11 @@ public class FTPbtnReturn implements ActionListener {
         button.addActionListener(this);
     }
 
+    /**
+     * Handles the action to return to the main menu (tab 0).
+     * 
+     * @param e The ActionEvent.
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         // Switch back to first tab instead of creating new window

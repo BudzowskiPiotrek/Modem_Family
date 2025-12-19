@@ -23,14 +23,23 @@ public class ServiceFTP {
 	private FTPClient ftpClient;
 	private ConnecionFTP conFTP;
 	private String user;
+	private String currentUsername; // Username of the logged-in user
+	private metroMalaga.Model.Rol userRole; // Role object of the logged-in user
 	private NotificationController notificationController;
 	private boolean notificationsInitialized = false;
 	private String ftpServerHost;
 	private static final String NOTIFICATION_SERVER_HOST = "127.0.0.1";
 
-	public ServiceFTP(String user) {
-		this.user = user;
-		this.conFTP = new ConnecionFTP(user);
+	/**
+	 * Constructor for ServiceFTP
+	 * 
+	 * @param username Username of the logged-in user
+	 * @param rol      Role object of the user
+	 */
+	public ServiceFTP(String username, metroMalaga.Model.Rol rol) {
+		this.currentUsername = username;
+		this.userRole = rol;
+		this.conFTP = new ConnecionFTP();
 		this.ftpClient = conFTP.getConnection();
 
 		if (ftpClient == null) {
@@ -47,6 +56,13 @@ public class ServiceFTP {
 		initializeNotificationSystem();
 	}
 
+	/**
+	 * Creates a new directory on the FTP server.
+	 * 
+	 * @param path The path of the directory to be created.
+	 * @return true if the directory was created successfully, false otherwise.
+	 * @throws IOException If an I/O error occurs or the directory already exists.
+	 */
 	public synchronized boolean makeDirectory(String path) throws IOException {
 
 		if (!isConnected()) {
@@ -54,6 +70,11 @@ public class ServiceFTP {
 		}
 
 		boolean created = ftpClient.makeDirectory(path);
+
+		// Register folder ownership if creation was successful
+		if (created && currentUsername != null) {
+			metroMalaga.Model.FTPFileOwnershipDAO.registerFile(path, currentUsername, true);
+		}
 
 		if (!created) {
 			int replyCode = ftpClient.getReplyCode();
@@ -68,6 +89,11 @@ public class ServiceFTP {
 		return true;
 	}
 
+	/**
+	 * Lists all files in the current working directory.
+	 * 
+	 * @return An array of FTPFile objects representing the files in the directory.
+	 */
 	public synchronized FTPFile[] listAllFiles() {
 		try {
 			if (!isConnected()) {
@@ -127,6 +153,12 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Changes the current working directory on the FTP server.
+	 * 
+	 * @param directoryName The name of the directory to change to.
+	 * @return true if the directory change was successful, false otherwise.
+	 */
 	public synchronized boolean changeDirectory(String directoryName) {
 		try {
 			return ftpClient.changeWorkingDirectory(directoryName);
@@ -136,6 +168,11 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Changes the working directory to the parent directory.
+	 * 
+	 * @return true if the directory change was successful, false otherwise.
+	 */
 	public boolean changeDirectoryUp() {
 		try {
 			return ftpClient.changeWorkingDirectory("..");
@@ -145,6 +182,11 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Retrieves the current working directory path.
+	 * 
+	 * @return The current working directory path as a String.
+	 */
 	public String getCurrentDirectory() {
 		try {
 			return ftpClient.printWorkingDirectory();
@@ -154,6 +196,13 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Uploads a local file to the FTP server.
+	 * 
+	 * @param localFilePath  The path of the local file to upload.
+	 * @param remoteFilePath The path on the server where the file should be stored.
+	 * @return true if the upload was successful, false otherwise.
+	 */
 	public synchronized boolean uploadFile(String localFilePath, String remoteFilePath) {
 		File localFile = new File(localFilePath);
 
@@ -164,13 +213,37 @@ public class ServiceFTP {
 		}
 
 		try (InputStream inputStream = new FileInputStream(localFile)) {
-			return ftpClient.storeFile(remoteFilePath, inputStream);
+			boolean success = ftpClient.storeFile(remoteFilePath, inputStream);
+
+			System.out.println("DEBUG uploadFile - Upload success: " + success);
+			System.out.println("DEBUG uploadFile - currentUsername: " + currentUsername);
+			System.out.println("DEBUG uploadFile - remoteFilePath: " + remoteFilePath);
+
+			// Register file ownership if upload was successful
+			if (success && currentUsername != null) {
+				System.out.println("DEBUG uploadFile - Registering ownership...");
+				metroMalaga.Model.FTPFileOwnershipDAO.registerFile(remoteFilePath, currentUsername, false);
+				System.out.println("DEBUG uploadFile - Ownership registered!");
+			} else {
+				System.out.println("DEBUG uploadFile - NOT registering ownership. success=" + success + ", username="
+						+ currentUsername);
+			}
+
+			return success;
 		} catch (IOException e) {
 			showError("Error uploading file: " + remoteFilePath, e);
 			return false;
 		}
 	}
 
+	/**
+	 * Downloads a file from the FTP server to the local machine.
+	 * 
+	 * @param remoteFilePath The path of the file on the FTP server.
+	 * @param localFilePath  The path on the local machine where the file should be
+	 *                       saved.
+	 * @return true if the download was successful, false otherwise.
+	 */
 	public synchronized boolean downloadFile(String remoteFilePath, String localFilePath) {
 		try (OutputStream outputStream = new FileOutputStream(localFilePath)) {
 			return ftpClient.retrieveFile(remoteFilePath, outputStream);
@@ -180,10 +253,26 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Deletes a file or directory on the FTP server.
+	 * 
+	 * @param path The path of the file or directory to delete.
+	 * @return true if the deletion was successful, false otherwise.
+	 */
 	public synchronized boolean deleteFile(String path) {
+		// Check if user has permission to delete this file
+		if (currentUsername != null && userRole != null) {
+			if (!metroMalaga.Model.FTPFileOwnershipDAO.canModifyFile(path, currentUsername, userRole, true)) {
+				JOptionPane.showMessageDialog(null,
+						"No tienes permisos para borrar este archivo.\nSolo puedes borrar tus propios archivos.",
+						"Permiso Denegado", JOptionPane.WARNING_MESSAGE);
+				return false;
+			}
+		}
+
 		try {
 			FTPFile file = ftpClient.mlistFile(path);
-			
+
 			if (file == null) {
 				return false;
 			}
@@ -193,6 +282,10 @@ public class ServiceFTP {
 			} else {
 				ftpClient.deleteFile(path);
 			}
+
+			// Remove from ownership database after successful deletion
+			metroMalaga.Model.FTPFileOwnershipDAO.deleteFile(path);
+
 			return true;
 		} catch (IOException e) {
 			showError("Could not delete: " + path, e);
@@ -200,6 +293,12 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Recursively deletes a directory and its contents.
+	 * 
+	 * @param dirPath The path of the directory to delete.
+	 * @throws IOException If an I/O error occurs during deletion.
+	 */
 	private void deleteDirectoryRecursive(String dirPath) throws IOException {
 		FTPFile[] files = ftpClient.listFiles(dirPath);
 		for (FTPFile file : files) {
@@ -208,20 +307,51 @@ public class ServiceFTP {
 				deleteDirectoryRecursive(fullPath);
 			} else {
 				ftpClient.deleteFile(fullPath);
+				// Delete ownership record for each file
+				metroMalaga.Model.FTPFileOwnershipDAO.deleteFile(fullPath);
 			}
 		}
 		ftpClient.removeDirectory(dirPath);
+		// Delete ownership record for the directory itself
+		metroMalaga.Model.FTPFileOwnershipDAO.deleteFile(dirPath);
 	}
 
+	/**
+	 * Renames a file or directory on the FTP server.
+	 * 
+	 * @param remoteFrom The current name/path of the file.
+	 * @param remoteTo   The new name/path for the file.
+	 * @return true if the rename was successful, false otherwise.
+	 */
 	public synchronized boolean renameFile(String remoteFrom, String remoteTo) {
+		// Check if user has permission to rename this file
+		if (currentUsername != null && userRole != null) {
+			if (!metroMalaga.Model.FTPFileOwnershipDAO.canModifyFile(remoteFrom, currentUsername, userRole, false)) {
+				JOptionPane.showMessageDialog(null,
+						"No tienes permisos para renombrar este archivo.\nSolo puedes renombrar tus propios archivos.",
+						"Permiso Denegado", JOptionPane.WARNING_MESSAGE);
+				return false;
+			}
+		}
+
 		try {
-			return ftpClient.rename(remoteFrom, remoteTo);
+			boolean success = ftpClient.rename(remoteFrom, remoteTo);
+
+			// Update ownership database if rename was successful
+			if (success) {
+				metroMalaga.Model.FTPFileOwnershipDAO.renameFile(remoteFrom, remoteTo);
+			}
+
+			return success;
 		} catch (IOException e) {
 			showError("Could not rename file", e);
 			return false;
 		}
 	}
 
+	/**
+	 * Closes the FTP connection and logs out.
+	 */
 	public void close() {
 		if (ftpClient != null && ftpClient.isConnected()) {
 			try {
@@ -233,6 +363,12 @@ public class ServiceFTP {
 		}
 	}
 
+	/**
+	 * Calculates the total size of a directory recursively.
+	 * 
+	 * @param directoryName The name of the directory to calculate.
+	 * @return The total size in bytes.
+	 */
 	public synchronized long calculateDirectorySize(String directoryName) {
 		long totalSize = 0;
 		String originalDirectory = getCurrentDirectory();
@@ -289,14 +425,20 @@ public class ServiceFTP {
 	 * otherwise connect as client to the server
 	 */
 	private void initializeNotificationSystem() {
-		if (NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
-			// We are on the notification server host, start the server
-			NotificationServer.getInstance().start();
-			System.out.println("Running as NOTIFICATION SERVER (FTP server at " + ftpServerHost + ")");
-		} else {
-			// We are a remote client, will connect to notification server when table model
-			// is set
-			System.out.println("Running as NOTIFICATION CLIENT (will connect to server at " + ftpServerHost + ")");
+		try {
+			if (NOTIFICATION_SERVER_HOST.equals(ftpServerHost)) {
+				// We are on the notification server host, start the server
+				NotificationServer.getInstance().start();
+				System.out.println("Running as NOTIFICATION SERVER (FTP server at " + ftpServerHost + ")");
+			} else {
+				// We are a remote client, will connect to notification server when table model
+				// is set
+				System.out.println("Running as NOTIFICATION CLIENT (will connect to server at " + ftpServerHost + ")");
+			}
+		} catch (Exception e) {
+			// If notification system fails, log it but don't prevent FTP from working
+			System.err.println("Warning: Notification system initialization failed: " + e.getMessage());
+			System.out.println("FTP will work normally, but without real-time synchronization");
 		}
 	}
 
@@ -309,9 +451,18 @@ public class ServiceFTP {
 	 */
 	public void setTableModel(FTPTableModel tableModel) {
 		if (tableModel != null) {
-			// Only create notification controller (client) if we're NOT running as server
-			this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
-			notificationsInitialized = true;
+			try {
+				// Try to create notification controller (client)
+				this.notificationController = new NotificationController(tableModel, this, ftpServerHost);
+				notificationsInitialized = true;
+				System.out.println("Notification system initialized successfully");
+			} catch (Exception e) {
+				// If notification system fails to initialize, log it but DON'T block FTP access
+				System.err.println("Warning: Notification system could not be initialized: " + e.getMessage());
+				System.out.println("FTP will work normally, but without real-time updates from other clients");
+				this.notificationController = null;
+				notificationsInitialized = false;
+			}
 		}
 	}
 
@@ -355,4 +506,3 @@ public class ServiceFTP {
 		this.notificationController = controller;
 	}
 }
-

@@ -22,7 +22,7 @@ public class ServiceFTPTest {
 	@BeforeEach
 	public void setUp() throws IOException {
 
-		service = new ServiceFTP(TEST_USER_ROLE);
+		service = new ServiceFTP(null, null);
 
 		tempFile = File.createTempFile("test_upload", ".txt");
 		try (FileWriter writer = new FileWriter(tempFile)) {

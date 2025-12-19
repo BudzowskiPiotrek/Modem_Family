@@ -9,46 +9,58 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controller class for the CRUD interface.
+ * Handles database interactions, table loading, and form actions.
+ */
 public class CrudController {
-
-    private static final String URL = "jdbc:mysql://192.168.1.35/centimetromalaga";
-    private static final String USER = "remoto";
-    private static final String PASS = "proyecto";
 
     private CrudFrontend vista;
     private Connection conn;
     private MenuSelect menuSelect;
+    private ConnecionSQL conexionSQL;
 
     private String tablaActual;
-    private List<String> nombresColumnas; 
+    private List<String> nombresColumnas;
     private String idRegistroEdicion = null;
 
+    /**
+     * Constructor for CrudController.
+     * 
+     * @param vista      The frontend view.
+     * @param menuSelect The menu controller for navigation.
+     */
     public CrudController(CrudFrontend vista, MenuSelect menuSelect) {
         this.vista = vista;
         this.menuSelect = menuSelect;
         this.nombresColumnas = new ArrayList<>();
+        this.conexionSQL = new ConnecionSQL();
 
         conectarBD();
         inicializarEventos();
         cargarListaTablas();
     }
 
+    /**
+     * Establishes connection to the database.
+     */
     private void conectarBD() {
-        try {
-            conn = DriverManager.getConnection(URL, USER, PASS);
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(vista, Language.get(171) + e.getMessage());
+        conn = conexionSQL.connect();
+        if (conn == null) {
             System.exit(1);
         }
     }
 
+    /**
+     * Initializes event listeners for the view components.
+     */
     private void inicializarEventos() {
         vista.getListaTablas().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 String seleccion = vista.getTablaSeleccionada();
                 if (seleccion != null) {
                     tablaActual = seleccion;
-                    idRegistroEdicion = null; 
+                    idRegistroEdicion = null;
                     vista.limpiarCamposFormulario();
                     cargarDatosTabla();
                 }
@@ -89,13 +101,16 @@ public class CrudController {
         });
     }
 
+    /**
+     * Loads the list of available tables from the database.
+     */
     private void cargarListaTablas() {
         try {
             String catalogo = conn.getCatalog();
 
             if (catalogo == null) {
                 JOptionPane.showMessageDialog(vista,
-                        Language.get(172), 
+                        Language.get(172),
                         Language.get(173),
                         JOptionPane.ERROR_MESSAGE);
                 return;
@@ -116,13 +131,16 @@ public class CrudController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(vista, 
+            JOptionPane.showMessageDialog(vista,
                     Language.get(174) + e.getMessage(),
-                    Language.get(175), 
+                    Language.get(175),
                     JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    /**
+     * Loads data from the currently selected table into the view.
+     */
     private void cargarDatosTabla() {
         if (tablaActual == null)
             return;
@@ -147,7 +165,19 @@ public class CrudController {
             while (rs.next()) {
                 Object[] fila = new Object[colCount];
                 for (int i = 1; i <= colCount; i++) {
-                    fila[i - 1] = rs.getObject(i);
+                    // Hide passwords in the usuarios table
+                    if (tablaActual.equalsIgnoreCase("usuarios") &&
+                            nombresColumnas.get(i - 1).equalsIgnoreCase("password")) {
+                        fila[i - 1] = "********";
+                    } else {
+                        Object value = rs.getObject(i);
+                        // Convert Boolean to int for MySQL compatibility
+                        if (value instanceof Boolean) {
+                            fila[i - 1] = ((Boolean) value) ? 1 : 0;
+                        } else {
+                            fila[i - 1] = value;
+                        }
+                    }
                 }
                 datos.add(fila);
             }
@@ -161,19 +191,43 @@ public class CrudController {
         }
     }
 
+    /**
+     * Handles the save action (create or update record).
+     */
     private void accionGuardar() {
         if (tablaActual == null)
             return;
 
         if (!canModifyTable(tablaActual)) {
-            JOptionPane.showMessageDialog(vista, 
-                    Language.get(177), 
+            JOptionPane.showMessageDialog(vista,
+                    Language.get(177),
                     Language.get(178),
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         List<String> valores = vista.getDatosFormulario();
+
+        // Hash passwords before saving if this is the usuarios table
+        if (tablaActual.equalsIgnoreCase("usuarios")) {
+            int passwordIndex = nombresColumnas.indexOf("password");
+            if (passwordIndex != -1 && passwordIndex < valores.size()) {
+                String plainPassword = valores.get(passwordIndex);
+                // Only hash if it's not already a BCrypt hash and not the placeholder
+                if (!plainPassword.equals("********") && !PasswordUtil.isBCryptHash(plainPassword)) {
+                    // Validate password: at least 8 characters, only letters and numbers
+                    if (plainPassword.length() < 8 || !plainPassword.matches("[a-zA-Z0-9]+")) {
+                        JOptionPane.showMessageDialog(vista,
+                                "The password must be at least 8 characters long and contain only letters and numbers.",
+                                Language.get(178),
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    String hashedPassword = PasswordUtil.hashPassword(plainPassword);
+                    valores.set(passwordIndex, hashedPassword);
+                }
+            }
+        }
 
         try {
             PreparedStatement pst;
@@ -193,19 +247,36 @@ public class CrudController {
             } else {
                 String nombreColID = nombresColumnas.get(0);
 
+                // Build UPDATE statement, excluding password if it's the placeholder
                 StringBuilder sql = new StringBuilder("UPDATE " + tablaActual + " SET ");
+                List<String> valoresParaUpdate = new ArrayList<>();
+
+                boolean first = true;
                 for (int i = 1; i < nombresColumnas.size(); i++) {
-                    sql.append(nombresColumnas.get(i)).append("=?");
-                    if (i < nombresColumnas.size() - 1)
-                        sql.append(", ");
+                    String nombreCol = nombresColumnas.get(i);
+                    String valor = valores.get(i);
+
+                    // Skip password field if it's the placeholder (not changed)
+                    boolean isPasswordPlaceholder = tablaActual.equalsIgnoreCase("usuarios") &&
+                            nombreCol.equalsIgnoreCase("password") &&
+                            valor.equals("********");
+
+                    if (!isPasswordPlaceholder) {
+                        if (!first) {
+                            sql.append(", ");
+                        }
+                        sql.append(nombreCol).append("=?");
+                        valoresParaUpdate.add(valor);
+                        first = false;
+                    }
                 }
                 sql.append(" WHERE ").append(nombreColID).append("=?");
 
                 pst = conn.prepareStatement(sql.toString());
 
                 int paramIndex = 1;
-                for (int i = 1; i < valores.size(); i++) {
-                    pst.setString(paramIndex++, valores.get(i));
+                for (String valor : valoresParaUpdate) {
+                    pst.setString(paramIndex++, valor);
                 }
                 pst.setString(paramIndex, idRegistroEdicion);
             }
@@ -222,10 +293,15 @@ public class CrudController {
         }
     }
 
+    /**
+     * Handles the delete action for a record.
+     * 
+     * @param fila The row index of the record to delete.
+     */
     private void accionEliminar(int fila) {
         if (!canModifyTable(tablaActual)) {
-            JOptionPane.showMessageDialog(vista, 
-                    Language.get(181), 
+            JOptionPane.showMessageDialog(vista,
+                    Language.get(181),
                     Language.get(178),
                     JOptionPane.WARNING_MESSAGE);
             return;
@@ -234,9 +310,9 @@ public class CrudController {
         Object id = vista.getTableValueAt(fila, 0);
         String nombreColID = nombresColumnas.get(0);
 
-        int confirm = JOptionPane.showConfirmDialog(vista, 
+        int confirm = JOptionPane.showConfirmDialog(vista,
                 Language.get(182) + id + Language.get(183));
-        
+
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 String sql = "DELETE FROM " + tablaActual + " WHERE " + nombreColID + " = ?";
@@ -250,6 +326,12 @@ public class CrudController {
         }
     }
 
+    /**
+     * Checks if the current user has permission to view the specified table.
+     * 
+     * @param tableName The name of the table.
+     * @return true if allowed, false otherwise.
+     */
     private boolean canViewTable(String tableName) {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
             return false;
@@ -270,6 +352,12 @@ public class CrudController {
         return false;
     }
 
+    /**
+     * Checks if the current user has permission to modify the specified table.
+     * 
+     * @param tableName The name of the table.
+     * @return true if allowed, false otherwise.
+     */
     private boolean canModifyTable(String tableName) {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
             return false;
@@ -286,6 +374,11 @@ public class CrudController {
         return false;
     }
 
+    /**
+     * Gets the permission string of the current user.
+     * 
+     * @return The permission string, or empty string if user/role is null.
+     */
     public String getUserPermission() {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
             return "";

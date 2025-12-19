@@ -22,6 +22,14 @@ public class FTPbtnNewFolder implements ActionListener {
 	private final Usuario user;
 	private final Common cn = new Common();
 
+	/**
+	 * Constructor for FTPbtnNewFolder class.
+	 * 
+	 * @param button  The JButton component.
+	 * @param service The FTP service instance.
+	 * @param model   The FTP table model.
+	 * @param user    The current user.
+	 */
 	public FTPbtnNewFolder(JButton button, ServiceFTP service, FTPTableModel model, Usuario user) {
 		this.user = user;
 		this.button = button;
@@ -30,6 +38,11 @@ public class FTPbtnNewFolder implements ActionListener {
 		this.button.addActionListener(this);
 	}
 
+	/**
+	 * Handles the action to create a new folder.
+	 * 
+	 * @param e The ActionEvent.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 

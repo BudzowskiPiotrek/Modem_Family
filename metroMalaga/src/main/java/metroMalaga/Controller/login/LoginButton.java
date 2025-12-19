@@ -7,6 +7,10 @@ import java.awt.event.MouseListener;
 import javax.swing.JButton;
 import javax.swing.border.MatteBorder;
 
+/**
+ * Handles mouse interactions for generic buttons on the login screen,
+ * providing hover effects.
+ */
 public class LoginButton implements MouseListener {
 
     private final JButton button;
@@ -17,10 +21,21 @@ public class LoginButton implements MouseListener {
     private final MatteBorder defaultBorder;
     private final MatteBorder hoverBorder;
 
-    public LoginButton(JButton button, 
-                             Color defaultBackground, Color defaultForeground,
-                             Color hoverBackground, Color hoverForeground,
-                             MatteBorder defaultBorder, MatteBorder hoverBorder) {
+    /**
+     * Constructor with custom borders.
+     * 
+     * @param button            The button to handle.
+     * @param defaultBackground Default background color.
+     * @param defaultForeground Default foreground color.
+     * @param hoverBackground   Hover background color.
+     * @param hoverForeground   Hover foreground color.
+     * @param defaultBorder     Default button border.
+     * @param hoverBorder       Hover button border.
+     */
+    public LoginButton(JButton button,
+            Color defaultBackground, Color defaultForeground,
+            Color hoverBackground, Color hoverForeground,
+            MatteBorder defaultBorder, MatteBorder hoverBorder) {
         this.button = button;
         this.defaultBackground = defaultBackground;
         this.defaultForeground = defaultForeground;
@@ -30,11 +45,20 @@ public class LoginButton implements MouseListener {
         this.hoverBorder = hoverBorder;
     }
 
-    public LoginButton(JButton button, 
-                             Color defaultBackground, Color defaultForeground,
-                             Color hoverBackground, Color hoverForeground) {
-        this(button, defaultBackground, defaultForeground, 
-             hoverBackground, hoverForeground, null, null);
+    /**
+     * Constructor without custom borders.
+     * 
+     * @param button            The button to handle.
+     * @param defaultBackground Default background color.
+     * @param defaultForeground Default foreground color.
+     * @param hoverBackground   Hover background color.
+     * @param hoverForeground   Hover foreground color.
+     */
+    public LoginButton(JButton button,
+            Color defaultBackground, Color defaultForeground,
+            Color hoverBackground, Color hoverForeground) {
+        this(button, defaultBackground, defaultForeground,
+                hoverBackground, hoverForeground, null, null);
     }
 
     @Override
@@ -53,7 +77,7 @@ public class LoginButton implements MouseListener {
     public void mouseEntered(MouseEvent e) {
         button.setBackground(hoverBackground);
         button.setForeground(hoverForeground);
-        
+
         if (hoverBorder != null) {
             button.setBorder(hoverBorder);
         }
@@ -63,7 +87,7 @@ public class LoginButton implements MouseListener {
     public void mouseExited(MouseEvent e) {
         button.setBackground(defaultBackground);
         button.setForeground(defaultForeground);
-        
+
         if (defaultBorder != null) {
             button.setBorder(defaultBorder);
         }

@@ -16,6 +16,12 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private NotificationServer server;
 
+    /**
+     * Constructor for ClientHandler.
+     * 
+     * @param socket The client socket.
+     * @param server The main server instance.
+     */
     public ClientHandler(Socket socket, NotificationServer server) {
         this.socket = socket;
         this.server = server;
@@ -44,6 +50,12 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Sends a message to the connected client.
+     * 
+     * @param message The message to send.
+     * @return true if sent successfully, false otherwise.
+     */
     public boolean sendMessage(String message) {
         if (out != null && !socket.isClosed()) {
             try {
@@ -56,6 +68,9 @@ public class ClientHandler implements Runnable {
         return false;
     }
 
+    /**
+     * Closes the client connection and resources.
+     */
     public void close() {
         try {
             if (in != null) {

@@ -13,6 +13,12 @@ import metroMalaga.Controller.smtp.tasks.LoadContentTask;
 import metroMalaga.Model.EmailModel;
 import metroMalaga.Model.Language;
 
+/**
+ * Mouse listener for the emails table.
+ * Handles selection events to display email content.
+ * Note: Should consider consolidating with MouseClickListener if they serve
+ * redundant purposes.
+ */
 public class EmailTableMouseListener extends MouseAdapter {
 
 	private final HandleSMTP backend;
@@ -22,6 +28,16 @@ public class EmailTableMouseListener extends MouseAdapter {
 	private final JTextArea txtViewer;
 	private final JButton btnDownloadEmail;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param backend          The backend service.
+	 * @param controller       The main controller.
+	 * @param emailTable       The table displaying emails.
+	 * @param tableModel       The table model.
+	 * @param txtViewer        The text area for viewing email content.
+	 * @param btnDownloadEmail The button for downloading email.
+	 */
 	public EmailTableMouseListener(HandleSMTP backend, ButtonHandleSMTP controller, JTable emailTable,
 			DefaultTableModel tableModel, JTextArea txtViewer, JButton btnDownloadEmail) {
 		this.backend = backend;
@@ -55,6 +71,11 @@ public class EmailTableMouseListener extends MouseAdapter {
 		}
 	}
 
+	/**
+	 * Formats and displays the email content.
+	 * 
+	 * @param mail The email to display.
+	 */
 	private void displayContent(EmailModel mail) {
 		String attachmentsInfo = "";
 		if (mail.hasAttachments()) {

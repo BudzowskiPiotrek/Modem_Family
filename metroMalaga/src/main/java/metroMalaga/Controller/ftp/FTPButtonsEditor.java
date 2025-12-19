@@ -30,6 +30,13 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 	private Common cn;
 	private Usuario user;
 
+	/**
+	 * Constructor for FTPButtonsEditor.
+	 * 
+	 * @param service The FTP service instance.
+	 * @param model   The FTP table model.
+	 * @param user    The current user.
+	 */
 	public FTPButtonsEditor(ServiceFTP service, FTPTableModel model, Usuario user) {
 		this.cn = new Common();
 		this.user = user;
@@ -49,6 +56,30 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 		this.currentFile = (FTPFile) value;
+
+		// Check if user can modify/delete this file
+		String filename = currentFile.getName();
+		boolean canDelete = metroMalaga.Model.FTPFileOwnershipDAO.canModifyFile(
+				filename,
+				user.getUsernameApp(),
+				user.getRol(),
+				true // checking delete permission
+		);
+
+		boolean canModify = metroMalaga.Model.FTPFileOwnershipDAO.canModifyFile(
+				filename,
+				user.getUsernameApp(),
+				user.getRol(),
+				false // checking modify/rename permission
+		);
+
+		boolean canDownload = metroMalaga.Model.FTPFileOwnershipDAO.canDownloadFile(user.getRol());
+
+		// Show/hide buttons based on permissions
+		panel.deleteButton.setVisible(canDelete);
+		panel.renameButton.setVisible(canModify);
+		panel.downloadButton.setVisible(canDownload);
+
 		return panel;
 	}
 
@@ -67,6 +98,11 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 		return false;
 	}
 
+	/**
+	 * Handles button actions (Download, Delete, Rename).
+	 * 
+	 * @param e The ActionEvent.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		fireEditingStopped();
@@ -102,29 +138,29 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 				boolean success = service.downloadFile(file.getName(), localFilePath);
 
 				if (success) {
-					JOptionPane.showMessageDialog(null, 
-						Language.get(107) + localFilePath);
+					JOptionPane.showMessageDialog(null,
+							Language.get(107) + localFilePath);
 					cn.registerLog(user.getUsernameApp(), "File downloaded:" + localFilePath);
 				} else {
-					JOptionPane.showMessageDialog(null, 
-						Language.get(108), 
-						Language.get(109),
-						JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null,
+							Language.get(108),
+							Language.get(109),
+							JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, 
-					Language.get(110) + e.getMessage(), 
-					Language.get(109),
-					JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null,
+						Language.get(110) + e.getMessage(),
+						Language.get(109),
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
 	private void handleDelete(FTPFile file) {
-		int confirm = JOptionPane.showConfirmDialog(null, 
-			Language.get(111) + file.getName() + Language.get(112),
-			Language.get(113), 
-			JOptionPane.YES_NO_OPTION);
+		int confirm = JOptionPane.showConfirmDialog(null,
+				Language.get(111) + file.getName() + Language.get(112),
+				Language.get(113),
+				JOptionPane.YES_NO_OPTION);
 
 		if (confirm == JOptionPane.YES_OPTION) {
 			try {
@@ -138,24 +174,24 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 					updateTable();
 					cn.registerLog(user.getUsernameApp(), "File delete:" + file.getName());
 				} else {
-					JOptionPane.showMessageDialog(null, 
-						Language.get(115), 
-						Language.get(116),
-						JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null,
+							Language.get(115),
+							Language.get(116),
+							JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, 
-					Language.get(117) + e.getMessage(), 
-					Language.get(116),
-					JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null,
+						Language.get(117) + e.getMessage(),
+						Language.get(116),
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
 	private void handleRename(FTPFile file) {
-		String newName = JOptionPane.showInputDialog(null, 
-			Language.get(118) + file.getName() + Language.get(119));
-		
+		String newName = JOptionPane.showInputDialog(null,
+				Language.get(118) + file.getName() + Language.get(119));
+
 		if (newName != null && !newName.trim().isEmpty()) {
 			try {
 				boolean success = service.renameFile(file.getName(), newName.trim());
@@ -169,16 +205,16 @@ public class FTPButtonsEditor extends AbstractCellEditor implements TableCellEdi
 					cn.registerLog(user.getUsernameApp(),
 							"File renamed :" + file.getName() + " for: " + newName.trim());
 				} else {
-					JOptionPane.showMessageDialog(null, 
-						Language.get(121), 
-						Language.get(122),
-						JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null,
+							Language.get(121),
+							Language.get(122),
+							JOptionPane.ERROR_MESSAGE);
 				}
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, 
-					Language.get(123) + e.getMessage(), 
-					Language.get(122),
-					JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null,
+						Language.get(123) + e.getMessage(),
+						Language.get(122),
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}

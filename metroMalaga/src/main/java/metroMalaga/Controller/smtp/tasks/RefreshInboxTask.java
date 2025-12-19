@@ -8,6 +8,10 @@ import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.EmailModel;
 import metroMalaga.Model.Language;
 
+/**
+ * Task for refreshing the email inbox.
+ * Fetches new emails from the server and updates the UI table.
+ */
 public class RefreshInboxTask implements Runnable {
 
 	private final HandleSMTP backend;
@@ -21,6 +25,18 @@ public class RefreshInboxTask implements Runnable {
 
 	private static volatile boolean isRefreshing = false;
 
+	/**
+	 * Constructor for RefreshInboxTask.
+	 * 
+	 * @param backend          The backend service.
+	 * @param isAuto           Whether this is an auto-refresh.
+	 * @param btnRefresh       The refresh button.
+	 * @param txtViewer        The text viewer.
+	 * @param emailTable       The email table.
+	 * @param tableModel       The table model.
+	 * @param currentEmailList The current list of emails.
+	 * @param controller       The main controller.
+	 */
 	public RefreshInboxTask(HandleSMTP backend, boolean isAuto, JButton btnRefresh, JTextArea txtViewer,
 			JTable emailTable, DefaultTableModel tableModel, List<EmailModel> currentEmailList,
 			ButtonHandleSMTP controller) {

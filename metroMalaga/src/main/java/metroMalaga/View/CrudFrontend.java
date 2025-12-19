@@ -10,16 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
+import metroMalaga.Controller.Common;
 
+/**
+ * Frontend panel for CRUD operations, handling UI components and user
+ * interactions.
+ */
 public class CrudFrontend extends JPanel {
 
     private Usuario user;
 
-    private final Color COLOR_FONDO = Color.WHITE;
-    private final Color COLOR_BORDE = new Color(220, 220, 220);
-    private final Color COLOR_PRIMARIO = new Color(66, 139, 202);
-    private final Color COLOR_PELIGRO = new Color(220, 53, 69);
-    private final Color COLOR_TEXTO = new Color(50, 50, 50);
     private final Font FUENTE_PRINCIPAL = new Font("Segoe UI", Font.PLAIN, 14);
     private final Font FUENTE_TITULO = new Font("Segoe UI", Font.BOLD, 14);
 
@@ -30,6 +30,7 @@ public class CrudFrontend extends JPanel {
     private DefaultTableModel modeloTabla;
 
     private JPanel panelFormulario;
+    private JPanel panelBotonesInferior;
     private ArrayList<JTextField> camposFormulario;
 
     private JButton btnGuardar;
@@ -37,39 +38,203 @@ public class CrudFrontend extends JPanel {
     private JButton btnCancelarEdicion;
     private JLabel lblEstadoFormulario;
 
-    private JPanel panelSur; // Panel inferior con formulario
+    private JPanel panelSur;
 
     private JScrollPane scrollTablasPanel;
     private JScrollPane scrollTablaPanel;
 
     private AccionFilaListener accionFilaListener;
 
-    private String tablaActual; // Para verificar permisos según la tabla actual
+    private String tablaActual;
 
+    /**
+     * Constructor for CrudFrontend.
+     * 
+     * @param user The logged-in user.
+     */
     public CrudFrontend(Usuario user) {
         this.user = user;
         setLayout(new BorderLayout(10, 10));
-        setBackground(COLOR_FONDO);
 
         camposFormulario = new ArrayList<>();
-
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
         crearMenuLateral();
         crearPanelCentral();
         crearPanelInferior();
+
+        applyTheme();
     }
 
+    /**
+     * Applies the current application theme to the CRUD panel components.
+     */
+    public void applyTheme() {
+        Color bgMain = Common.getBackground();
+        Color bgPanel = Common.getPanelBackground();
+        Color txt = Common.getText();
+        Color border = Common.getBorder();
+        Color fieldBg = Common.getFieldBackground();
+        Color accent = Common.getAccent();
+        Color danger = Common.getDanger();
+
+        setBackground(bgMain);
+
+        // Lista de tablas lateral
+        if (listaTablas != null) {
+            listaTablas.setBackground(fieldBg);
+            listaTablas.setForeground(txt);
+            listaTablas.setSelectionBackground(Common.isDarkMode ? new Color(200, 0, 0) : new Color(230, 240, 255));
+            listaTablas.setSelectionForeground(Common.isDarkMode ? Color.WHITE : Color.BLACK);
+        }
+
+        if (scrollTablasPanel != null) {
+            scrollTablasPanel.setBorder(BorderFactory.createTitledBorder(
+                    new LineBorder(border), Language.get(71),
+                    javax.swing.border.TitledBorder.LEFT,
+                    javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, txt));
+            scrollTablasPanel.getViewport().setBackground(fieldBg);
+            scrollTablasPanel.setBackground(fieldBg);
+        }
+
+        // Tabla central - CELDAS NORMALES
+        if (tablaDatos != null) {
+            tablaDatos.setBackground(fieldBg);
+            tablaDatos.setForeground(txt);
+            tablaDatos.setGridColor(Common.isDarkMode ? new Color(60, 60, 60) : border);
+            tablaDatos.setSelectionBackground(Common.isDarkMode ? new Color(200, 0, 0) : new Color(230, 240, 255));
+            tablaDatos.setSelectionForeground(Common.isDarkMode ? Color.WHITE : Color.BLACK);
+
+            // 👇 RENDERER PARA CELDAS NORMALES
+            tablaDatos.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value,
+                        boolean isSelected, boolean hasFocus, int row, int column) {
+                    Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                    if (!isSelected) {
+                        c.setBackground(Common.getFieldBackground());
+                        c.setForeground(Common.getText());
+                    } else {
+                        c.setBackground(Common.isDarkMode ? new Color(200, 0, 0) : new Color(230, 240, 255));
+                        c.setForeground(Common.isDarkMode ? Color.WHITE : Color.BLACK);
+                    }
+
+                    ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                    return c;
+                }
+            });
+
+            // Header de la tabla
+            JTableHeader header = tablaDatos.getTableHeader();
+            header.setBackground(Common.isDarkMode ? new Color(40, 40, 40) : new Color(245, 245, 245));
+            header.setForeground(txt);
+
+            header.setDefaultRenderer(new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                        boolean hasFocus, int row, int column) {
+                    JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                            column);
+                    l.setBackground(Common.isDarkMode ? new Color(40, 40, 40) : new Color(245, 245, 245));
+                    l.setFont(FUENTE_TITULO);
+                    l.setForeground(Common.getText());
+                    l.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Common.getBorder()));
+                    l.setHorizontalAlignment(SwingConstants.CENTER);
+                    return l;
+                }
+            });
+        }
+
+        if (scrollTablaPanel != null) {
+            scrollTablaPanel.getViewport().setBackground(fieldBg);
+            scrollTablaPanel.setBackground(fieldBg);
+            scrollTablaPanel.setBorder(BorderFactory.createTitledBorder(
+                    new LineBorder(border), Language.get(72),
+                    javax.swing.border.TitledBorder.LEFT,
+                    javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, txt));
+        }
+
+        // Panel inferior
+        if (panelSur != null) {
+            panelSur.setBackground(bgPanel);
+            panelSur.setBorder(new CompoundBorder(
+                    new LineBorder(border),
+                    new EmptyBorder(15, 15, 15, 15)));
+        }
+
+        if (lblEstadoFormulario != null) {
+            lblEstadoFormulario.setForeground(txt);
+        }
+
+        if (panelFormulario != null) {
+            panelFormulario.setBackground(bgPanel);
+            for (Component comp : panelFormulario.getComponents()) {
+                if (comp instanceof JPanel) {
+                    JPanel campoPanel = (JPanel) comp;
+                    campoPanel.setBackground(bgPanel);
+                    for (Component subComp : campoPanel.getComponents()) {
+                        if (subComp instanceof JLabel) {
+                            ((JLabel) subComp).setForeground(txt);
+                        } else if (subComp instanceof JTextField) {
+                            JTextField field = (JTextField) subComp;
+                            field.setBackground(fieldBg);
+                            field.setForeground(txt);
+                            field.setCaretColor(txt);
+                            field.setBorder(new CompoundBorder(
+                                    new LineBorder(border),
+                                    new EmptyBorder(5, 8, 5, 8)));
+                        }
+                    }
+                }
+            }
+        }
+
+        if (panelBotonesInferior != null) {
+            panelBotonesInferior.setBackground(bgPanel);
+        }
+
+        if (btnGuardar != null) {
+            btnGuardar.setBackground(bgPanel);
+            btnGuardar.setForeground(accent);
+            btnGuardar.setBorder(new CompoundBorder(
+                    new LineBorder(accent, 1),
+                    new EmptyBorder(8, 20, 8, 20)));
+        }
+
+        if (btnVolver != null) {
+            btnVolver.setBackground(bgPanel);
+            btnVolver.setForeground(txt);
+            btnVolver.setBorder(new CompoundBorder(
+                    new LineBorder(border, 1),
+                    new EmptyBorder(8, 20, 8, 20)));
+        }
+
+        if (btnCancelarEdicion != null) {
+            btnCancelarEdicion.setBackground(danger);
+            btnCancelarEdicion.setForeground(Color.WHITE);
+            btnCancelarEdicion.setBorder(new CompoundBorder(
+                    new LineBorder(danger, 1),
+                    new EmptyBorder(8, 20, 8, 20)));
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Updates all texts and labels based on the current language.
+     */
     public void updateAllTexts() {
         scrollTablasPanel.setBorder(BorderFactory.createTitledBorder(
-                new LineBorder(COLOR_BORDE), Language.get(71),
+                new LineBorder(Common.getBorder()), Language.get(71),
                 javax.swing.border.TitledBorder.LEFT,
-                javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
+                javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, Common.getText()));
 
         scrollTablaPanel.setBorder(BorderFactory.createTitledBorder(
-                new LineBorder(COLOR_BORDE), Language.get(72),
+                new LineBorder(Common.getBorder()), Language.get(72),
                 javax.swing.border.TitledBorder.LEFT,
-                javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
+                javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, Common.getText()));
 
         if (lblEstadoFormulario.getText().contains("Editar") || lblEstadoFormulario.getText().contains("Edit")) {
             lblEstadoFormulario.setText(Language.get(73));
@@ -111,10 +276,14 @@ public class CrudFrontend extends JPanel {
             tablaDatos.getColumnModel().getColumn(accionesCol).setPreferredWidth(150);
         }
 
-        revalidate();
-        repaint();
+        applyTheme();
     }
 
+    /**
+     * Gets updated column names including the actions column.
+     * 
+     * @return Array of column names.
+     */
     private Object[] getUpdatedColumnNames() {
         Object[] currentColumns = new Object[modeloTabla.getColumnCount()];
         for (int i = 0; i < modeloTabla.getColumnCount() - 1; i++) {
@@ -124,6 +293,9 @@ public class CrudFrontend extends JPanel {
         return currentColumns;
     }
 
+    /**
+     * Creates the side menu for table selection.
+     */
     private void crearMenuLateral() {
         modeloListaTablas = new DefaultListModel<>();
 
@@ -131,21 +303,16 @@ public class CrudFrontend extends JPanel {
         listaTablas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         listaTablas.setFont(FUENTE_PRINCIPAL);
         listaTablas.setFixedCellHeight(30);
-        listaTablas.setBackground(COLOR_FONDO);
-        listaTablas.setSelectionBackground(new Color(230, 240, 255));
-        listaTablas.setSelectionForeground(Color.BLACK);
 
         scrollTablasPanel = new JScrollPane(listaTablas);
         scrollTablasPanel.setPreferredSize(new Dimension(200, 0));
-        scrollTablasPanel.setBorder(BorderFactory.createTitledBorder(
-                new LineBorder(COLOR_BORDE), Language.get(71),
-                javax.swing.border.TitledBorder.LEFT,
-                javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
-        scrollTablasPanel.getViewport().setBackground(COLOR_FONDO);
 
         add(scrollTablasPanel, BorderLayout.WEST);
     }
 
+    /**
+     * Creates the central panel for data display.
+     */
     private void crearPanelCentral() {
         modeloTabla = new DefaultTableModel() {
             @Override
@@ -158,124 +325,109 @@ public class CrudFrontend extends JPanel {
         tablaDatos.setRowHeight(35);
         tablaDatos.setFont(FUENTE_PRINCIPAL);
         tablaDatos.setShowVerticalLines(false);
-        tablaDatos.setGridColor(COLOR_BORDE);
-        tablaDatos.setSelectionBackground(new Color(230, 240, 255));
-        tablaDatos.setSelectionForeground(Color.BLACK);
-
-        JTableHeader header = tablaDatos.getTableHeader();
-        header.setDefaultRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-                    boolean hasFocus, int row, int column) {
-                JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
-                        column);
-                l.setBackground(new Color(245, 245, 245));
-                l.setFont(FUENTE_TITULO);
-                l.setForeground(Color.DARK_GRAY);
-                l.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, COLOR_BORDE));
-                l.setHorizontalAlignment(SwingConstants.CENTER);
-                return l;
-            }
-        });
-        header.setPreferredSize(new Dimension(0, 35));
 
         scrollTablaPanel = new JScrollPane(tablaDatos);
-        scrollTablaPanel.getViewport().setBackground(COLOR_FONDO);
-        scrollTablaPanel.setBorder(BorderFactory.createTitledBorder(
-                new LineBorder(COLOR_BORDE), Language.get(72),
-                javax.swing.border.TitledBorder.LEFT,
-                javax.swing.border.TitledBorder.TOP, FUENTE_TITULO, COLOR_TEXTO));
 
         add(scrollTablaPanel, BorderLayout.CENTER);
     }
 
+    /**
+     * Creates the bottom panel for form and buttons.
+     */
     private void crearPanelInferior() {
         panelSur = new JPanel(new BorderLayout());
-        panelSur.setBackground(COLOR_FONDO);
-        panelSur.setBorder(new CompoundBorder(
-                new LineBorder(COLOR_BORDE),
-                new EmptyBorder(15, 15, 15, 15)));
 
         lblEstadoFormulario = new JLabel(Language.get(73));
         lblEstadoFormulario.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblEstadoFormulario.setForeground(COLOR_TEXTO);
         lblEstadoFormulario.setBorder(new EmptyBorder(0, 0, 15, 0));
         panelSur.add(lblEstadoFormulario, BorderLayout.NORTH);
 
         panelFormulario = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        panelFormulario.setBackground(COLOR_FONDO);
         panelFormulario.setBorder(null);
 
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panelBotones.setBackground(COLOR_FONDO);
-        panelBotones.setBorder(new EmptyBorder(15, 0, 0, 0));
+        panelBotonesInferior = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelBotonesInferior.setBorder(new EmptyBorder(15, 0, 0, 0));
 
         btnCancelarEdicion = new JButton(Language.get(74));
-        estilarBotonSolido(btnCancelarEdicion, COLOR_PELIGRO, Color.WHITE);
+        btnCancelarEdicion.setFont(FUENTE_TITULO);
+        btnCancelarEdicion.setFocusPainted(false);
+        btnCancelarEdicion.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnCancelarEdicion.setVisible(true);
 
         btnGuardar = new JButton(Language.get(75));
-        estilarBotonOutline(btnGuardar, COLOR_PRIMARIO);
+        btnGuardar.setFont(FUENTE_TITULO);
+        btnGuardar.setFocusPainted(false);
+        btnGuardar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btnVolver = new JButton(Language.get(76));
-        estilarBotonOutline(btnVolver, Color.GRAY);
+        btnVolver.setFont(FUENTE_TITULO);
+        btnVolver.setFocusPainted(false);
+        btnVolver.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        panelBotones.add(btnCancelarEdicion);
-        panelBotones.add(btnVolver);
-        panelBotones.add(btnGuardar);
+        panelBotonesInferior.add(btnCancelarEdicion);
+        panelBotonesInferior.add(btnVolver);
+        panelBotonesInferior.add(btnGuardar);
+
         panelSur.add(panelFormulario, BorderLayout.CENTER);
-        panelSur.add(panelBotones, BorderLayout.SOUTH);
+        panelSur.add(panelBotonesInferior, BorderLayout.SOUTH);
 
         panelSur.setPreferredSize(new Dimension(0, 250));
 
         add(panelSur, BorderLayout.SOUTH);
 
-        // Ocultar panel inferior si el usuario no tiene permisos de modificación
         updatePanelInferiorVisibility();
     }
 
-    private void estilarBotonSolido(JButton btn, Color bg, Color fg) {
-        btn.setFont(FUENTE_TITULO);
-        btn.setBackground(bg);
-        btn.setForeground(fg);
-        btn.setFocusPainted(false);
-        btn.setBorder(new CompoundBorder(
-                new LineBorder(bg, 1),
-                new EmptyBorder(8, 20, 8, 20)));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    }
-
-    private void estilarBotonOutline(JButton btn, Color color) {
-        btn.setFont(FUENTE_TITULO);
-        btn.setBackground(Color.WHITE);
-        btn.setForeground(color);
-        btn.setFocusPainted(false);
-        btn.setBorder(new CompoundBorder(
-                new LineBorder(color, 1),
-                new EmptyBorder(8, 20, 8, 20)));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    }
-
+    /**
+     * Gets the list of tables.
+     * 
+     * @return The JList of tables.
+     */
     public JList<String> getListaTablas() {
         return listaTablas;
     }
 
+    /**
+     * Gets the save button.
+     * 
+     * @return The save button.
+     */
     public JButton getBtnGuardar() {
         return btnGuardar;
     }
 
+    /**
+     * Gets the cancel edit button.
+     * 
+     * @return The cancel edit button.
+     */
     public JButton getBtnCancelarEdicion() {
         return btnCancelarEdicion;
     }
 
+    /**
+     * Gets the return button.
+     * 
+     * @return The return button.
+     */
     public JButton getBtnVolver() {
         return btnVolver;
     }
 
+    /**
+     * Gets the name of the currently selected table.
+     * 
+     * @return The table name.
+     */
     public String getTablaSeleccionada() {
         return listaTablas.getSelectedValue();
     }
 
+    /**
+     * Sets the list of available tables.
+     * 
+     * @param tablas List of table names.
+     */
     public void setListaTablas(List<String> tablas) {
         modeloListaTablas.clear();
         for (String tabla : tablas) {
@@ -283,20 +435,36 @@ public class CrudFrontend extends JPanel {
         }
     }
 
+    /**
+     * Updates the data table with new columns and data.
+     * 
+     * @param columnas Matrix of column names.
+     * @param datos    Matrix of data.
+     */
     public void actualizarTablaDatos(String[] columnas, Object[][] datos) {
         modeloTabla.setDataVector(datos, columnas);
 
-        // Solo agregar columna de acciones si el usuario puede modificar
         if (modeloTabla.getColumnCount() > 0 && canModifyCurrentTable()) {
             agregarColumnaAcciones();
         }
+
+        // Re-aplicar tema después de actualizar datos
+        applyTheme();
     }
 
+    /**
+     * Sets the current table name.
+     * 
+     * @param tabla Table name.
+     */
     public void setTablaActual(String tabla) {
         this.tablaActual = tabla;
         updatePanelInferiorVisibility();
     }
 
+    /**
+     * Adds the actions column (edit/delete) to the table.
+     */
     private void agregarColumnaAcciones() {
         modeloTabla.addColumn(Language.get(82));
 
@@ -306,27 +474,42 @@ public class CrudFrontend extends JPanel {
         tablaDatos.getColumnModel().getColumn(accionesCol).setPreferredWidth(150);
     }
 
+    /**
+     * Gets a value from the table.
+     * 
+     * @param fila    Row index.
+     * @param columna Column index.
+     * @return The value at the specified cell.
+     */
     public Object getTableValueAt(int fila, int columna) {
         return modeloTabla.getValueAt(fila, columna);
     }
 
+    /**
+     * Generates the form fields based on column names.
+     * 
+     * @param nombresColumnas Array of column names.
+     */
     public void generarFormulario(String[] nombresColumnas) {
         panelFormulario.removeAll();
         camposFormulario.clear();
 
         for (String nombreCol : nombresColumnas) {
             JPanel campoPanel = new JPanel(new BorderLayout(5, 5));
-            campoPanel.setBackground(COLOR_FONDO);
+            campoPanel.setBackground(Common.getPanelBackground());
 
             JLabel label = new JLabel(nombreCol + ":");
             label.setFont(FUENTE_PRINCIPAL);
-            label.setForeground(COLOR_TEXTO);
+            label.setForeground(Common.getText());
             label.setPreferredSize(new Dimension(120, 25));
 
             JTextField textField = new JTextField(15);
             textField.setFont(FUENTE_PRINCIPAL);
+            textField.setBackground(Common.getFieldBackground());
+            textField.setForeground(Common.getText());
+            textField.setCaretColor(Common.getText());
             textField.setBorder(new CompoundBorder(
-                    new LineBorder(COLOR_BORDE),
+                    new LineBorder(Common.getBorder()),
                     new EmptyBorder(5, 8, 5, 8)));
 
             campoPanel.add(label, BorderLayout.WEST);
@@ -340,6 +523,9 @@ public class CrudFrontend extends JPanel {
         panelFormulario.repaint();
     }
 
+    /**
+     * Clears all form fields.
+     */
     public void limpiarCamposFormulario() {
         for (JTextField campo : camposFormulario) {
             campo.setText("");
@@ -348,6 +534,11 @@ public class CrudFrontend extends JPanel {
         lblEstadoFormulario.setText(Language.get(78));
     }
 
+    /**
+     * Fills the form with data for editing.
+     * 
+     * @param datosFila Array of data from the selected row.
+     */
     public void llenarFormularioParaEditar(Object[] datosFila) {
         for (int i = 0; i < datosFila.length && i < camposFormulario.size(); i++) {
             camposFormulario.get(i).setText(datosFila[i] != null ? datosFila[i].toString() : "");
@@ -356,6 +547,11 @@ public class CrudFrontend extends JPanel {
         lblEstadoFormulario.setText(Language.get(79));
     }
 
+    /**
+     * Gets data from the form fields.
+     * 
+     * @return List of strings containing form data.
+     */
     public List<String> getDatosFormulario() {
         List<String> datos = new ArrayList<>();
         for (JTextField campo : camposFormulario) {
@@ -364,37 +560,45 @@ public class CrudFrontend extends JPanel {
         return datos;
     }
 
+    /**
+     * Sets the listener for row actions (edit/delete).
+     * 
+     * @param listener The listener.
+     */
     public void setAccionFilaListener(AccionFilaListener listener) {
         this.accionFilaListener = listener;
     }
 
+    /**
+     * Interface for handling row actions.
+     */
     public interface AccionFilaListener {
         void onEditar(int fila);
 
         void onEliminar(int fila);
     }
 
+    /**
+     * Custom renderer for the actions column buttons.
+     */
     class ButtonRenderer extends JPanel implements TableCellRenderer {
         private JButton btnEditar;
         private JButton btnEliminar;
 
         public ButtonRenderer() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
-            setBackground(Color.WHITE);
 
             btnEditar = new JButton(Language.get(80));
             btnEditar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            btnEditar.setBackground(COLOR_PRIMARIO);
-            btnEditar.setForeground(Color.WHITE);
             btnEditar.setFocusPainted(false);
             btnEditar.setBorder(new EmptyBorder(3, 10, 3, 10));
+            btnEditar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
             btnEliminar = new JButton(Language.get(81));
             btnEliminar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            btnEliminar.setBackground(COLOR_PELIGRO);
-            btnEliminar.setForeground(Color.WHITE);
             btnEliminar.setFocusPainted(false);
             btnEliminar.setBorder(new EmptyBorder(3, 10, 3, 10));
+            btnEliminar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
             add(btnEditar);
             add(btnEliminar);
@@ -403,12 +607,20 @@ public class CrudFrontend extends JPanel {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            // Ocultar botones si el usuario no tiene permisos de modificación
+
+            setBackground(Common.getFieldBackground());
+
+            btnEditar.setBackground(Common.getAccent());
+            btnEditar.setForeground(Color.WHITE);
+            btnEditar.setText(Language.get(80));
+
+            btnEliminar.setBackground(Common.getDanger());
+            btnEliminar.setForeground(Color.WHITE);
+            btnEliminar.setText(Language.get(81));
+
             if (canModifyCurrentTable()) {
                 btnEditar.setVisible(true);
                 btnEliminar.setVisible(true);
-                btnEditar.setText(Language.get(80));
-                btnEliminar.setText(Language.get(81));
             } else {
                 btnEditar.setVisible(false);
                 btnEliminar.setVisible(false);
@@ -417,6 +629,9 @@ public class CrudFrontend extends JPanel {
         }
     }
 
+    /**
+     * Custom editor for the actions column buttons.
+     */
     class ButtonEditor extends DefaultCellEditor {
         private JPanel panel;
         private JButton btnEditar;
@@ -427,14 +642,12 @@ public class CrudFrontend extends JPanel {
             super(checkBox);
 
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 2));
-            panel.setBackground(Color.WHITE);
 
             btnEditar = new JButton(Language.get(80));
             btnEditar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            btnEditar.setBackground(COLOR_PRIMARIO);
-            btnEditar.setForeground(Color.WHITE);
             btnEditar.setFocusPainted(false);
             btnEditar.setBorder(new EmptyBorder(3, 10, 3, 10));
+            btnEditar.setCursor(new Cursor(Cursor.HAND_CURSOR));
             btnEditar.addActionListener(e -> {
                 fireEditingStopped();
                 if (accionFilaListener != null) {
@@ -444,10 +657,9 @@ public class CrudFrontend extends JPanel {
 
             btnEliminar = new JButton(Language.get(81));
             btnEliminar.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-            btnEliminar.setBackground(COLOR_PELIGRO);
-            btnEliminar.setForeground(Color.WHITE);
             btnEliminar.setFocusPainted(false);
             btnEliminar.setBorder(new EmptyBorder(3, 10, 3, 10));
+            btnEliminar.setCursor(new Cursor(Cursor.HAND_CURSOR));
             btnEliminar.addActionListener(e -> {
                 fireEditingStopped();
                 if (accionFilaListener != null) {
@@ -463,12 +675,20 @@ public class CrudFrontend extends JPanel {
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             filaActual = row;
-            // Ocultar botones si el usuario no tiene permisos de modificación
+
+            panel.setBackground(Common.getFieldBackground());
+
+            btnEditar.setBackground(Common.getAccent());
+            btnEditar.setForeground(Color.WHITE);
+            btnEditar.setText(Language.get(80));
+
+            btnEliminar.setBackground(Common.getDanger());
+            btnEliminar.setForeground(Color.WHITE);
+            btnEliminar.setText(Language.get(81));
+
             if (canModifyCurrentTable()) {
                 btnEditar.setVisible(true);
                 btnEliminar.setVisible(true);
-                btnEditar.setText(Language.get(80));
-                btnEliminar.setText(Language.get(81));
             } else {
                 btnEditar.setVisible(false);
                 btnEliminar.setVisible(false);
@@ -482,12 +702,19 @@ public class CrudFrontend extends JPanel {
         }
     }
 
+    /**
+     * Gets the current user.
+     * 
+     * @return The user.
+     */
     public Usuario getUser() {
         return user;
     }
 
     /**
-     * Verifica si el usuario actual puede modificar la tabla actual
+     * Checks if the current user can modify the current table.
+     * 
+     * @return true if modification is allowed, false otherwise.
      */
     private boolean canModifyCurrentTable() {
         if (user == null || user.getRol() == null || tablaActual == null) {
@@ -497,10 +724,8 @@ public class CrudFrontend extends JPanel {
         String permiso = user.getRol().getPermiso();
 
         if ("usuario".equalsIgnoreCase(permiso)) {
-            // Usuario no puede modificar ninguna tabla
             return false;
         } else if ("admin".equalsIgnoreCase(permiso)) {
-            // Admin puede modificar todas las tablas excepto log
             return !tablaActual.equalsIgnoreCase("logs");
         }
 
@@ -508,7 +733,7 @@ public class CrudFrontend extends JPanel {
     }
 
     /**
-     * Actualiza la visibilidad del panel inferior según los permisos del usuario
+     * Updates the visibility of the bottom panel based on user permissions.
      */
     private void updatePanelInferiorVisibility() {
         if (panelSur == null) {
@@ -522,7 +747,6 @@ public class CrudFrontend extends JPanel {
 
         String permiso = user.getRol().getPermiso();
 
-        // Usuario con rol "usuario" no puede añadir ni modificar, ocultar panel
         if ("usuario".equalsIgnoreCase(permiso)) {
             panelSur.setVisible(false);
         } else {
