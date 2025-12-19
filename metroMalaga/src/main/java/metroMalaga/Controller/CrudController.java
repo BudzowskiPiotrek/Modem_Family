@@ -11,13 +11,10 @@ import java.util.List;
 
 public class CrudController {
 
-    private static final String URL = "jdbc:mysql://192.168.1.35/centimetromalaga";
-    private static final String USER = "remoto";
-    private static final String PASS = "proyecto";
-
     private CrudFrontend vista;
     private Connection conn;
     private MenuSelect menuSelect;
+    private ConnecionSQL conexionSQL;
 
     private String tablaActual;
     private List<String> nombresColumnas;
@@ -27,6 +24,7 @@ public class CrudController {
         this.vista = vista;
         this.menuSelect = menuSelect;
         this.nombresColumnas = new ArrayList<>();
+        this.conexionSQL = new ConnecionSQL();
 
         conectarBD();
         inicializarEventos();
@@ -34,10 +32,8 @@ public class CrudController {
     }
 
     private void conectarBD() {
-        try {
-            conn = DriverManager.getConnection(URL, USER, PASS);
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(vista, Language.get(171) + e.getMessage());
+        conn = conexionSQL.connect();
+        if (conn == null) {
             System.exit(1);
         }
     }
@@ -194,6 +190,14 @@ public class CrudController {
                 String plainPassword = valores.get(passwordIndex);
                 // Only hash if it's not already a BCrypt hash and not the placeholder
                 if (!plainPassword.equals("********") && !PasswordUtil.isBCryptHash(plainPassword)) {
+                    // Validate password: at least 8 characters, only letters and numbers
+                    if (plainPassword.length() < 8 || !plainPassword.matches("[a-zA-Z0-9]+")) {
+                        JOptionPane.showMessageDialog(vista,
+                                "The password must be at least 8 characters long and contain only letters and numbers.",
+                                Language.get(178),
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     String hashedPassword = PasswordUtil.hashPassword(plainPassword);
                     valores.set(passwordIndex, hashedPassword);
                 }
