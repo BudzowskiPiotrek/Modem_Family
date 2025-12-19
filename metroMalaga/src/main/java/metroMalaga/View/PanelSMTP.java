@@ -16,12 +16,19 @@ import metroMalaga.Controller.smtp.ButtonHoverHandle;
 import metroMalaga.Controller.smtp.FieldFocusHandle;
 import metroMalaga.Controller.smtp.HandleSMTP;
 
+/**
+ * Graphical interface for SMTP and IMAP operations.
+ * This panel allows users to compose and send emails, view their inbox,
+ * manage folders (Spam, Trash, etc.), and perform actions like 
+ * deleting or downloading messages.
+ * * @author User
+ * @version 1.0
+ */
 public class PanelSMTP extends JPanel {
 
     private final HandleSMTP backend;
     private final Usuario loggedUser;
 
-    // Componentes UI
     private JTextField txtTo, txtSubject;
     private JTextArea txtBody, txtViewer;
     private JTable emailTable;
@@ -31,16 +38,19 @@ public class PanelSMTP extends JPanel {
     private JLabel lblAttachedFile, lblTo, lblSubject, lblFolder;
     private JComboBox<String> cboFolders;
 
-    // Paneles
     private JPanel pCompose, pInbox, pButtonsCompose, pButtonsInbox, pFields, pFolderSelector, pInboxTop;
     private JSplitPane mainSplit, inboxSplit;
 
     private ButtonHandleSMTP buttonHandler;
 
-    // Fuentes
     private final Font F_HEADER = new Font("Segoe UI", Font.BOLD, 16);
     private final Font F_TEXT = new Font("Segoe UI", Font.PLAIN, 14);
 
+    /**
+     * Constructs the SMTP panel for the logged-in user.
+     * Initializes the backend connection and sets up the UI components.
+     * * @param usuario The current authenticated user.
+     */
     public PanelSMTP(Usuario usuario) {
         this.loggedUser = usuario;
         this.backend = new HandleSMTP();
@@ -52,11 +62,18 @@ public class PanelSMTP extends JPanel {
         applyTheme();
     }
 
+    /**
+     * Configures the basic layout properties of the main panel.
+     */
     private void setupPanel() {
         setLayout(new BorderLayout(15, 15));
         setBorder(new EmptyBorder(15, 15, 15, 15));
     }
 
+    /**
+     * Applies the current visual theme to all UI components.
+     * Adjusts colors, borders, and custom renderers for tables and headers.
+     */
     public void applyTheme() {
         Color bgMain = Common.getBackground();
         Color bgPanel = Common.getPanelBackground();
@@ -64,7 +81,6 @@ public class PanelSMTP extends JPanel {
         Color border = Common.getBorder();
         Color fieldBg = Common.getFieldBackground();
 
-        // 1. Fondos principales
         this.setBackground(bgMain);
         if (mainSplit != null) {
             mainSplit.setBackground(bgMain);
@@ -75,28 +91,18 @@ public class PanelSMTP extends JPanel {
             inboxSplit.setBorder(null);
         }
 
-        // 2. Paneles
         updatePanelStyle(pCompose, Language.get(53));
         updatePanelStyle(pInbox, Language.get(54));
 
-        if (pFields != null)
-            pFields.setBackground(bgPanel);
-        if (pButtonsCompose != null)
-            pButtonsCompose.setBackground(bgPanel);
-        if (pButtonsInbox != null)
-            pButtonsInbox.setBackground(bgPanel);
-        if (pFolderSelector != null)
-            pFolderSelector.setBackground(bgPanel);
-        if (pInboxTop != null)
-            pInboxTop.setBackground(bgPanel);
+        if (pFields != null) pFields.setBackground(bgPanel);
+        if (pButtonsCompose != null) pButtonsCompose.setBackground(bgPanel);
+        if (pButtonsInbox != null) pButtonsInbox.setBackground(bgPanel);
+        if (pFolderSelector != null) pFolderSelector.setBackground(bgPanel);
+        if (pInboxTop != null) pInboxTop.setBackground(bgPanel);
 
-        // 3. Etiquetas
-        if (lblTo != null)
-            lblTo.setForeground(txt);
-        if (lblSubject != null)
-            lblSubject.setForeground(txt);
-        if (lblFolder != null)
-            lblFolder.setForeground(txt);
+        if (lblTo != null) lblTo.setForeground(txt);
+        if (lblSubject != null) lblSubject.setForeground(txt);
+        if (lblFolder != null) lblFolder.setForeground(txt);
 
         if (lblAttachedFile != null) {
             String lblText = lblAttachedFile.getText();
@@ -107,20 +113,17 @@ public class PanelSMTP extends JPanel {
             }
         }
 
-        // 4. Campos de texto
         updateFieldStyle(txtTo);
         updateFieldStyle(txtSubject);
         updateTextAreaStyle(txtBody);
         updateTextAreaStyle(txtViewer);
 
-        // 5. ComboBox
         if (cboFolders != null) {
             cboFolders.setBackground(fieldBg);
             cboFolders.setForeground(txt);
             cboFolders.setBorder(new LineBorder(border, 1));
         }
 
-        // 6. Tabla - CON RENDERER PERSONALIZADO
         if (emailTable != null) {
             emailTable.setBackground(fieldBg);
             emailTable.setForeground(txt);
@@ -128,7 +131,6 @@ public class PanelSMTP extends JPanel {
             emailTable.setSelectionBackground(Common.isDarkMode ? new Color(200, 0, 0) : new Color(230, 240, 255));
             emailTable.setSelectionForeground(Common.isDarkMode ? Color.WHITE : Color.BLACK);
 
-            // 👇 RENDERER PARA CELDAS NORMALES
             emailTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value,
@@ -153,7 +155,6 @@ public class PanelSMTP extends JPanel {
             header.setForeground(txt);
             header.setBorder(new MatteBorder(0, 0, 1, 0, border));
 
-            // 👇 RENDERER PARA EL HEADER
             header.setDefaultRenderer(new DefaultTableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -169,96 +170,17 @@ public class PanelSMTP extends JPanel {
                 }
             });
 
-            // 👇 Actualizar ScrollPane de la tabla
             updateScrollPaneTheme(emailTable, fieldBg, border);
         }
 
-        // 7. Botones
         updateButtonsTheme();
-
         this.repaint();
         this.revalidate();
     }
 
-    private void updatePanelStyle(JPanel p, String title) {
-        if (p == null)
-            return;
-        p.setBackground(Common.getPanelBackground());
-        p.setBorder(new CompoundBorder(
-                new LineBorder(Common.getBorder(), 1),
-                new TitledBorder(new EmptyBorder(10, 10, 10, 10), title,
-                        TitledBorder.LEFT, TitledBorder.TOP, F_HEADER, Common.getText())));
-    }
-
-    private void updateFieldStyle(JTextComponent c) {
-        if (c == null)
-            return;
-        c.setBackground(Common.getFieldBackground());
-        c.setForeground(Common.getText());
-        c.setCaretColor(Common.getText());
-        if (c instanceof JTextField) {
-            c.setBorder(new CompoundBorder(
-                    new LineBorder(Common.getBorder(), 1),
-                    new EmptyBorder(2, 5, 2, 5)));
-        }
-    }
-
-    private void updateTextAreaStyle(JTextArea area) {
-        if (area == null)
-            return;
-        area.setBackground(Common.getFieldBackground());
-        area.setForeground(Common.getText());
-        area.setCaretColor(Common.getText());
-        area.setBorder(new EmptyBorder(5, 5, 5, 5));
-
-        // Actualizar ScrollPane
-        updateScrollPaneTheme(area, Common.getFieldBackground(), Common.getBorder());
-    }
-
-    private void updateScrollPaneTheme(Component component, Color bg, Color border) {
-        if (component.getParent() instanceof JViewport) {
-            JViewport viewport = (JViewport) component.getParent();
-            viewport.setBackground(bg);
-            if (viewport.getParent() instanceof JScrollPane) {
-                JScrollPane scroll = (JScrollPane) viewport.getParent();
-                scroll.setBackground(bg);
-                scroll.setBorder(new LineBorder(border, 1));
-                scroll.getViewport().setBackground(bg);
-            }
-        }
-    }
-
-    private void updateButtonsTheme() {
-        Color bg = Common.getPanelBackground();
-        Color txt = Common.getText();
-        Color danger = Common.getDanger();
-        Color accent = Common.getAccent();
-
-        JButton[] normalButtons = { btnAttach, btnRefresh, btnToggleRead, btnDownloadEmail };
-        for (JButton b : normalButtons) {
-            if (b != null) {
-                b.setBackground(bg);
-                b.setForeground(txt);
-                b.setBorder(new LineBorder(Common.getBorder(), 1));
-            }
-        }
-
-        if (btnSend != null) {
-            btnSend.setBackground(bg);
-            btnSend.setForeground(accent);
-            btnSend.setBorder(new LineBorder(accent, 1, true));
-        }
-
-        JButton[] dangerButtons = { btnClearAttach, btnDelete, btnReturn };
-        for (JButton b : dangerButtons) {
-            if (b != null) {
-                b.setBackground(danger);
-                b.setForeground(Color.WHITE);
-                b.setBorder(new LineBorder(danger, 1));
-            }
-        }
-    }
-
+    /**
+     * Updates localizable texts based on the selected language.
+     */
     public void updateAllTexts() {
         lblTo.setText(Language.get(55));
         lblSubject.setText(Language.get(56));
@@ -290,7 +212,6 @@ public class PanelSMTP extends JPanel {
             txtViewer.setText(Language.get(68));
         }
 
-        // Actualizar títulos de paneles
         updatePanelStyle(pCompose, Language.get(53));
         updatePanelStyle(pInbox, Language.get(54));
 
@@ -298,6 +219,9 @@ public class PanelSMTP extends JPanel {
         repaint();
     }
 
+    /**
+     * Initializes the UI components and structures.
+     */
     private void initUI() {
         pCompose = new JPanel(new BorderLayout(10, 10));
         pFields = new JPanel(new GridBagLayout());
@@ -336,7 +260,6 @@ public class PanelSMTP extends JPanel {
         pCompose.add(scrollBody, BorderLayout.CENTER);
         pCompose.add(pButtonsCompose, BorderLayout.SOUTH);
 
-        // --- Panel Inbox ---
         pInbox = new JPanel(new BorderLayout(10, 10));
 
         pFolderSelector = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -347,7 +270,6 @@ public class PanelSMTP extends JPanel {
         cboFolders.setPreferredSize(new Dimension(200, 30));
         cboFolders.setFont(F_TEXT);
 
-        // Cargar carpetas disponibles
         List<String> allFolders = backend.getAvailableFolders();
         List<String> allowedFolders = Arrays.asList("INBOX", "Spam", "Trash", "[Gmail]/Spam", "[Gmail]/Trash");
 
@@ -371,6 +293,7 @@ public class PanelSMTP extends JPanel {
 
         String[] cols = { Language.get(61), Language.get(62), Language.get(63) };
         tableModel = new DefaultTableModel(cols, 0) {
+            @Override
             public boolean isCellEditable(int r, int c) {
                 return false;
             }
@@ -457,6 +380,80 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    private void updatePanelStyle(JPanel p, String title) {
+        if (p == null) return;
+        p.setBackground(Common.getPanelBackground());
+        p.setBorder(new CompoundBorder(
+                new LineBorder(Common.getBorder(), 1),
+                new TitledBorder(new EmptyBorder(10, 10, 10, 10), title,
+                        TitledBorder.LEFT, TitledBorder.TOP, F_HEADER, Common.getText())));
+    }
+
+    private void updateFieldStyle(JTextComponent c) {
+        if (c == null) return;
+        c.setBackground(Common.getFieldBackground());
+        c.setForeground(Common.getText());
+        c.setCaretColor(Common.getText());
+        if (c instanceof JTextField) {
+            c.setBorder(new CompoundBorder(
+                    new LineBorder(Common.getBorder(), 1),
+                    new EmptyBorder(2, 5, 2, 5)));
+        }
+    }
+
+    private void updateTextAreaStyle(JTextArea area) {
+        if (area == null) return;
+        area.setBackground(Common.getFieldBackground());
+        area.setForeground(Common.getText());
+        area.setCaretColor(Common.getText());
+        area.setBorder(new EmptyBorder(5, 5, 5, 5));
+        updateScrollPaneTheme(area, Common.getFieldBackground(), Common.getBorder());
+    }
+
+    private void updateScrollPaneTheme(Component component, Color bg, Color border) {
+        if (component.getParent() instanceof JViewport) {
+            JViewport viewport = (JViewport) component.getParent();
+            viewport.setBackground(bg);
+            if (viewport.getParent() instanceof JScrollPane) {
+                JScrollPane scroll = (JScrollPane) viewport.getParent();
+                scroll.setBackground(bg);
+                scroll.setBorder(new LineBorder(border, 1));
+                scroll.getViewport().setBackground(bg);
+            }
+        }
+    }
+
+    private void updateButtonsTheme() {
+        Color bg = Common.getPanelBackground();
+        Color txt = Common.getText();
+        Color danger = Common.getDanger();
+        Color accent = Common.getAccent();
+
+        JButton[] normalButtons = { btnAttach, btnRefresh, btnToggleRead, btnDownloadEmail };
+        for (JButton b : normalButtons) {
+            if (b != null) {
+                b.setBackground(bg);
+                b.setForeground(txt);
+                b.setBorder(new LineBorder(Common.getBorder(), 1));
+            }
+        }
+
+        if (btnSend != null) {
+            btnSend.setBackground(bg);
+            btnSend.setForeground(accent);
+            btnSend.setBorder(new LineBorder(accent, 1, true));
+        }
+
+        JButton[] dangerButtons = { btnClearAttach, btnDelete, btnReturn };
+        for (JButton b : dangerButtons) {
+            if (b != null) {
+                b.setBackground(danger);
+                b.setForeground(Color.WHITE);
+                b.setBorder(new LineBorder(danger, 1));
+            }
+        }
+    }
+
     private void addGBC(JPanel p, Component c, int x, int y, double weight) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = x;
@@ -508,70 +505,22 @@ public class PanelSMTP extends JPanel {
         return t;
     }
 
-    // Getters
-    public JTextField getTxtTo() {
-        return txtTo;
-    }
-
-    public JTextField getTxtSubject() {
-        return txtSubject;
-    }
-
-    public JTextArea getTxtBody() {
-        return txtBody;
-    }
-
-    public JTextArea getTxtViewer() {
-        return txtViewer;
-    }
-
-    public JTable getEmailTable() {
-        return emailTable;
-    }
-
-    public DefaultTableModel getTableModel() {
-        return tableModel;
-    }
-
-    public JButton getBtnSend() {
-        return btnSend;
-    }
-
-    public JButton getBtnAttach() {
-        return btnAttach;
-    }
-
-    public JButton getBtnClearAttach() {
-        return btnClearAttach;
-    }
-
-    public JButton getBtnRefresh() {
-        return btnRefresh;
-    }
-
-    public JButton getBtnDelete() {
-        return btnDelete;
-    }
-
-    public JButton getBtnToggleRead() {
-        return btnToggleRead;
-    }
-
-    public JButton getBtnDownloadEmail() {
-        return btnDownloadEmail;
-    }
-
-    public JLabel getLblAttachedFile() {
-        return lblAttachedFile;
-    }
-
-    public JButton getBtnReturn() {
-        return btnReturn;
-    }
-
-    public void setBtnReturn(JButton btnReturn) {
-        this.btnReturn = btnReturn;
-    }
+    public JTextField getTxtTo() { return txtTo; }
+    public JTextField getTxtSubject() { return txtSubject; }
+    public JTextArea getTxtBody() { return txtBody; }
+    public JTextArea getTxtViewer() { return txtViewer; }
+    public JTable getEmailTable() { return emailTable; }
+    public DefaultTableModel getTableModel() { return tableModel; }
+    public JButton getBtnSend() { return btnSend; }
+    public JButton getBtnAttach() { return btnAttach; }
+    public JButton getBtnClearAttach() { return btnClearAttach; }
+    public JButton getBtnRefresh() { return btnRefresh; }
+    public JButton getBtnDelete() { return btnDelete; }
+    public JButton getBtnToggleRead() { return btnToggleRead; }
+    public JButton getBtnDownloadEmail() { return btnDownloadEmail; }
+    public JLabel getLblAttachedFile() { return lblAttachedFile; }
+    public JButton getBtnReturn() { return btnReturn; }
+    public void setBtnReturn(JButton btnReturn) { this.btnReturn = btnReturn; }
 
     public void setOnReturnCallback(Runnable callback) {
         if (buttonHandler != null) {
