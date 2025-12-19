@@ -13,7 +13,7 @@ This is a comprehensive Java-based desktop application designed for the administ
 | **File Explorer (FTP)** | **Login & Identity** |
 |:---:|:---:|
 | ![CRUD Dark Mode](https://media.licdn.com/dms/image/v2/D4E22AQH78udZ6UzdVA/feedshare-shrink_1280/B4EZs2W98KIIA0-/0/1766143549601?e=1767830400&v=beta&t=2LquvrelvSwtgwOeyxPWlVt4DQVh89thiMjPa4UGrB8) | ![FTP System](https://media.licdn.com/dms/image/v2/D4E22AQFd2KxbdM09eQ/feedshare-shrink_1280/B4EZs2W98EGUAs-/0/1766143549598?e=1767830400&v=beta&t=17h83TlKr5Rw9UP0_3akXTILT6A5ZWdDhSVjI7xO2vs) |
-| *Remote File Management via TCP Sockets* | *Corporate Metro Málaga Access* |
+| *Remote File Management* | *Corporate Metro Málaga Access* |
 
 ---
 
