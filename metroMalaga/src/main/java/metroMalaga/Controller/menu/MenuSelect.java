@@ -34,6 +34,19 @@ public class MenuSelect implements ChangeListener {
 		this.tabbedPane = tabbedPane;
 		this.user = user;
 		tabbedPane.addChangeListener(this);
+
+		if (panelMenu.getBtnConfirm() != null) {
+			panelMenu.getBtnConfirm().addActionListener(e -> logout());
+		}
+		if (panelMenu.getBtnCancel() != null) {
+			panelMenu.getBtnCancel().addActionListener(e -> switchToTab(0));
+		}
+
+		// Initialize the current tab (usually 0/CRUD) since the listener attached after
+		// tabs were added
+		if (tabbedPane.getTabCount() > 0) {
+			stateChanged(new ChangeEvent(tabbedPane));
+		}
 	}
 
 	public Usuario getUser() {
@@ -219,5 +232,10 @@ public class MenuSelect implements ChangeListener {
 		if (tabIndex >= 0 && tabIndex < tabbedPane.getTabCount()) {
 			tabbedPane.setSelectedIndex(tabIndex);
 		}
+	}
+
+	public void logout() {
+		panelMenu.disposeWindow();
+		new PanelLogin().setVisible(true);
 	}
 }
