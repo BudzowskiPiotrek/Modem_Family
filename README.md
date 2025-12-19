@@ -1,6 +1,6 @@
 # 🚇 CentriMetro - Management System (Modem Family)
 
-This is a comprehensive Java-based desktop application designed for the administrative management of **Metro Málaga** services. The platform integrates user administration, remote file management via FTP, and SMTP communication, all built on a robust architecture synchronized in real-time through Sockets.
+This is a comprehensive Java-based desktop application designed for the administrative management of **Centri Metro** services. The platform integrates user administration, remote file management via FTP, and SMTP communication, all built on a robust architecture synchronized in real-time through Sockets.
 ---
 
 ## 📸 Visual Interface / Interfaz Visual
@@ -51,18 +51,6 @@ The codebase is strictly organized following the **MVC pattern** to ensure scala
 * **`metroMalaga.View`**: Decoupled GUI components (`PanelFTP`, `PanelMenu`, `PanelSMTP`).
 * **`metroMalaga.Controller`**: Logic orchestrators managing interactions between views and services (`ServiceFTP`, `MenuSelect`).
 * **`metroMalaga.Socket`**: Server logic and client threads for real-time event synchronization.
-
----
-
-## 📦 Installation & Execution
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/BudzowskiPiotrek/Modem_Family.git](https://github.com/BudzowskiPiotrek/Modem_Family.git)
-    ```
-2.  **Dependencies:** Ensure **Apache Commons Net** and your JDBC connector JARs are added to your Build Path.
-3.  **Socket Server:** To enable real-time updates, start the `ServidorSocket.java` class first.
-4.  **Application:** Run the main Login class to access the Metro Málaga dashboard.
 
 ---
 
