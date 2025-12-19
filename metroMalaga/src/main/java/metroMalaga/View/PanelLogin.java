@@ -14,10 +14,6 @@ import metroMalaga.Controller.login.LoginPlaceholderPasswordFieldHandler;
 import metroMalaga.Controller.login.LoginPlaceholderTextFieldHandler;
 import metroMalaga.Model.Usuario;
 
-/**
- * Login window for the Metro Malaga application. Features a high-contrast,
- * Persona 5-inspired aesthetic for user authentication.
- */
 public class PanelLogin extends JFrame {
 
 	private JTextField userField;
@@ -34,10 +30,6 @@ public class PanelLogin extends JFrame {
 	private final Font P5_INPUT_FONT = new Font("SansSerif", Font.BOLD | Font.ITALIC, 24);
 	private final Font P5_BUTTON_FONT = new Font("Dialog", Font.BOLD | Font.ITALIC, 24);
 
-	/**
-	 * Constructs the Login panel and initializes the UI components and event
-	 * handlers.
-	 */
 	public PanelLogin() {
 		settingsFrame();
 		JPanel backgroundPanel = new JPanel(new GridBagLayout());
@@ -52,18 +44,11 @@ public class PanelLogin extends JFrame {
 		this.getContentPane().requestFocusInWindow();
 	}
 
-	/**
-	 * Handles the UI transition when a login attempt is successful by disposing of
-	 * the window.
-	 */
 	public void loginSuccessful() {
 		this.setVisible(false);
 		this.dispose();
 	}
 
-	/**
-	 * Orchestrates the configuration of all UI components.
-	 */
 	private void settingsComponents() {
 		settingsLabel();
 		settingsUser();
@@ -71,9 +56,6 @@ public class PanelLogin extends JFrame {
 		settingsButton();
 	}
 
-	/**
-	 * Configures the title label with a custom HTML-styled typographic design.
-	 */
 	private void settingsLabel() {
 		String p5StyledText = "<html>"
 				+ "<span style='background-color:black; color:white; font-size:32px; font-family:Sans-serif; font-style:italic;'>L</span>"
@@ -87,9 +69,6 @@ public class PanelLogin extends JFrame {
 		labelLogin.setBorder(new MatteBorder(0, 0, 5, 0, P5_BLACK));
 	}
 
-	/**
-	 * Configures the username input field and its placeholder behavior.
-	 */
 	private void settingsUser() {
 		userField = new JTextField(20);
 
@@ -103,10 +82,6 @@ public class PanelLogin extends JFrame {
 				P5_GRAY_PLACEHOLDER, focusedBorder, unfocusedBorder, padding));
 	}
 
-	/**
-	 * Configures the password input field, including its hidden character settings
-	 * and placeholder.
-	 */
 	private void settingsPass() {
 		passwordField = new JPasswordField(15);
 
@@ -121,13 +96,6 @@ public class PanelLogin extends JFrame {
 				P5_WHITE, P5_GRAY_PLACEHOLDER, focusedBorder, unfocusedBorder, padding));
 	}
 
-	/**
-	 * Applies a specific visual style to text fields, including custom borders and
-	 * fonts.
-	 * 
-	 * @param field       The text field to style.
-	 * @param placeholder The initial placeholder text.
-	 */
 	private void styleP5Field(JTextField field, String placeholder) {
 		field.setPreferredSize(new Dimension(250, 50));
 		field.setBackground(P5_BLACK);
@@ -141,10 +109,6 @@ public class PanelLogin extends JFrame {
 		field.setBorder(new CompoundBorder(field.getBorder(), new EmptyBorder(5, 15, 5, 15)));
 	}
 
-	/**
-	 * Initializes the login button with custom theme colors, borders, and mouse
-	 * listeners.
-	 */
 	private void settingsButton() {
 		buttonLogin = new JButton("LOGIN");
 		buttonLogin.setPreferredSize(new Dimension(180, 60));
@@ -163,11 +127,6 @@ public class PanelLogin extends JFrame {
 				defaultBorder, hoverBorder));
 	}
 
-	/**
-	 * Positions components within the frame using GridBagConstraints.
-	 * 
-	 * @param container The parent container to receive the components.
-	 */
 	private void addComponentsFrame(Container container) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.gridx = 0;
@@ -192,11 +151,8 @@ public class PanelLogin extends JFrame {
 		container.add(buttonLogin, gbc);
 	}
 
-	/**
-	 * Configures window-specific settings such as title, size, and location.
-	 */
 	private void settingsFrame() {
-		setTitle("Login - Metro Málaga");
+		setTitle("Login - Metro M�laga");
 		setSize(700, 700);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);

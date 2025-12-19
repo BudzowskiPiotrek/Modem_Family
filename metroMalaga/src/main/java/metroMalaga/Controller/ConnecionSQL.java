@@ -9,7 +9,7 @@ import metroMalaga.Model.Language;
 
 public class ConnecionSQL {
 
-	private final String RUTA = "jdbc:mysql://192.168.1.35/centimetromalaga";
+	private final String RUTA = "jdbc:mysql://192.168.1.15/centimetromalaga";
 	private final String USUARIO = "remoto";
 	private final String PASS = "proyecto";
 
