@@ -13,6 +13,11 @@ public class ServerListenerThread implements Runnable {
     private static final int PORT = 5000;
     private NotificationServer server;
 
+    /**
+     * Constructor for ServerListenerThread.
+     * 
+     * @param server The notification server instance.
+     */
     public ServerListenerThread(NotificationServer server) {
         this.server = server;
     }

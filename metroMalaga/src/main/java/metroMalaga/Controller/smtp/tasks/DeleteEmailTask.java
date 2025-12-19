@@ -7,6 +7,9 @@ import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.EmailModel;
 import metroMalaga.Model.Language;
 
+/**
+ * Task for deleting an email from the server and updating the UI.
+ */
 public class DeleteEmailTask implements Runnable {
 
 	private final HandleSMTP backend;
@@ -16,6 +19,16 @@ public class DeleteEmailTask implements Runnable {
 	private final String uid;
 	private final int row;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param backend          The backend service.
+	 * @param txtViewer        The text area viewer.
+	 * @param currentEmailList The current list of emails.
+	 * @param tableModel       The table model.
+	 * @param uid              The unique ID of the mail to delete.
+	 * @param row              The row index in the table.
+	 */
 	public DeleteEmailTask(HandleSMTP backend, JTextArea txtViewer, List<EmailModel> currentEmailList,
 			DefaultTableModel tableModel, String uid, int row) {
 		this.backend = backend;

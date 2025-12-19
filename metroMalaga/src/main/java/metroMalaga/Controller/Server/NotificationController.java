@@ -13,7 +13,8 @@ import metroMalaga.Model.FTPTableModel;
 
 /**
  * Controller that coordinates FTP notifications between clients and manages
- * table updates.
+ * table updates. Acts as an adapter between the NotificationClient and the UI
+ * model.
  */
 public class NotificationController implements NotificationClient.MessageListener {
     private NotificationClient client;
@@ -21,6 +22,13 @@ public class NotificationController implements NotificationClient.MessageListene
     private ServiceFTP service;
     private String serverHost;
 
+    /**
+     * Constructor for NotificationController.
+     * 
+     * @param tableModel The FTP table model to update.
+     * @param service    The FTP service for refreshing data.
+     * @param serverHost The hostname of the notification server.
+     */
     public NotificationController(FTPTableModel tableModel, ServiceFTP service, String serverHost) {
         this.tableModel = tableModel;
         this.service = service;
@@ -37,7 +45,10 @@ public class NotificationController implements NotificationClient.MessageListene
     }
 
     /**
-     * Called when a notification message is received from the server
+     * Called when a notification message is received from the server.
+     * Triggers a UI refresh.
+     * 
+     * @param message The received message.
      */
     @Override
     public void onMessageReceived(String message) {
@@ -49,7 +60,7 @@ public class NotificationController implements NotificationClient.MessageListene
     }
 
     /**
-     * Notify all clients about an FTP change
+     * Notify all clients about an FTP change via the server.
      * 
      * @param action   The type of action (UPLOAD, DELETE, RENAME, etc.)
      * @param filePath The affected file path
@@ -71,7 +82,7 @@ public class NotificationController implements NotificationClient.MessageListene
     }
 
     /**
-     * Refresh the FTP table with current data from server
+     * Refresh the FTP table with current data from server.
      */
     private void refreshTable() {
         try {
@@ -93,7 +104,7 @@ public class NotificationController implements NotificationClient.MessageListene
     }
 
     /**
-     * Disconnect from notification server
+     * Disconnect from notification server.
      */
     public void disconnect() {
         if (client != null) {

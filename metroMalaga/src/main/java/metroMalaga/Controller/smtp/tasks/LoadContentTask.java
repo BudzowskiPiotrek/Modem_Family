@@ -6,6 +6,10 @@ import metroMalaga.Controller.smtp.HandleSMTP;
 import metroMalaga.Model.EmailModel;
 import metroMalaga.Model.Language;
 
+/**
+ * Task for loading the content of a specific email.
+ * Fetches full content including body and attachments.
+ */
 public class LoadContentTask implements Runnable {
 
 	private final HandleSMTP backend;
@@ -15,6 +19,16 @@ public class LoadContentTask implements Runnable {
 	private final DefaultTableModel tableModel;
 	private final int row;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param backend          The backend service.
+	 * @param mail             The email model to load content into.
+	 * @param txtViewer        The viewer to update.
+	 * @param btnDownloadEmail The download button to enable.
+	 * @param tableModel       The table model to refresh (if needed).
+	 * @param row              The row index.
+	 */
 	public LoadContentTask(HandleSMTP backend, EmailModel mail, JTextArea txtViewer, JButton btnDownloadEmail,
 			DefaultTableModel tableModel, int row) {
 		this.backend = backend;
