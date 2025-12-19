@@ -16,6 +16,9 @@ import metroMalaga.Controller.smtp.ButtonHoverHandle;
 import metroMalaga.Controller.smtp.FieldFocusHandle;
 import metroMalaga.Controller.smtp.HandleSMTP;
 
+/**
+ * Panel for SMTP email management.
+ */
 public class PanelSMTP extends JPanel {
 
     private final HandleSMTP backend;
@@ -41,6 +44,11 @@ public class PanelSMTP extends JPanel {
     private final Font F_HEADER = new Font("Segoe UI", Font.BOLD, 16);
     private final Font F_TEXT = new Font("Segoe UI", Font.PLAIN, 14);
 
+    /**
+     * Constructor for PanelSMTP.
+     * 
+     * @param usuario The logged-in user.
+     */
     public PanelSMTP(Usuario usuario) {
         this.loggedUser = usuario;
         this.backend = new HandleSMTP();
@@ -52,11 +60,17 @@ public class PanelSMTP extends JPanel {
         applyTheme();
     }
 
+    /**
+     * Sets up the panel layout.
+     */
     private void setupPanel() {
         setLayout(new BorderLayout(15, 15));
         setBorder(new EmptyBorder(15, 15, 15, 15));
     }
 
+    /**
+     * Applies the current application theme to the panel components.
+     */
     public void applyTheme() {
         Color bgMain = Common.getBackground();
         Color bgPanel = Common.getPanelBackground();
@@ -180,6 +194,12 @@ public class PanelSMTP extends JPanel {
         this.revalidate();
     }
 
+    /**
+     * Updates the style of a panel.
+     * 
+     * @param p     The panel.
+     * @param title The title for the panel border.
+     */
     private void updatePanelStyle(JPanel p, String title) {
         if (p == null)
             return;
@@ -190,6 +210,11 @@ public class PanelSMTP extends JPanel {
                         TitledBorder.LEFT, TitledBorder.TOP, F_HEADER, Common.getText())));
     }
 
+    /**
+     * Updates the style of a text component.
+     * 
+     * @param c The text component.
+     */
     private void updateFieldStyle(JTextComponent c) {
         if (c == null)
             return;
@@ -203,6 +228,11 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    /**
+     * Updates the style of a text area.
+     * 
+     * @param area The text area.
+     */
     private void updateTextAreaStyle(JTextArea area) {
         if (area == null)
             return;
@@ -215,6 +245,13 @@ public class PanelSMTP extends JPanel {
         updateScrollPaneTheme(area, Common.getFieldBackground(), Common.getBorder());
     }
 
+    /**
+     * Updates the theme of a scroll pane containing a component.
+     * 
+     * @param component The component inside the scroll pane.
+     * @param bg        Background color.
+     * @param border    Border color.
+     */
     private void updateScrollPaneTheme(Component component, Color bg, Color border) {
         if (component.getParent() instanceof JViewport) {
             JViewport viewport = (JViewport) component.getParent();
@@ -228,6 +265,9 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    /**
+     * Updates the theme of the buttons.
+     */
     private void updateButtonsTheme() {
         Color bg = Common.getPanelBackground();
         Color txt = Common.getText();
@@ -259,6 +299,9 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    /**
+     * Updates all text labels based on the current language.
+     */
     public void updateAllTexts() {
         lblTo.setText(Language.get(55));
         lblSubject.setText(Language.get(56));
@@ -298,6 +341,9 @@ public class PanelSMTP extends JPanel {
         repaint();
     }
 
+    /**
+     * Initializes the UI components.
+     */
     private void initUI() {
         pCompose = new JPanel(new BorderLayout(10, 10));
         pFields = new JPanel(new GridBagLayout());
@@ -418,6 +464,9 @@ public class PanelSMTP extends JPanel {
         add(mainSplit, BorderLayout.CENTER);
     }
 
+    /**
+     * Registers action listeners for components.
+     */
     private void registerListeners() {
         this.buttonHandler = new ButtonHandleSMTP(this, backend);
 
@@ -439,6 +488,12 @@ public class PanelSMTP extends JPanel {
         applyHover(btnReturn, true);
     }
 
+    /**
+     * Applies hover effect to a button.
+     * 
+     * @param btn      The button.
+     * @param isDanger Whether it's a danger button.
+     */
     private void applyHover(JButton btn, boolean isDanger) {
         Color bg = isDanger ? Common.getDanger() : Common.getPanelBackground();
         Color fg = isDanger ? Color.WHITE : Common.getText();
@@ -457,6 +512,15 @@ public class PanelSMTP extends JPanel {
         }
     }
 
+    /**
+     * Adds a component to a panel using GridBagLayout.
+     * 
+     * @param p      The panel.
+     * @param c      The component.
+     * @param x      Grid X position.
+     * @param y      Grid Y position.
+     * @param weight Horizontal weight.
+     */
     private void addGBC(JPanel p, Component c, int x, int y, double weight) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = x;
@@ -470,6 +534,11 @@ public class PanelSMTP extends JPanel {
         p.add(c, gbc);
     }
 
+    /**
+     * Creates a text field.
+     * 
+     * @return The text field.
+     */
     private JTextField createField() {
         JTextField f = new JTextField();
         f.setPreferredSize(new Dimension(200, 30));
@@ -478,6 +547,11 @@ public class PanelSMTP extends JPanel {
         return f;
     }
 
+    /**
+     * Creates a text area.
+     * 
+     * @return The text area.
+     */
     private JTextArea createTextArea() {
         JTextArea a = new JTextArea();
         a.setFont(F_TEXT);
@@ -487,10 +561,23 @@ public class PanelSMTP extends JPanel {
         return a;
     }
 
+    /**
+     * Creates a scroll pane for a component.
+     * 
+     * @param c The component.
+     * @return The scroll pane.
+     */
     private JScrollPane createScrollPane(Component c) {
         return new JScrollPane(c);
     }
 
+    /**
+     * Creates a button.
+     * 
+     * @param text     Button text.
+     * @param isDanger Whether it's a danger button.
+     * @return The button.
+     */
     private JButton createButton(String text, boolean isDanger) {
         JButton b = new JButton(text);
         b.setPreferredSize(new Dimension(140, 35));
@@ -500,6 +587,11 @@ public class PanelSMTP extends JPanel {
         return b;
     }
 
+    /**
+     * Creates the email table.
+     * 
+     * @return The table.
+     */
     private JTable createTable() {
         JTable t = new JTable(tableModel);
         t.setFont(F_TEXT);
@@ -509,70 +601,156 @@ public class PanelSMTP extends JPanel {
     }
 
     // Getters
+
+    /**
+     * Gets the "To" text field.
+     * 
+     * @return The "To" text field.
+     */
     public JTextField getTxtTo() {
         return txtTo;
     }
 
+    /**
+     * Gets the "Subject" text field.
+     * 
+     * @return The "Subject" text field.
+     */
     public JTextField getTxtSubject() {
         return txtSubject;
     }
 
+    /**
+     * Gets the body text area.
+     * 
+     * @return The body text area.
+     */
     public JTextArea getTxtBody() {
         return txtBody;
     }
 
+    /**
+     * Gets the viewer text area.
+     * 
+     * @return The viewer text area.
+     */
     public JTextArea getTxtViewer() {
         return txtViewer;
     }
 
+    /**
+     * Gets the email table.
+     * 
+     * @return The email table.
+     */
     public JTable getEmailTable() {
         return emailTable;
     }
 
+    /**
+     * Gets the table model.
+     * 
+     * @return The table model.
+     */
     public DefaultTableModel getTableModel() {
         return tableModel;
     }
 
+    /**
+     * Gets the send button.
+     * 
+     * @return The send button.
+     */
     public JButton getBtnSend() {
         return btnSend;
     }
 
+    /**
+     * Gets the attach button.
+     * 
+     * @return The attach button.
+     */
     public JButton getBtnAttach() {
         return btnAttach;
     }
 
+    /**
+     * Gets the clear attachment button.
+     * 
+     * @return The clear attachment button.
+     */
     public JButton getBtnClearAttach() {
         return btnClearAttach;
     }
 
+    /**
+     * Gets the refresh button.
+     * 
+     * @return The refresh button.
+     */
     public JButton getBtnRefresh() {
         return btnRefresh;
     }
 
+    /**
+     * Gets the delete button.
+     * 
+     * @return The delete button.
+     */
     public JButton getBtnDelete() {
         return btnDelete;
     }
 
+    /**
+     * Gets the toggle read button.
+     * 
+     * @return The toggle read button.
+     */
     public JButton getBtnToggleRead() {
         return btnToggleRead;
     }
 
+    /**
+     * Gets the download email button.
+     * 
+     * @return The download email button.
+     */
     public JButton getBtnDownloadEmail() {
         return btnDownloadEmail;
     }
 
+    /**
+     * Gets the attached file label.
+     * 
+     * @return The attached file label.
+     */
     public JLabel getLblAttachedFile() {
         return lblAttachedFile;
     }
 
+    /**
+     * Gets the return button.
+     * 
+     * @return The return button.
+     */
     public JButton getBtnReturn() {
         return btnReturn;
     }
 
+    /**
+     * Sets the return button.
+     * 
+     * @param btnReturn The new return button.
+     */
     public void setBtnReturn(JButton btnReturn) {
         this.btnReturn = btnReturn;
     }
 
+    /**
+     * Sets the callback for the return action.
+     * 
+     * @param callback The callback to execute.
+     */
     public void setOnReturnCallback(Runnable callback) {
         if (buttonHandler != null) {
             buttonHandler.setOnReturnCallback(callback);

@@ -10,17 +10,23 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 
 /**
- * Loading dialog shown while connecting to FTP server
+ * Loading dialog shown while connecting to FTP server.
  */
 public class LoadingDialog extends JDialog {
     private static final long serialVersionUID = 1L;
     private JLabel statusLabel;
     private JProgressBar progressBar;
 
+    /**
+     * Constructor for LoadingDialog.
+     */
     public LoadingDialog() {
         initComponents();
     }
 
+    /**
+     * Initializes the components of the dialog.
+     */
     private void initComponents() {
         setTitle("Conectando a FTP");
         setModal(false);
@@ -42,13 +48,13 @@ public class LoadingDialog extends JDialog {
         panel.add(statusLabel, BorderLayout.NORTH);
         panel.add(progressBar, BorderLayout.CENTER);
 
-        add(panel);
+        panel.add(panel);
     }
 
     /**
-     * Update the status message shown in the dialog
+     * Update the status message shown in the dialog.
      * 
-     * @param status New status message
+     * @param status New status message.
      */
     public void updateStatus(String status) {
         if (statusLabel != null) {
@@ -57,14 +63,14 @@ public class LoadingDialog extends JDialog {
     }
 
     /**
-     * Show the loading dialog
+     * Show the loading dialog.
      */
     public void showDialog() {
         setVisible(true);
     }
 
     /**
-     * Close the loading dialog
+     * Close the loading dialog.
      */
     public void closeDialog() {
         dispose();

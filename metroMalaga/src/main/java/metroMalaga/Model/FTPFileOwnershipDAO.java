@@ -9,16 +9,16 @@ import java.sql.Timestamp;
 import metroMalaga.Controller.ConnecionSQL;
 
 /**
- * DAO for managing FTP file ownership in database
+ * DAO for managing FTP file ownership in database.
  */
 public class FTPFileOwnershipDAO {
 
     /**
-     * Register a file upload in the database
+     * Register a file upload in the database.
      * 
-     * @param filename Name of the file
-     * @param username Username who uploaded the file
-     * @param isFolder True if it's a folder, false if it's a file
+     * @param filename Name of the file.
+     * @param username Username who uploaded the file.
+     * @param isFolder True if it's a folder, false if it's a file.
      */
     public static void registerFile(String filename, String username, boolean isFolder) {
         String sql = "INSERT INTO ftp_file_ownership (filename, uploaded_by, file_type) VALUES (?, ?, ?) "
@@ -49,10 +49,10 @@ public class FTPFileOwnershipDAO {
     }
 
     /**
-     * Get the owner of a file
+     * Get the owner of a file.
      * 
-     * @param filename Name of the file
-     * @return Username of the owner, or null if file not found
+     * @param filename Name of the file.
+     * @return Username of the owner, or null if file not found.
      */
     public static String getFileOwner(String filename) {
         String sql = "SELECT uploaded_by FROM ftp_file_ownership WHERE filename = ?";
@@ -75,9 +75,9 @@ public class FTPFileOwnershipDAO {
     }
 
     /**
-     * Delete a file record from the database
+     * Delete a file record from the database.
      * 
-     * @param filename Name of the file to delete
+     * @param filename Name of the file to delete.
      */
     public static void deleteFile(String filename) {
         String sql = "DELETE FROM ftp_file_ownership WHERE filename = ?";
@@ -94,10 +94,10 @@ public class FTPFileOwnershipDAO {
     }
 
     /**
-     * Rename a file in the database
+     * Rename a file in the database.
      * 
-     * @param oldName Old filename
-     * @param newName New filename
+     * @param oldName Old filename.
+     * @param newName New filename.
      */
     public static void renameFile(String oldName, String newName) {
         String sql = "UPDATE ftp_file_ownership SET filename = ? WHERE filename = ?";
@@ -115,13 +115,13 @@ public class FTPFileOwnershipDAO {
     }
 
     /**
-     * Check if a user can modify a file (delete or rename)
+     * Check if a user can modify a file (delete or rename).
      * 
-     * @param filename Name of the file
-     * @param username Username trying to modify
-     * @param rol      Rol object with permissions
-     * @param isDelete true if checking delete permission, false for modify/rename
-     * @return true if user can modify, false otherwise
+     * @param filename Name of the file.
+     * @param username Username trying to modify.
+     * @param rol      Rol object with permissions.
+     * @param isDelete true if checking delete permission, false for modify/rename.
+     * @return true if user can modify, false otherwise.
      */
     public static boolean canModifyFile(String filename, String username, Rol rol, boolean isDelete) {
         // Admin can modify anything
@@ -146,10 +146,10 @@ public class FTPFileOwnershipDAO {
     }
 
     /**
-     * Check if a user can download a file
+     * Check if a user can download a file.
      * 
-     * @param rol Rol object with permissions
-     * @return true if user can download, false otherwise
+     * @param rol Rol object with permissions.
+     * @return true if user can download, false otherwise.
      */
     public static boolean canDownloadFile(Rol rol) {
         // Admin can always download

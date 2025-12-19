@@ -30,6 +30,9 @@ import metroMalaga.Model.FTPTableModel;
 import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
 
+/**
+ * Panel for FTP file management.
+ */
 public class PanelFTP extends JPanel {
 	private Usuario user;
 	private FTPTableModel ftpModel;
@@ -47,6 +50,14 @@ public class PanelFTP extends JPanel {
 	private static final Font MODERN_FONT = new Font("Dialog", Font.PLAIN, 14);
 	private static final Font HEADER_FONT = new Font("Dialog", Font.BOLD, 14);
 
+	/**
+	 * Constructor for PanelFTP.
+	 * 
+	 * @param user         The logged-in user.
+	 * @param service      The FTP service instance.
+	 * @param initialFiles Initial list of files to display.
+	 * @param ftpModel     The table model for FTP files.
+	 */
 	public PanelFTP(Usuario user, ServiceFTP service, List<FTPFile> initialFiles, FTPTableModel ftpModel) {
 		this.service = service;
 		this.ftpModel = ftpModel;
@@ -56,6 +67,9 @@ public class PanelFTP extends JPanel {
 		applyTheme();
 	}
 
+	/**
+	 * Applies the current application theme to the panel components.
+	 */
 	public void applyTheme() {
 		Color bgMain = Common.getBackground();
 		Color bgPanel = Common.getPanelBackground();
@@ -74,9 +88,8 @@ public class PanelFTP extends JPanel {
 			searchField.setForeground(txt);
 			searchField.setCaretColor(txt);
 			searchField.setBorder(new CompoundBorder(
-				new LineBorder(border, 1),
-				new EmptyBorder(5, 10, 5, 10)
-			));
+					new LineBorder(border, 1),
+					new EmptyBorder(5, 10, 5, 10)));
 		}
 
 		// Label
@@ -99,8 +112,9 @@ public class PanelFTP extends JPanel {
 				@Override
 				public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
 						boolean isSelected, boolean hasFocus, int row, int column) {
-					java.awt.Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-					
+					java.awt.Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+							column);
+
 					if (!isSelected) {
 						c.setBackground(Common.getFieldBackground());
 						c.setForeground(Common.getText());
@@ -108,7 +122,7 @@ public class PanelFTP extends JPanel {
 						c.setBackground(Common.isDarkMode ? new Color(200, 0, 0) : new Color(230, 245, 255));
 						c.setForeground(Common.isDarkMode ? Color.WHITE : Color.BLACK);
 					}
-					
+
 					setHorizontalAlignment(JLabel.CENTER);
 					setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
 					return c;
@@ -124,12 +138,13 @@ public class PanelFTP extends JPanel {
 			header.setBackground(Common.isDarkMode ? new Color(40, 40, 40) : new Color(248, 249, 250));
 			header.setForeground(txt);
 			header.setBorder(null);
-			
+
 			header.setDefaultRenderer(new DefaultTableCellRenderer() {
 				@Override
-				public java.awt.Component getTableCellRendererComponent(JTable table, Object value, 
+				public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
 						boolean isSelected, boolean hasFocus, int row, int column) {
-					JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+					JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+							column);
 					l.setBackground(Common.isDarkMode ? new Color(40, 40, 40) : new Color(248, 249, 250));
 					l.setFont(HEADER_FONT);
 					l.setForeground(Common.getText());
@@ -148,18 +163,20 @@ public class PanelFTP extends JPanel {
 		}
 
 		// Paneles
-		if (actionPanel != null) actionPanel.setBackground(bgPanel);
-		if (filterPanel != null) filterPanel.setBackground(bgPanel);
-		if (topPanel != null) topPanel.setBackground(bgPanel);
+		if (actionPanel != null)
+			actionPanel.setBackground(bgPanel);
+		if (filterPanel != null)
+			filterPanel.setBackground(bgPanel);
+		if (topPanel != null)
+			topPanel.setBackground(bgPanel);
 
 		// 👇 BOTONES CON TAMAÑO CORRECTO
 		if (uploadButton != null) {
 			uploadButton.setBackground(bgPanel);
 			uploadButton.setForeground(accent);
 			uploadButton.setBorder(new CompoundBorder(
-				new LineBorder(accent, 1),
-				new EmptyBorder(8, 15, 8, 15)
-			));
+					new LineBorder(accent, 1),
+					new EmptyBorder(8, 15, 8, 15)));
 			uploadButton.setPreferredSize(new Dimension(80, 35));
 		}
 
@@ -167,9 +184,8 @@ public class PanelFTP extends JPanel {
 			upButton.setBackground(bgPanel);
 			upButton.setForeground(txt);
 			upButton.setBorder(new CompoundBorder(
-				new LineBorder(border, 1),
-				new EmptyBorder(8, 15, 8, 15)
-			));
+					new LineBorder(border, 1),
+					new EmptyBorder(8, 15, 8, 15)));
 			upButton.setPreferredSize(new Dimension(80, 35));
 		}
 
@@ -177,24 +193,25 @@ public class PanelFTP extends JPanel {
 			returnButton.setBackground(danger);
 			returnButton.setForeground(Color.WHITE);
 			returnButton.setBorder(new CompoundBorder(
-				new LineBorder(danger, 1),
-				new EmptyBorder(8, 15, 8, 15)
-			));
+					new LineBorder(danger, 1),
+					new EmptyBorder(8, 15, 8, 15)));
 		}
 
 		if (folderButton != null) {
 			folderButton.setBackground(Common.isDarkMode ? new Color(40, 167, 69) : new Color(40, 167, 69));
 			folderButton.setForeground(Color.WHITE);
 			folderButton.setBorder(new CompoundBorder(
-				new LineBorder(new Color(40, 167, 69), 1),
-				new EmptyBorder(8, 15, 8, 15)
-			));
+					new LineBorder(new Color(40, 167, 69), 1),
+					new EmptyBorder(8, 15, 8, 15)));
 		}
 
 		revalidate();
 		repaint();
 	}
 
+	/**
+	 * Updates all text labels based on the current language.
+	 */
 	public void updateAllTexts() {
 		returnButton.setText(Language.get(84));
 		folderButton.setText("📁 " + Language.get(85));
@@ -207,12 +224,18 @@ public class PanelFTP extends JPanel {
 		applyTheme();
 	}
 
+	/**
+	 * Restores the button column renderer and editor.
+	 */
 	private void restoreButtonColumn() {
 		fileTable.getColumnModel().getColumn(3).setCellRenderer(buttonsRenderer);
 		fileTable.getColumnModel().getColumn(3).setCellEditor(buttonsEditor);
 		fileTable.getColumnModel().getColumn(3).setPreferredWidth(200);
 	}
 
+	/**
+	 * Initializes the UI components.
+	 */
 	private void initializeComponents() {
 		this.fileTable = new JTable(this.ftpModel);
 		this.searchField = new JTextField(20);
@@ -248,6 +271,9 @@ public class PanelFTP extends JPanel {
 		folderButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 	}
 
+	/**
+	 * Sets up the layout of the panel.
+	 */
 	private void setupLayout() {
 		setLayout(new BorderLayout(10, 10));
 		setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -274,26 +300,56 @@ public class PanelFTP extends JPanel {
 		add(scrollPane, BorderLayout.CENTER);
 	}
 
+	/**
+	 * Gets the folder button.
+	 * 
+	 * @return The folder button.
+	 */
 	public JButton getFolderButton() {
 		return folderButton;
 	}
 
+	/**
+	 * Gets the file table.
+	 * 
+	 * @return The file table.
+	 */
 	public JTable getFileTable() {
 		return fileTable;
 	}
 
+	/**
+	 * Gets the search field.
+	 * 
+	 * @return The search field.
+	 */
 	public JTextField getSearchField() {
 		return searchField;
 	}
 
+	/**
+	 * Gets the upload button.
+	 * 
+	 * @return The upload button.
+	 */
 	public JButton getUploadButton() {
 		return uploadButton;
 	}
 
+	/**
+	 * Gets the up button.
+	 * 
+	 * @return The up button.
+	 */
 	public JButton getUpButton() {
 		return upButton;
 	}
 
+	/**
+	 * Gets the return button.
+	 * 
+	 * @return The return button.
+	 */
 	public JButton getReturnButton() {
 		return returnButton;
 	}

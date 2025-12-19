@@ -9,6 +9,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controller class for the CRUD interface.
+ * Handles database interactions, table loading, and form actions.
+ */
 public class CrudController {
 
     private CrudFrontend vista;
@@ -20,6 +24,12 @@ public class CrudController {
     private List<String> nombresColumnas;
     private String idRegistroEdicion = null;
 
+    /**
+     * Constructor for CrudController.
+     * 
+     * @param vista      The frontend view.
+     * @param menuSelect The menu controller for navigation.
+     */
     public CrudController(CrudFrontend vista, MenuSelect menuSelect) {
         this.vista = vista;
         this.menuSelect = menuSelect;
@@ -31,6 +41,9 @@ public class CrudController {
         cargarListaTablas();
     }
 
+    /**
+     * Establishes connection to the database.
+     */
     private void conectarBD() {
         conn = conexionSQL.connect();
         if (conn == null) {
@@ -38,6 +51,9 @@ public class CrudController {
         }
     }
 
+    /**
+     * Initializes event listeners for the view components.
+     */
     private void inicializarEventos() {
         vista.getListaTablas().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -85,6 +101,9 @@ public class CrudController {
         });
     }
 
+    /**
+     * Loads the list of available tables from the database.
+     */
     private void cargarListaTablas() {
         try {
             String catalogo = conn.getCatalog();
@@ -119,6 +138,9 @@ public class CrudController {
         }
     }
 
+    /**
+     * Loads data from the currently selected table into the view.
+     */
     private void cargarDatosTabla() {
         if (tablaActual == null)
             return;
@@ -169,6 +191,9 @@ public class CrudController {
         }
     }
 
+    /**
+     * Handles the save action (create or update record).
+     */
     private void accionGuardar() {
         if (tablaActual == null)
             return;
@@ -268,6 +293,11 @@ public class CrudController {
         }
     }
 
+    /**
+     * Handles the delete action for a record.
+     * 
+     * @param fila The row index of the record to delete.
+     */
     private void accionEliminar(int fila) {
         if (!canModifyTable(tablaActual)) {
             JOptionPane.showMessageDialog(vista,
@@ -296,6 +326,12 @@ public class CrudController {
         }
     }
 
+    /**
+     * Checks if the current user has permission to view the specified table.
+     * 
+     * @param tableName The name of the table.
+     * @return true if allowed, false otherwise.
+     */
     private boolean canViewTable(String tableName) {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
             return false;
@@ -316,6 +352,12 @@ public class CrudController {
         return false;
     }
 
+    /**
+     * Checks if the current user has permission to modify the specified table.
+     * 
+     * @param tableName The name of the table.
+     * @return true if allowed, false otherwise.
+     */
     private boolean canModifyTable(String tableName) {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
             return false;
@@ -332,6 +374,11 @@ public class CrudController {
         return false;
     }
 
+    /**
+     * Gets the permission string of the current user.
+     * 
+     * @return The permission string, or empty string if user/role is null.
+     */
     public String getUserPermission() {
         if (vista.getUser() == null || vista.getUser().getRol() == null) {
             return "";
