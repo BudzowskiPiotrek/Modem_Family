@@ -6,7 +6,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import metroMalaga.Model.Language;
 
 public class ConnecionFTP {
-	private static final String SERVER = "127.0.0.1";
+	private static final String SERVER = "192.168.1.15";
 	private static final int PORT = 21;
 	private String user = "proyecto";
 	private static final String PASS = "proyecto";
