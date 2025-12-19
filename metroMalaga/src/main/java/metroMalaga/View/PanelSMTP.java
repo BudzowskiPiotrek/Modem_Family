@@ -6,6 +6,7 @@ import javax.swing.table.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
+import java.util.Arrays;
 
 import metroMalaga.Model.Usuario;
 import metroMalaga.Model.Language;
@@ -25,7 +26,8 @@ public class PanelSMTP extends JPanel {
     private JTextArea txtBody, txtViewer;
     private JTable emailTable;
     private DefaultTableModel tableModel;
-    private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail, btnReturn;
+    private JButton btnSend, btnAttach, btnClearAttach, btnRefresh, btnDelete, btnToggleRead, btnDownloadEmail,
+            btnReturn;
     private JLabel lblAttachedFile, lblTo, lblSubject, lblFolder;
     private JComboBox<String> cboFolders;
 
@@ -77,16 +79,24 @@ public class PanelSMTP extends JPanel {
         updatePanelStyle(pCompose, Language.get(53));
         updatePanelStyle(pInbox, Language.get(54));
 
-        if (pFields != null) pFields.setBackground(bgPanel);
-        if (pButtonsCompose != null) pButtonsCompose.setBackground(bgPanel);
-        if (pButtonsInbox != null) pButtonsInbox.setBackground(bgPanel);
-        if (pFolderSelector != null) pFolderSelector.setBackground(bgPanel);
-        if (pInboxTop != null) pInboxTop.setBackground(bgPanel);
+        if (pFields != null)
+            pFields.setBackground(bgPanel);
+        if (pButtonsCompose != null)
+            pButtonsCompose.setBackground(bgPanel);
+        if (pButtonsInbox != null)
+            pButtonsInbox.setBackground(bgPanel);
+        if (pFolderSelector != null)
+            pFolderSelector.setBackground(bgPanel);
+        if (pInboxTop != null)
+            pInboxTop.setBackground(bgPanel);
 
         // 3. Etiquetas
-        if (lblTo != null) lblTo.setForeground(txt);
-        if (lblSubject != null) lblSubject.setForeground(txt);
-        if (lblFolder != null) lblFolder.setForeground(txt);
+        if (lblTo != null)
+            lblTo.setForeground(txt);
+        if (lblSubject != null)
+            lblSubject.setForeground(txt);
+        if (lblFolder != null)
+            lblFolder.setForeground(txt);
 
         if (lblAttachedFile != null) {
             String lblText = lblAttachedFile.getText();
@@ -124,7 +134,7 @@ public class PanelSMTP extends JPanel {
                 public Component getTableCellRendererComponent(JTable table, Object value,
                         boolean isSelected, boolean hasFocus, int row, int column) {
                     Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                    
+
                     if (!isSelected) {
                         c.setBackground(Common.getFieldBackground());
                         c.setForeground(Common.getText());
@@ -132,7 +142,7 @@ public class PanelSMTP extends JPanel {
                         c.setBackground(Common.isDarkMode ? new Color(200, 0, 0) : new Color(230, 240, 255));
                         c.setForeground(Common.isDarkMode ? Color.WHITE : Color.BLACK);
                     }
-                    
+
                     ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
                     return c;
                 }
@@ -142,13 +152,14 @@ public class PanelSMTP extends JPanel {
             header.setBackground(Common.isDarkMode ? new Color(40, 40, 40) : new Color(245, 245, 245));
             header.setForeground(txt);
             header.setBorder(new MatteBorder(0, 0, 1, 0, border));
-            
+
             // 👇 RENDERER PARA EL HEADER
             header.setDefaultRenderer(new DefaultTableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                         boolean hasFocus, int row, int column) {
-                    JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                            column);
                     l.setBackground(Common.isDarkMode ? new Color(40, 40, 40) : new Color(245, 245, 245));
                     l.setFont(F_HEADER);
                     l.setForeground(Common.getText());
@@ -170,30 +181,31 @@ public class PanelSMTP extends JPanel {
     }
 
     private void updatePanelStyle(JPanel p, String title) {
-        if (p == null) return;
+        if (p == null)
+            return;
         p.setBackground(Common.getPanelBackground());
         p.setBorder(new CompoundBorder(
-            new LineBorder(Common.getBorder(), 1), 
-            new TitledBorder(new EmptyBorder(10, 10, 10, 10), title, 
-                TitledBorder.LEFT, TitledBorder.TOP, F_HEADER, Common.getText())
-        ));
+                new LineBorder(Common.getBorder(), 1),
+                new TitledBorder(new EmptyBorder(10, 10, 10, 10), title,
+                        TitledBorder.LEFT, TitledBorder.TOP, F_HEADER, Common.getText())));
     }
 
     private void updateFieldStyle(JTextComponent c) {
-        if (c == null) return;
+        if (c == null)
+            return;
         c.setBackground(Common.getFieldBackground());
         c.setForeground(Common.getText());
         c.setCaretColor(Common.getText());
         if (c instanceof JTextField) {
             c.setBorder(new CompoundBorder(
-                new LineBorder(Common.getBorder(), 1), 
-                new EmptyBorder(2, 5, 2, 5)
-            ));
+                    new LineBorder(Common.getBorder(), 1),
+                    new EmptyBorder(2, 5, 2, 5)));
         }
     }
 
     private void updateTextAreaStyle(JTextArea area) {
-        if (area == null) return;
+        if (area == null)
+            return;
         area.setBackground(Common.getFieldBackground());
         area.setForeground(Common.getText());
         area.setCaretColor(Common.getText());
@@ -222,7 +234,7 @@ public class PanelSMTP extends JPanel {
         Color danger = Common.getDanger();
         Color accent = Common.getAccent();
 
-        JButton[] normalButtons = {btnAttach, btnRefresh, btnToggleRead, btnDownloadEmail};
+        JButton[] normalButtons = { btnAttach, btnRefresh, btnToggleRead, btnDownloadEmail };
         for (JButton b : normalButtons) {
             if (b != null) {
                 b.setBackground(bg);
@@ -237,7 +249,7 @@ public class PanelSMTP extends JPanel {
             btnSend.setBorder(new LineBorder(accent, 1, true));
         }
 
-        JButton[] dangerButtons = {btnClearAttach, btnDelete, btnReturn};
+        JButton[] dangerButtons = { btnClearAttach, btnDelete, btnReturn };
         for (JButton b : dangerButtons) {
             if (b != null) {
                 b.setBackground(danger);
@@ -251,7 +263,8 @@ public class PanelSMTP extends JPanel {
         lblTo.setText(Language.get(55));
         lblSubject.setText(Language.get(56));
 
-        if (lblFolder != null) lblFolder.setText(Language.get(197)); 
+        if (lblFolder != null)
+            lblFolder.setText(Language.get(197));
 
         String currentLabel = lblAttachedFile.getText();
         if (currentLabel.contains("No ") || currentLabel.contains("files") || currentLabel.contains("SIN")) {
@@ -262,8 +275,8 @@ public class PanelSMTP extends JPanel {
         btnClearAttach.setText(Language.get(58));
         btnSend.setText(Language.get(59));
 
-        tableModel.setColumnIdentifiers(new String[]{
-            Language.get(61), Language.get(62), Language.get(63)
+        tableModel.setColumnIdentifiers(new String[] {
+                Language.get(61), Language.get(62), Language.get(63)
         });
 
         btnRefresh.setText(Language.get(64));
@@ -336,14 +349,13 @@ public class PanelSMTP extends JPanel {
 
         // Cargar carpetas disponibles
         List<String> allFolders = backend.getAvailableFolders();
-        List<String> allowedFolders = List.of("INBOX", "Spam", "Trash", "[Gmail]/Spam", "[Gmail]/Trash");
+        List<String> allowedFolders = Arrays.asList("INBOX", "Spam", "Trash", "[Gmail]/Spam", "[Gmail]/Trash");
 
         for (String folder : allFolders) {
-            if (allowedFolders.stream().anyMatch(allowed -> 
-                folder.equalsIgnoreCase(allowed) || 
-                folder.contains("Spam") || 
-                folder.contains("Trash") ||
-                folder.contains("INBOX"))) {
+            if (allowedFolders.stream().anyMatch(allowed -> folder.equalsIgnoreCase(allowed) ||
+                    folder.contains("Spam") ||
+                    folder.contains("Trash") ||
+                    folder.contains("INBOX"))) {
                 cboFolders.addItem(folder);
             }
         }
@@ -359,7 +371,9 @@ public class PanelSMTP extends JPanel {
 
         String[] cols = { Language.get(61), Language.get(62), Language.get(63) };
         tableModel = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         emailTable = createTable();
 
@@ -367,9 +381,9 @@ public class PanelSMTP extends JPanel {
         txtViewer.setEditable(false);
         txtViewer.setText(Language.get(68));
 
-        inboxSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
-            createScrollPane(emailTable), 
-            createScrollPane(txtViewer));
+        inboxSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                createScrollPane(emailTable),
+                createScrollPane(txtViewer));
         inboxSplit.setDividerLocation(500);
         inboxSplit.setDividerSize(5);
         inboxSplit.setBorder(null);
@@ -410,7 +424,7 @@ public class PanelSMTP extends JPanel {
         cboFolders.addActionListener(e -> {
             String selectedFolder = (String) cboFolders.getSelectedItem();
             if (selectedFolder != null) {
-                backend.setCurrentFolder(selectedFolder); 
+                backend.setCurrentFolder(selectedFolder);
                 buttonHandler.refreshInbox(false);
             }
         });
@@ -433,9 +447,8 @@ public class PanelSMTP extends JPanel {
         btn.setBackground(bg);
         btn.setForeground(fg);
         btn.setBorder(new CompoundBorder(
-            new LineBorder(borderColor, 1), 
-            new EmptyBorder(5, 10, 5, 10)
-        ));
+                new LineBorder(borderColor, 1),
+                new EmptyBorder(5, 10, 5, 10)));
 
         for (java.awt.event.MouseListener ml : btn.getMouseListeners()) {
             if (ml instanceof ButtonHoverHandle) {
@@ -446,7 +459,9 @@ public class PanelSMTP extends JPanel {
 
     private void addGBC(JPanel p, Component c, int x, int y, double weight) {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = x; gbc.gridy = y; gbc.weightx = weight;
+        gbc.gridx = x;
+        gbc.gridy = y;
+        gbc.weightx = weight;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(8, 5, 8, 5);
         if (c instanceof JLabel) {
@@ -494,22 +509,69 @@ public class PanelSMTP extends JPanel {
     }
 
     // Getters
-    public JTextField getTxtTo() { return txtTo; }
-    public JTextField getTxtSubject() { return txtSubject; }
-    public JTextArea getTxtBody() { return txtBody; }
-    public JTextArea getTxtViewer() { return txtViewer; }
-    public JTable getEmailTable() { return emailTable; }
-    public DefaultTableModel getTableModel() { return tableModel; }
-    public JButton getBtnSend() { return btnSend; }
-    public JButton getBtnAttach() { return btnAttach; }
-    public JButton getBtnClearAttach() { return btnClearAttach; }
-    public JButton getBtnRefresh() { return btnRefresh; }
-    public JButton getBtnDelete() { return btnDelete; }
-    public JButton getBtnToggleRead() { return btnToggleRead; }
-    public JButton getBtnDownloadEmail() { return btnDownloadEmail; }
-    public JLabel getLblAttachedFile() { return lblAttachedFile; }
-    public JButton getBtnReturn() { return btnReturn; }
-    public void setBtnReturn(JButton btnReturn) { this.btnReturn = btnReturn; }
+    public JTextField getTxtTo() {
+        return txtTo;
+    }
+
+    public JTextField getTxtSubject() {
+        return txtSubject;
+    }
+
+    public JTextArea getTxtBody() {
+        return txtBody;
+    }
+
+    public JTextArea getTxtViewer() {
+        return txtViewer;
+    }
+
+    public JTable getEmailTable() {
+        return emailTable;
+    }
+
+    public DefaultTableModel getTableModel() {
+        return tableModel;
+    }
+
+    public JButton getBtnSend() {
+        return btnSend;
+    }
+
+    public JButton getBtnAttach() {
+        return btnAttach;
+    }
+
+    public JButton getBtnClearAttach() {
+        return btnClearAttach;
+    }
+
+    public JButton getBtnRefresh() {
+        return btnRefresh;
+    }
+
+    public JButton getBtnDelete() {
+        return btnDelete;
+    }
+
+    public JButton getBtnToggleRead() {
+        return btnToggleRead;
+    }
+
+    public JButton getBtnDownloadEmail() {
+        return btnDownloadEmail;
+    }
+
+    public JLabel getLblAttachedFile() {
+        return lblAttachedFile;
+    }
+
+    public JButton getBtnReturn() {
+        return btnReturn;
+    }
+
+    public void setBtnReturn(JButton btnReturn) {
+        this.btnReturn = btnReturn;
+    }
 
     public void setOnReturnCallback(Runnable callback) {
         if (buttonHandler != null) {
