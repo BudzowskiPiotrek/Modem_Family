@@ -191,13 +191,10 @@ public class PanelLogin extends JFrame {
 	 * Configures the frame properties.
 	 */
 	private void settingsFrame() {
-<<<<<<< HEAD
 
-		setTitle(Language.get(198));
+		setTitle("Login - Centimetro Malaga");
 
-=======
-		setTitle("Login - Metro M�laga");
->>>>>>> parent of 1084133 (Update PanelLogin.java)
+
 		setSize(700, 700);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
