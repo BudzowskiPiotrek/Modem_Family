@@ -6,22 +6,16 @@ This is a comprehensive Java-based desktop application designed for the administ
 
 ## 🚀 Key Features
 
-### 📁 FTP File Management
-A fully functional file explorer to interact with remote servers intuitively:
-* **Full Operations:** Upload, download, rename, and delete files or directories.
-* **Smart Navigation:** Folder-based navigation with double-click support and directory-up functionality.
-* **New Folder Creation:** Reliable directory creation with server response validation (handling specific errors like Code 550).
-* **Real-time Filtering:** Dynamic search functionality to find files within the current view instantly.
+## 🎨 Professional UI/UX
+* **Adaptive Themes:** Includes a native **Dark Mode** and **Light Mode** toggle to improve user experience.
+* **Multi-language Support:** Real-time translation between **Spanish (ES)** and **English (EN)** managed via database.
+* **Modern Components:** Custom `TableCellRenderers` for interactive action buttons (Download, Edit, Delete).
 
-### 🔄 Real-Time Synchronization (Socket System)
-A Client-Server architecture implemented to maintain data integrity across multiple users:
-* **Event Server:** A centralized `ServerSocket` that manages active client connections.
-* **Automatic Broadcast:** Whenever a user performs an action (upload, delete, or create folders), the server instantly notifies all connected clients.
-* **Instant Refresh:** Clients receive a `RELOAD` signal and update their UI automatically without user intervention.
+## 📩 SMTP & FTP Integrated Services
+* **Email Client:** Full inbox synchronization, message reading pane, and attachment support.
+* **FTP Explorer:** Remote file management with real-time broadcast notifications via **TCP Sockets**.
+* **Security:** Password protection using **BCrypt** hashing and Role-Based Access Control (RBAC).
 
-### 📧 SMTP Communications & CRUD Administration
-* **SMTP Module:** Integrated mailing system for sending reports and notifications.
-* **CRUD Module:** Management panel for administrative control over the user database, roles, and system permissions.
 
 ---
 
