@@ -152,7 +152,13 @@ public class CrudController {
                             nombresColumnas.get(i - 1).equalsIgnoreCase("password")) {
                         fila[i - 1] = "********";
                     } else {
-                        fila[i - 1] = rs.getObject(i);
+                        Object value = rs.getObject(i);
+                        // Convert Boolean to int for MySQL compatibility
+                        if (value instanceof Boolean) {
+                            fila[i - 1] = ((Boolean) value) ? 1 : 0;
+                        } else {
+                            fila[i - 1] = value;
+                        }
                     }
                 }
                 datos.add(fila);
